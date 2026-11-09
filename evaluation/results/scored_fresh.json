@@ -1,0 +1,1888 @@
+{
+ "accuracy_v15_fresh_host": {
+  "pipeline": "current",
+  "thresholds": "shipped",
+  "view": "root",
+  "recall": {
+   "detected": 14,
+   "total": 24,
+   "byLayer": {
+    "L1": 8,
+    "L2": 1,
+    "L3": 0,
+    "L4": 6
+   }
+  },
+  "untargeted": {
+   "atk_fresh_win_psloggedon": {
+    "alerts": {},
+    "packets": 248
+   },
+   "atk_fresh_win_netshareenum": {
+    "alerts": {},
+    "packets": 36
+   },
+   "atk_fresh_win_rpcdump": {
+    "alerts": {},
+    "packets": 11
+   },
+   "atk_fresh_win_samr": {
+    "alerts": {},
+    "packets": 46
+   },
+   "atk_fresh_win_zerologon": {
+    "alerts": {},
+    "packets": 4406
+   },
+   "atk_fresh_win_sigred": {
+    "alerts": {},
+    "packets": 50
+   },
+   "atk_fresh_win_wmi": {
+    "alerts": {},
+    "packets": 139
+   },
+   "atk_fresh_win_dcom": {
+    "alerts": {},
+    "packets": 74
+   },
+   "atk_fresh_win_sharprdp": {
+    "alerts": {},
+    "packets": 1046
+   },
+   "atk_fresh_win_smbexec": {
+    "alerts": {},
+    "packets": 82
+   },
+   "atk_fresh_win_skeleton": {
+    "alerts": {},
+    "packets": 15
+   },
+   "atk_fresh_win_zerologon_scan": {
+    "alerts": {},
+    "packets": 396
+   },
+   "atk_fresh_win_eventservice": {
+    "alerts": {},
+    "packets": 32
+   },
+   "atk_fresh_win_spoolsample": {
+    "alerts": {},
+    "packets": 66
+   },
+   "atk_fresh_win_kerbrute": {
+    "alerts": {},
+    "packets": 33
+   },
+   "atk_fresh_win_masterkey": {
+    "alerts": {},
+    "packets": 31
+   },
+   "atk_fresh_win_backupkey": {
+    "alerts": {},
+    "packets": 9
+   },
+   "atk_fresh_win_dcshadow": {
+    "alerts": {},
+    "packets": 71
+   },
+   "atk_fresh_win_dcsync": {
+    "alerts": {},
+    "packets": 22
+   },
+   "atk_fresh_win_pwdreset": {
+    "alerts": {},
+    "packets": 67
+   },
+   "atk_fresh_win_smbghost": {
+    "alerts": {},
+    "packets": 10
+   }
+  },
+  "benign": {
+   "packets": 139506,
+   "flaggedPackets": 1,
+   "packetFPR": 7.168150473814746e-06,
+   "alerts": 1,
+   "alertsPer1000": 0.007168150473814746,
+   "seconds": 789.621281,
+   "alertsPerHour": 4.559147640297704,
+   "byAlert": {
+    "RULE-001": 1
+   },
+   "byLayer": {
+    "L1": 0,
+    "L2": 0,
+    "L3": 1,
+    "L4": 0
+   },
+   "perTrace": {
+    "benign_fresh_pixel": {
+     "packets": 139506,
+     "flagged": 1,
+     "alerts": {
+      "RULE-001": 1
+     },
+     "seconds": 789.621281
+    }
+   }
+  },
+  "captures": {
+   "atk_fresh_rat_androidtester": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "FLOW-001",
+     "FLOW-003"
+    ],
+    "alerts": {
+     "RULE-007": 13,
+     "FLOW-001": 2,
+     "FLOW-003": 1
+    },
+    "packets": 89733
+   },
+   "atk_fresh_rat_droidjack": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 63305
+   },
+   "atk_fresh_rat_hawkshaw": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "FLOW-003"
+    ],
+    "alerts": {
+     "RULE-007": 1,
+     "FLOW-003": 2
+    },
+    "packets": 91452
+   },
+   "atk_fresh_rat_spymax": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "FLOW-001",
+     "FLOW-003"
+    ],
+    "alerts": {
+     "RULE-007": 12,
+     "FLOW-001": 2,
+     "FLOW-003": 4
+    },
+    "packets": 194984
+   },
+   "atk_fresh_rat_androrat": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 34700
+   },
+   "atk_fresh_rat_saefko": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "C2-003",
+     "FLOW-003"
+    ],
+    "alerts": {
+     "FLOW-003": 3,
+     "C2-003": 101
+    },
+    "packets": 40753
+   },
+   "atk_fresh_rat_ahmyth": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "FLOW-003"
+    ],
+    "alerts": {
+     "RULE-002": 1,
+     "FLOW-003": 2
+    },
+    "packets": 46121
+   },
+   "atk_fresh_rat_cli_androrat": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "FLOW-003"
+    ],
+    "alerts": {
+     "FLOW-003": 1
+    },
+    "packets": 2286
+   },
+   "atk_fresh_flood_tcp_synack_reflection": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 8000
+   },
+   "atk_fresh_flood_tcp_syn_amp": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:PORT_SCAN": 1
+    },
+    "packets": 896
+   },
+   "atk_fresh_flood_udp_dnsany": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:DNS_TUNNELING": 12
+    },
+    "packets": 11999
+   },
+   "atk_fresh_flood_udp_ubnt": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 48951
+   },
+   "atk_fresh_flood_udp_bacnet": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 9617
+   },
+   "atk_fresh_flood_udp_isakmp": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 3984
+   },
+   "atk_fresh_flood_udp_manyprotocols": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 9
+    },
+    "packets": 387725
+   },
+   "atk_fresh_flood_udp_memcached_ntp_cldap": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:DNS_TUNNELING": 446
+    },
+    "packets": 29462
+   },
+   "atk_fresh_flood_udp_snmp": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 4373
+   },
+   "atk_fresh_flood_dns_rrsig_fragmented": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "BRUTE-001": 1,
+     "L1:DNS_TUNNELING": 21,
+     "RULE-005": 4
+    },
+    "packets": 4412
+   },
+   "atk_fresh_flood_ip_randomproto": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:ARP_SPOOFING": 4
+    },
+    "packets": 75065
+   },
+   "atk_fresh_flood_tcp_dominate": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD",
+     "L1:SYN_FLOOD"
+    ],
+    "alerts": {
+     "L1:SYN_FLOOD": 1,
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 9878
+   },
+   "atk_fresh_flood_udp_fragmented": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 4
+    },
+    "packets": 19774
+   },
+   "atk_fresh_flood_udp_null": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 2
+    },
+    "packets": 5659
+   },
+   "atk_fresh_flood_udp_rdm": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 3
+    },
+    "packets": 4968
+   },
+   "atk_fresh_c2_foudre_dga": {
+    "class": "dga_backdoor",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 28
+   }
+  }
+ },
+ "accuracy_v140_fresh_host": {
+  "pipeline": "current",
+  "thresholds": "shipped",
+  "view": "root",
+  "recall": {
+   "detected": 7,
+   "total": 24,
+   "byLayer": {
+    "L1": 1,
+    "L2": 1,
+    "L3": 5,
+    "L4": 0
+   }
+  },
+  "untargeted": {
+   "atk_fresh_win_psloggedon": {
+    "alerts": {},
+    "packets": 248
+   },
+   "atk_fresh_win_netshareenum": {
+    "alerts": {},
+    "packets": 36
+   },
+   "atk_fresh_win_rpcdump": {
+    "alerts": {},
+    "packets": 11
+   },
+   "atk_fresh_win_samr": {
+    "alerts": {},
+    "packets": 46
+   },
+   "atk_fresh_win_zerologon": {
+    "alerts": {},
+    "packets": 4406
+   },
+   "atk_fresh_win_sigred": {
+    "alerts": {},
+    "packets": 50
+   },
+   "atk_fresh_win_wmi": {
+    "alerts": {},
+    "packets": 139
+   },
+   "atk_fresh_win_dcom": {
+    "alerts": {},
+    "packets": 74
+   },
+   "atk_fresh_win_sharprdp": {
+    "alerts": {},
+    "packets": 1046
+   },
+   "atk_fresh_win_smbexec": {
+    "alerts": {},
+    "packets": 82
+   },
+   "atk_fresh_win_skeleton": {
+    "alerts": {},
+    "packets": 15
+   },
+   "atk_fresh_win_zerologon_scan": {
+    "alerts": {},
+    "packets": 396
+   },
+   "atk_fresh_win_eventservice": {
+    "alerts": {},
+    "packets": 32
+   },
+   "atk_fresh_win_spoolsample": {
+    "alerts": {},
+    "packets": 66
+   },
+   "atk_fresh_win_kerbrute": {
+    "alerts": {},
+    "packets": 33
+   },
+   "atk_fresh_win_masterkey": {
+    "alerts": {},
+    "packets": 31
+   },
+   "atk_fresh_win_backupkey": {
+    "alerts": {},
+    "packets": 9
+   },
+   "atk_fresh_win_dcshadow": {
+    "alerts": {},
+    "packets": 71
+   },
+   "atk_fresh_win_dcsync": {
+    "alerts": {},
+    "packets": 22
+   },
+   "atk_fresh_win_pwdreset": {
+    "alerts": {},
+    "packets": 67
+   },
+   "atk_fresh_win_smbghost": {
+    "alerts": {},
+    "packets": 10
+   }
+  },
+  "benign": {
+   "packets": 139506,
+   "flaggedPackets": 15,
+   "packetFPR": 0.00010752225710722119,
+   "alerts": 15,
+   "alertsPer1000": 0.1075222571072212,
+   "seconds": 789.621281,
+   "alertsPerHour": 68.38721460446556,
+   "byAlert": {
+    "RULE-001": 1,
+    "L1:DNS_TUNNELING": 13,
+    "L1:COVERT_CHANNEL": 1
+   },
+   "byLayer": {
+    "L1": 14,
+    "L2": 0,
+    "L3": 1,
+    "L4": 0
+   },
+   "perTrace": {
+    "benign_fresh_pixel": {
+     "packets": 139506,
+     "flagged": 15,
+     "alerts": {
+      "RULE-001": 1,
+      "L1:DNS_TUNNELING": 13,
+      "L1:COVERT_CHANNEL": 1
+     },
+     "seconds": 789.621281
+    }
+   }
+  },
+  "captures": {
+   "atk_fresh_rat_androidtester": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 21,
+     "L1:COVERT_CHANNEL": 25,
+     "RULE-010": 1
+    },
+    "packets": 89733
+   },
+   "atk_fresh_rat_droidjack": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:COVERT_CHANNEL": 11
+    },
+    "packets": 63305
+   },
+   "atk_fresh_rat_hawkshaw": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 1,
+     "L1:COVERT_CHANNEL": 18
+    },
+    "packets": 91452
+   },
+   "atk_fresh_rat_spymax": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 13,
+     "L1:COVERT_CHANNEL": 28
+    },
+    "packets": 194984
+   },
+   "atk_fresh_rat_androrat": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:COVERT_CHANNEL": 5
+    },
+    "packets": 34700
+   },
+   "atk_fresh_rat_saefko": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "C2-003"
+    ],
+    "alerts": {
+     "C2-003": 90
+    },
+    "packets": 40753
+   },
+   "atk_fresh_rat_ahmyth": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-002": 6,
+     "L1:COVERT_CHANNEL": 10
+    },
+    "packets": 46121
+   },
+   "atk_fresh_rat_cli_androrat": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 2286
+   },
+   "atk_fresh_flood_tcp_synack_reflection": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "RULE-010"
+    ],
+    "alerts": {
+     "RULE-010": 1
+    },
+    "packets": 8000
+   },
+   "atk_fresh_flood_tcp_syn_amp": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:PORT_SCAN": 1
+    },
+    "packets": 896
+   },
+   "atk_fresh_flood_udp_dnsany": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "RULE-010"
+    ],
+    "alerts": {
+     "L1:DNS_TUNNELING": 12,
+     "L1:COVERT_CHANNEL": 1,
+     "RULE-010": 1
+    },
+    "packets": 11999
+   },
+   "atk_fresh_flood_udp_ubnt": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 48951
+   },
+   "atk_fresh_flood_udp_bacnet": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 9617
+   },
+   "atk_fresh_flood_udp_isakmp": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 3984
+   },
+   "atk_fresh_flood_udp_manyprotocols": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "RULE-010"
+    ],
+    "alerts": {
+     "L1:COVERT_CHANNEL": 2,
+     "RULE-010": 2
+    },
+    "packets": 387725
+   },
+   "atk_fresh_flood_udp_memcached_ntp_cldap": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "RULE-010"
+    ],
+    "alerts": {
+     "L1:DNS_TUNNELING": 446,
+     "L1:COVERT_CHANNEL": 1,
+     "RULE-010": 1
+    },
+    "packets": 29462
+   },
+   "atk_fresh_flood_udp_snmp": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 4373
+   },
+   "atk_fresh_flood_dns_rrsig_fragmented": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "BRUTE-001": 1,
+     "L1:DNS_TUNNELING": 21,
+     "RULE-005": 2
+    },
+    "packets": 4412
+   },
+   "atk_fresh_flood_ip_randomproto": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "RULE-010"
+    ],
+    "alerts": {
+     "RULE-010": 1
+    },
+    "packets": 75065
+   },
+   "atk_fresh_flood_tcp_dominate": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:SYN_FLOOD"
+    ],
+    "alerts": {
+     "L1:SYN_FLOOD": 1
+    },
+    "packets": 9878
+   },
+   "atk_fresh_flood_udp_fragmented": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 7
+    },
+    "packets": 19774
+   },
+   "atk_fresh_flood_udp_null": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 5659
+   },
+   "atk_fresh_flood_udp_rdm": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 3
+    },
+    "packets": 4968
+   },
+   "atk_fresh_c2_foudre_dga": {
+    "class": "dga_backdoor",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 28
+   }
+  }
+ },
+ "accuracy_v151_fresh_host": {
+  "pipeline": "current",
+  "thresholds": "shipped",
+  "view": "root",
+  "recall": {
+   "detected": 11,
+   "total": 24,
+   "byLayer": {
+    "L1": 8,
+    "L2": 1,
+    "L3": 0,
+    "L4": 3
+   }
+  },
+  "untargeted": {
+   "atk_fresh_win_psloggedon": {
+    "alerts": {},
+    "packets": 248
+   },
+   "atk_fresh_win_netshareenum": {
+    "alerts": {},
+    "packets": 36
+   },
+   "atk_fresh_win_rpcdump": {
+    "alerts": {},
+    "packets": 11
+   },
+   "atk_fresh_win_samr": {
+    "alerts": {},
+    "packets": 46
+   },
+   "atk_fresh_win_zerologon": {
+    "alerts": {},
+    "packets": 4406
+   },
+   "atk_fresh_win_sigred": {
+    "alerts": {},
+    "packets": 50
+   },
+   "atk_fresh_win_wmi": {
+    "alerts": {},
+    "packets": 139
+   },
+   "atk_fresh_win_dcom": {
+    "alerts": {},
+    "packets": 74
+   },
+   "atk_fresh_win_sharprdp": {
+    "alerts": {},
+    "packets": 1046
+   },
+   "atk_fresh_win_smbexec": {
+    "alerts": {},
+    "packets": 82
+   },
+   "atk_fresh_win_skeleton": {
+    "alerts": {},
+    "packets": 15
+   },
+   "atk_fresh_win_zerologon_scan": {
+    "alerts": {},
+    "packets": 396
+   },
+   "atk_fresh_win_eventservice": {
+    "alerts": {},
+    "packets": 32
+   },
+   "atk_fresh_win_spoolsample": {
+    "alerts": {},
+    "packets": 66
+   },
+   "atk_fresh_win_kerbrute": {
+    "alerts": {},
+    "packets": 33
+   },
+   "atk_fresh_win_masterkey": {
+    "alerts": {},
+    "packets": 31
+   },
+   "atk_fresh_win_backupkey": {
+    "alerts": {},
+    "packets": 9
+   },
+   "atk_fresh_win_dcshadow": {
+    "alerts": {},
+    "packets": 71
+   },
+   "atk_fresh_win_dcsync": {
+    "alerts": {},
+    "packets": 22
+   },
+   "atk_fresh_win_pwdreset": {
+    "alerts": {},
+    "packets": 67
+   },
+   "atk_fresh_win_smbghost": {
+    "alerts": {},
+    "packets": 10
+   }
+  },
+  "benign": {
+   "packets": 139506,
+   "flaggedPackets": 1,
+   "packetFPR": 7.168150473814746e-06,
+   "alerts": 1,
+   "alertsPer1000": 0.007168150473814746,
+   "seconds": 789.621281,
+   "alertsPerHour": 4.559147640297704,
+   "byAlert": {
+    "RULE-001": 1
+   },
+   "byLayer": {
+    "L1": 0,
+    "L2": 0,
+    "L3": 1,
+    "L4": 0
+   },
+   "perTrace": {
+    "benign_fresh_pixel": {
+     "packets": 139506,
+     "flagged": 1,
+     "alerts": {
+      "RULE-001": 1
+     },
+     "seconds": 789.621281
+    }
+   }
+  },
+  "captures": {
+   "atk_fresh_rat_androidtester": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "FLOW-001"
+    ],
+    "alerts": {
+     "RULE-007": 13,
+     "FLOW-001": 2
+    },
+    "packets": 89733
+   },
+   "atk_fresh_rat_droidjack": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 63305
+   },
+   "atk_fresh_rat_hawkshaw": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 1
+    },
+    "packets": 91452
+   },
+   "atk_fresh_rat_spymax": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "FLOW-001"
+    ],
+    "alerts": {
+     "RULE-007": 12,
+     "FLOW-001": 2
+    },
+    "packets": 194984
+   },
+   "atk_fresh_rat_androrat": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 34700
+   },
+   "atk_fresh_rat_saefko": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "C2-003",
+     "FLOW-003"
+    ],
+    "alerts": {
+     "FLOW-003": 1,
+     "C2-003": 101
+    },
+    "packets": 40753
+   },
+   "atk_fresh_rat_ahmyth": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-002": 1
+    },
+    "packets": 46121
+   },
+   "atk_fresh_rat_cli_androrat": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 2286
+   },
+   "atk_fresh_flood_tcp_synack_reflection": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 8000
+   },
+   "atk_fresh_flood_tcp_syn_amp": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:PORT_SCAN": 1
+    },
+    "packets": 896
+   },
+   "atk_fresh_flood_udp_dnsany": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:DNS_TUNNELING": 12
+    },
+    "packets": 11999
+   },
+   "atk_fresh_flood_udp_ubnt": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 48951
+   },
+   "atk_fresh_flood_udp_bacnet": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 9617
+   },
+   "atk_fresh_flood_udp_isakmp": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 3984
+   },
+   "atk_fresh_flood_udp_manyprotocols": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 9
+    },
+    "packets": 387725
+   },
+   "atk_fresh_flood_udp_memcached_ntp_cldap": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:DNS_TUNNELING": 446
+    },
+    "packets": 29462
+   },
+   "atk_fresh_flood_udp_snmp": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 4373
+   },
+   "atk_fresh_flood_dns_rrsig_fragmented": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "BRUTE-001": 1,
+     "L1:DNS_TUNNELING": 21,
+     "RULE-005": 4
+    },
+    "packets": 4412
+   },
+   "atk_fresh_flood_ip_randomproto": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:ARP_SPOOFING": 4
+    },
+    "packets": 75065
+   },
+   "atk_fresh_flood_tcp_dominate": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD",
+     "L1:SYN_FLOOD"
+    ],
+    "alerts": {
+     "L1:SYN_FLOOD": 1,
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 9878
+   },
+   "atk_fresh_flood_udp_fragmented": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 4
+    },
+    "packets": 19774
+   },
+   "atk_fresh_flood_udp_null": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 2
+    },
+    "packets": 5659
+   },
+   "atk_fresh_flood_udp_rdm": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 3
+    },
+    "packets": 4968
+   },
+   "atk_fresh_c2_foudre_dga": {
+    "class": "dga_backdoor",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 28
+   }
+  }
+ },
+ "accuracy_v15_fresh_phone": {
+  "pipeline": "current",
+  "thresholds": "shipped",
+  "view": "root",
+  "recall": {
+   "detected": 14,
+   "total": 24,
+   "byLayer": {
+    "L1": 8,
+    "L2": 1,
+    "L3": 0,
+    "L4": 6
+   }
+  },
+  "untargeted": {
+   "atk_fresh_win_psloggedon": {
+    "alerts": {},
+    "packets": 248
+   },
+   "atk_fresh_win_netshareenum": {
+    "alerts": {},
+    "packets": 36
+   },
+   "atk_fresh_win_rpcdump": {
+    "alerts": {},
+    "packets": 11
+   },
+   "atk_fresh_win_samr": {
+    "alerts": {},
+    "packets": 46
+   },
+   "atk_fresh_win_zerologon": {
+    "alerts": {},
+    "packets": 4406
+   },
+   "atk_fresh_win_sigred": {
+    "alerts": {},
+    "packets": 50
+   },
+   "atk_fresh_win_wmi": {
+    "alerts": {},
+    "packets": 139
+   },
+   "atk_fresh_win_dcom": {
+    "alerts": {},
+    "packets": 74
+   },
+   "atk_fresh_win_sharprdp": {
+    "alerts": {},
+    "packets": 1046
+   },
+   "atk_fresh_win_smbexec": {
+    "alerts": {},
+    "packets": 82
+   },
+   "atk_fresh_win_skeleton": {
+    "alerts": {},
+    "packets": 15
+   },
+   "atk_fresh_win_zerologon_scan": {
+    "alerts": {},
+    "packets": 396
+   },
+   "atk_fresh_win_eventservice": {
+    "alerts": {},
+    "packets": 32
+   },
+   "atk_fresh_win_spoolsample": {
+    "alerts": {},
+    "packets": 66
+   },
+   "atk_fresh_win_kerbrute": {
+    "alerts": {},
+    "packets": 33
+   },
+   "atk_fresh_win_masterkey": {
+    "alerts": {},
+    "packets": 31
+   },
+   "atk_fresh_win_backupkey": {
+    "alerts": {},
+    "packets": 9
+   },
+   "atk_fresh_win_dcshadow": {
+    "alerts": {},
+    "packets": 71
+   },
+   "atk_fresh_win_dcsync": {
+    "alerts": {},
+    "packets": 22
+   },
+   "atk_fresh_win_pwdreset": {
+    "alerts": {},
+    "packets": 67
+   },
+   "atk_fresh_win_smbghost": {
+    "alerts": {},
+    "packets": 10
+   }
+  },
+  "benign": {
+   "packets": 319236,
+   "flaggedPackets": 6,
+   "packetFPR": 1.8794872758711425e-05,
+   "alerts": 6,
+   "alertsPer1000": 0.018794872758711424,
+   "seconds": 1536.98919,
+   "alertsPerHour": 14.053449523610508,
+   "byAlert": {
+    "RULE-001": 4,
+    "L1:DNS_TUNNELING": 1,
+    "FLOW-003": 1
+   },
+   "byLayer": {
+    "L1": 1,
+    "L2": 0,
+    "L3": 4,
+    "L4": 1
+   },
+   "perTrace": {
+    "benign_fresh_pixel": {
+     "packets": 139506,
+     "flagged": 1,
+     "alerts": {
+      "RULE-001": 1
+     },
+     "seconds": 789.621281
+    },
+    "benign_fresh_samsung": {
+     "packets": 179730,
+     "flagged": 5,
+     "alerts": {
+      "RULE-001": 3,
+      "L1:DNS_TUNNELING": 1,
+      "FLOW-003": 1
+     },
+     "seconds": 747.367909
+    }
+   }
+  },
+  "captures": {
+   "atk_fresh_rat_androidtester": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "FLOW-001",
+     "FLOW-003"
+    ],
+    "alerts": {
+     "RULE-007": 13,
+     "FLOW-001": 2,
+     "FLOW-003": 1
+    },
+    "packets": 89733
+   },
+   "atk_fresh_rat_droidjack": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 63305
+   },
+   "atk_fresh_rat_hawkshaw": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "FLOW-003"
+    ],
+    "alerts": {
+     "RULE-007": 1,
+     "FLOW-003": 2
+    },
+    "packets": 91452
+   },
+   "atk_fresh_rat_spymax": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "FLOW-001",
+     "FLOW-003"
+    ],
+    "alerts": {
+     "RULE-007": 12,
+     "FLOW-001": 2,
+     "FLOW-003": 4
+    },
+    "packets": 194984
+   },
+   "atk_fresh_rat_androrat": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 34700
+   },
+   "atk_fresh_rat_saefko": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "C2-003",
+     "FLOW-003"
+    ],
+    "alerts": {
+     "FLOW-003": 3,
+     "C2-003": 101
+    },
+    "packets": 40753
+   },
+   "atk_fresh_rat_ahmyth": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "FLOW-003"
+    ],
+    "alerts": {
+     "RULE-002": 1,
+     "FLOW-003": 2
+    },
+    "packets": 46121
+   },
+   "atk_fresh_rat_cli_androrat": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "FLOW-003"
+    ],
+    "alerts": {
+     "FLOW-003": 1
+    },
+    "packets": 2286
+   },
+   "atk_fresh_flood_tcp_synack_reflection": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 8000
+   },
+   "atk_fresh_flood_tcp_syn_amp": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:PORT_SCAN": 1
+    },
+    "packets": 896
+   },
+   "atk_fresh_flood_udp_dnsany": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:DNS_TUNNELING": 12
+    },
+    "packets": 11999
+   },
+   "atk_fresh_flood_udp_ubnt": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 48951
+   },
+   "atk_fresh_flood_udp_bacnet": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 9617
+   },
+   "atk_fresh_flood_udp_isakmp": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 3984
+   },
+   "atk_fresh_flood_udp_manyprotocols": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 9
+    },
+    "packets": 387725
+   },
+   "atk_fresh_flood_udp_memcached_ntp_cldap": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:DNS_TUNNELING": 446
+    },
+    "packets": 29462
+   },
+   "atk_fresh_flood_udp_snmp": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 4373
+   },
+   "atk_fresh_flood_dns_rrsig_fragmented": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "BRUTE-001": 1,
+     "L1:DNS_TUNNELING": 21,
+     "RULE-005": 4
+    },
+    "packets": 4412
+   },
+   "atk_fresh_flood_ip_randomproto": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:ARP_SPOOFING": 4
+    },
+    "packets": 75065
+   },
+   "atk_fresh_flood_tcp_dominate": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD",
+     "L1:SYN_FLOOD"
+    ],
+    "alerts": {
+     "L1:SYN_FLOOD": 1,
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 9878
+   },
+   "atk_fresh_flood_udp_fragmented": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 4
+    },
+    "packets": 19774
+   },
+   "atk_fresh_flood_udp_null": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 2
+    },
+    "packets": 5659
+   },
+   "atk_fresh_flood_udp_rdm": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 3
+    },
+    "packets": 4968
+   },
+   "atk_fresh_c2_foudre_dga": {
+    "class": "dga_backdoor",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 28
+   }
+  }
+ },
+ "accuracy_v140_fresh_phone": {
+  "pipeline": "current",
+  "thresholds": "shipped",
+  "view": "root",
+  "recall": {
+   "detected": 7,
+   "total": 24,
+   "byLayer": {
+    "L1": 1,
+    "L2": 1,
+    "L3": 5,
+    "L4": 0
+   }
+  },
+  "untargeted": {
+   "atk_fresh_win_psloggedon": {
+    "alerts": {},
+    "packets": 248
+   },
+   "atk_fresh_win_netshareenum": {
+    "alerts": {},
+    "packets": 36
+   },
+   "atk_fresh_win_rpcdump": {
+    "alerts": {},
+    "packets": 11
+   },
+   "atk_fresh_win_samr": {
+    "alerts": {},
+    "packets": 46
+   },
+   "atk_fresh_win_zerologon": {
+    "alerts": {},
+    "packets": 4406
+   },
+   "atk_fresh_win_sigred": {
+    "alerts": {},
+    "packets": 50
+   },
+   "atk_fresh_win_wmi": {
+    "alerts": {},
+    "packets": 139
+   },
+   "atk_fresh_win_dcom": {
+    "alerts": {},
+    "packets": 74
+   },
+   "atk_fresh_win_sharprdp": {
+    "alerts": {},
+    "packets": 1046
+   },
+   "atk_fresh_win_smbexec": {
+    "alerts": {},
+    "packets": 82
+   },
+   "atk_fresh_win_skeleton": {
+    "alerts": {},
+    "packets": 15
+   },
+   "atk_fresh_win_zerologon_scan": {
+    "alerts": {},
+    "packets": 396
+   },
+   "atk_fresh_win_eventservice": {
+    "alerts": {},
+    "packets": 32
+   },
+   "atk_fresh_win_spoolsample": {
+    "alerts": {},
+    "packets": 66
+   },
+   "atk_fresh_win_kerbrute": {
+    "alerts": {},
+    "packets": 33
+   },
+   "atk_fresh_win_masterkey": {
+    "alerts": {},
+    "packets": 31
+   },
+   "atk_fresh_win_backupkey": {
+    "alerts": {},
+    "packets": 9
+   },
+   "atk_fresh_win_dcshadow": {
+    "alerts": {},
+    "packets": 71
+   },
+   "atk_fresh_win_dcsync": {
+    "alerts": {},
+    "packets": 22
+   },
+   "atk_fresh_win_pwdreset": {
+    "alerts": {},
+    "packets": 67
+   },
+   "atk_fresh_win_smbghost": {
+    "alerts": {},
+    "packets": 10
+   }
+  },
+  "benign": {
+   "packets": 319236,
+   "flaggedPackets": 33,
+   "packetFPR": 0.00010337180017291283,
+   "alerts": 33,
+   "alertsPer1000": 0.10337180017291282,
+   "seconds": 1536.98919,
+   "alertsPerHour": 77.29397237985779,
+   "byAlert": {
+    "RULE-001": 4,
+    "L1:DNS_TUNNELING": 25,
+    "L1:COVERT_CHANNEL": 1,
+    "L1:CONNECTION_FLOOD": 1,
+    "RULE-007": 2
+   },
+   "byLayer": {
+    "L1": 27,
+    "L2": 0,
+    "L3": 6,
+    "L4": 0
+   },
+   "perTrace": {
+    "benign_fresh_pixel": {
+     "packets": 139506,
+     "flagged": 15,
+     "alerts": {
+      "RULE-001": 1,
+      "L1:DNS_TUNNELING": 13,
+      "L1:COVERT_CHANNEL": 1
+     },
+     "seconds": 789.621281
+    },
+    "benign_fresh_samsung": {
+     "packets": 179730,
+     "flagged": 18,
+     "alerts": {
+      "RULE-001": 3,
+      "L1:CONNECTION_FLOOD": 1,
+      "RULE-007": 2,
+      "L1:DNS_TUNNELING": 12
+     },
+     "seconds": 747.367909
+    }
+   }
+  },
+  "captures": {
+   "atk_fresh_rat_androidtester": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 21,
+     "L1:COVERT_CHANNEL": 25,
+     "RULE-010": 1
+    },
+    "packets": 89733
+   },
+   "atk_fresh_rat_droidjack": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:COVERT_CHANNEL": 11
+    },
+    "packets": 63305
+   },
+   "atk_fresh_rat_hawkshaw": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 1,
+     "L1:COVERT_CHANNEL": 18
+    },
+    "packets": 91452
+   },
+   "atk_fresh_rat_spymax": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 13,
+     "L1:COVERT_CHANNEL": 28
+    },
+    "packets": 194984
+   },
+   "atk_fresh_rat_androrat": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:COVERT_CHANNEL": 5
+    },
+    "packets": 34700
+   },
+   "atk_fresh_rat_saefko": {
+    "class": "android_rat",
+    "detected": true,
+    "hits": [
+     "C2-003"
+    ],
+    "alerts": {
+     "C2-003": 90
+    },
+    "packets": 40753
+   },
+   "atk_fresh_rat_ahmyth": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-002": 6,
+     "L1:COVERT_CHANNEL": 10
+    },
+    "packets": 46121
+   },
+   "atk_fresh_rat_cli_androrat": {
+    "class": "android_rat",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 2286
+   },
+   "atk_fresh_flood_tcp_synack_reflection": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "RULE-010"
+    ],
+    "alerts": {
+     "RULE-010": 1
+    },
+    "packets": 8000
+   },
+   "atk_fresh_flood_tcp_syn_amp": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "L1:PORT_SCAN": 1
+    },
+    "packets": 896
+   },
+   "atk_fresh_flood_udp_dnsany": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "RULE-010"
+    ],
+    "alerts": {
+     "L1:DNS_TUNNELING": 12,
+     "L1:COVERT_CHANNEL": 1,
+     "RULE-010": 1
+    },
+    "packets": 11999
+   },
+   "atk_fresh_flood_udp_ubnt": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 48951
+   },
+   "atk_fresh_flood_udp_bacnet": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 9617
+   },
+   "atk_fresh_flood_udp_isakmp": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 3984
+   },
+   "atk_fresh_flood_udp_manyprotocols": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "RULE-010"
+    ],
+    "alerts": {
+     "L1:COVERT_CHANNEL": 2,
+     "RULE-010": 2
+    },
+    "packets": 387725
+   },
+   "atk_fresh_flood_udp_memcached_ntp_cldap": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "RULE-010"
+    ],
+    "alerts": {
+     "L1:DNS_TUNNELING": 446,
+     "L1:COVERT_CHANNEL": 1,
+     "RULE-010": 1
+    },
+    "packets": 29462
+   },
+   "atk_fresh_flood_udp_snmp": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 4373
+   },
+   "atk_fresh_flood_dns_rrsig_fragmented": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "BRUTE-001": 1,
+     "L1:DNS_TUNNELING": 21,
+     "RULE-005": 2
+    },
+    "packets": 4412
+   },
+   "atk_fresh_flood_ip_randomproto": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "RULE-010"
+    ],
+    "alerts": {
+     "RULE-010": 1
+    },
+    "packets": 75065
+   },
+   "atk_fresh_flood_tcp_dominate": {
+    "class": "flood",
+    "detected": true,
+    "hits": [
+     "L1:SYN_FLOOD"
+    ],
+    "alerts": {
+     "L1:SYN_FLOOD": 1
+    },
+    "packets": 9878
+   },
+   "atk_fresh_flood_udp_fragmented": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 7
+    },
+    "packets": 19774
+   },
+   "atk_fresh_flood_udp_null": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 5659
+   },
+   "atk_fresh_flood_udp_rdm": {
+    "class": "flood",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 3
+    },
+    "packets": 4968
+   },
+   "atk_fresh_c2_foudre_dga": {
+    "class": "dga_backdoor",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 28
+   }
+  }
+ }
+}

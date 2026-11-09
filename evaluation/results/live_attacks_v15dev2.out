@@ -1,0 +1,59 @@
+learning period: waiting 62 s
+port_scan_connect 4101 ms
+syn_flood 6608 ms
+http_sqli 288 ms
+http_traversal 203 ms
+http_scanner_sqlmap_ua 152 ms
+http_scanner_nikto_ua 88 ms
+http_scanner_nmap_ua 84 ms
+http_shellshock 130 ms
+http_rce 80 ms
+http_xxe 161 ms
+http_download 172 ms
+http_cobalt_beacon 4863 ms
+http_exfil 7885 ms
+dns_tunnel_fast 12762 ms
+dns_tunnel_slow 24096 ms
+stratum_btc 895 ms
+stratum_xmrig 217 ms
+irc_bot 478 ms
+meterpreter 370 ms
+ssh_tool_banner 168 ms
+ssh_bruteforce 1313 ms
+shellcode 210 ms
+opaque_c2 933 ms
+shell_on_dns_port 343 ms
+beacon_bare_address 162851 ms
+dns_txt_channel 4841 ms
+dns_failed_lookups 3078 ms
+talk 18443: failed to connect to /192.168.1.8 (port 18443) from /10.0.0.2 (port 40596) after 3000ms
+tls_library_switch 21418 ms
+OK   port_scan_connect          {'L1:PORT_SCAN': 1, 'L1:SYN_FLOOD': 1, 'FLOW-002': 1, 'L1:CONNECTION_FLOOD': 1}
+OK   syn_flood                  {'L1:SYN_FLOOD': 1, 'L1:CONNECTION_FLOOD': 1}
+OK   http_sqli                  {'EXP-001': 2, 'RULE-002': 2}
+OK   http_traversal             {'EXP-002': 1}
+OK   http_scanner_sqlmap_ua     {'RECON-003': 1, 'RULE-009': 1}
+OK   http_scanner_nikto_ua      {'RECON-002': 1, 'RULE-009': 1}
+OK   http_scanner_nmap_ua       {'RECON-001': 1, 'RULE-009': 1}
+OK   http_shellshock            {'EXP-003': 1, 'NET-002': 1}
+OK   http_rce                   {'EXP-003': 1}
+OK   http_xxe                   {'EXP-004': 1}
+OK   http_download              {'RULE-003': 1}
+OK   http_cobalt_beacon         {'MAL-003': 1}
+OK   http_exfil                 {'FLOW-003': 1, 'EXFIL-001': 1, 'RULE-007': 1}
+OK   dns_tunnel_fast            {'L1:DNS_TUNNELING': 2, 'RULE-004': 2}
+OK   dns_tunnel_slow            {'L1:DNS_TUNNELING': 3}
+OK   stratum_btc                {'RULE-006': 1}
+OK   stratum_xmrig              {'RULE-006': 1}
+OK   irc_bot                    {'C2-003': 1}
+OK   meterpreter                {'MAL-001': 1}
+OK   ssh_tool_banner            {'BRUTE-001': 1}
+OK   ssh_bruteforce             {'RULE-005': 1}
+OK   shellcode                  {'RULE-008': 1}
+OK   opaque_c2                  {'FLOW-001': 1}
+MISS shell_on_dns_port          {}
+OK   beacon_bare_address        {'FLOW-003': 1}
+OK   dns_txt_channel            {'FLOW-004': 1}
+OK   dns_failed_lookups         {'FLOW-005': 1}
+OK   tls_library_switch         {'APP-001': 1}
+detected 27/28; alerts outside any window: {}; app rss=162 MiB; test processes killed: 0

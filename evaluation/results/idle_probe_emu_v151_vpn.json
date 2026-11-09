@@ -1,0 +1,30 @@
+{
+ "mode": "andronet",
+ "cases": [
+  {
+   "idleSeconds": 30,
+   "firstBack": true,
+   "secondBack": true
+  },
+  {
+   "idleSeconds": 90,
+   "firstBack": true,
+   "secondBack": true
+  },
+  {
+   "idleSeconds": 180,
+   "firstBack": true,
+   "secondBack": true
+  },
+  {
+   "idleSeconds": 300,
+   "firstBack": true,
+   "secondBack": true
+  },
+  {
+   "idleSeconds": 600,
+   "firstBack": true,
+   "secondBack": true
+  }
+ ]
+}

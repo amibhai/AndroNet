@@ -44,6 +44,7 @@ object RuleEngine {
 
         // Rate/Temporal conditions
         data class PacketRate(val operator: Operator, val count: Int, val windowMs: Long) : Condition()
+        data class ByteRate(val operator: Operator, val bytes: Long, val windowMs: Long) : Condition()
         data class UniqueDestinations(val operator: Operator, val count: Int, val windowMs: Long) : Condition()
         data class TimeSince(val event: String, val operator: Operator, val durationMs: Long) : Condition()
 
@@ -91,14 +92,29 @@ object RuleEngine {
     class SourceWindow {
         private val times = ArrayDeque<Long>()
         private val destinations = ArrayDeque<String>()
+        private val sizes = ArrayDeque<Int>()
 
-        fun add(now: Long, destination: String) {
+        fun add(now: Long, destination: String, size: Int) {
             times.addLast(now)
             destinations.addLast(destination)
+            sizes.addLast(size)
             if (times.size > MAX_WINDOW_ENTRIES) {
                 times.removeFirst()
                 destinations.removeFirst()
+                sizes.removeFirst()
             }
+        }
+
+        fun bytesSince(start: Long, destination: String): Long {
+            var total = 0L
+            val t = times.asReversed().iterator()
+            val s = sizes.asReversed().iterator()
+            val d = destinations.asReversed().iterator()
+            while (t.hasNext() && t.next() >= start) {
+                val size = s.next()
+                if (d.next() == destination) total += size
+            }
+            return total
         }
 
         fun countSince(start: Long): Int {
@@ -119,6 +135,7 @@ object RuleEngine {
 
     private const val MAX_WINDOW_ENTRIES = 1000
     private const val MAX_SOURCES_PER_RULE = 64
+    private const val BULK_UPLOAD_BYTES = 1024L * 1024
 
     data class RuleState(
         var lastTriggered: Long = 0,
@@ -263,7 +280,7 @@ object RuleEngine {
                             // Counts connection attempts: one login session is many packets
                             Condition.FlagsContain(listOf("SYN")),
                             Condition.Not(Condition.FlagsContain(listOf("ACK"))),
-                            Condition.PacketRate(Operator.GREATER_THAN, 10, 60000)
+                            Condition.PacketRate(Operator.GREATER_THAN, 7, 60000)
                         )
                     )
                 ),
@@ -308,7 +325,9 @@ object RuleEngine {
                         listOf(
                             Condition.DirectionEquals("outgoing"),
                             Condition.PayloadSize(Operator.GREATER_THAN, 1024),
-                            Condition.PacketRate(Operator.GREATER_THAN, 500, 10000)
+                            // Bytes, since the tunnel MTU decides how many packets a megabyte takes, and to
+                            // one destination: a page load's many large TLS hellos are no upload
+                            Condition.ByteRate(Operator.GREATER_THAN, BULK_UPLOAD_BYTES, 10000)
                         )
                     )
                 ),
@@ -408,20 +427,19 @@ object RuleEngine {
                 val hasTemporal = rule.conditions.any(::isTemporal)
                 var window: SourceWindow? = null
                 if (hasTemporal) {
-                    val source = packetInfo["sourceIp"]?.toString() ?: ""
-                    window = state.windows.getOrPut(source) { SourceWindow() }
-                    window.add(System.currentTimeMillis(), packetInfo["destinationIp"]?.toString() ?: "")
+                    window = state.windows.getOrPut(AppContext.principal(packetInfo)) { SourceWindow() }
+                    window.add(PacketClock.now(), packetInfo["destinationIp"]?.toString() ?: "", (packetInfo["payloadSize"] as? Int) ?: payload?.size ?: 0)
                 }
 
                 // Evaluate conditions
                 if (!hasTemporal || evaluateConditions(rule.conditions, packetInfo, payload, payloadStr, window)) {
-                    state.lastTriggered = System.currentTimeMillis()
+                    state.lastTriggered = PacketClock.now()
                     state.triggerCount++
 
                     matches.add(
                         RuleMatch(
                             rule = rule,
-                            timestamp = System.currentTimeMillis(),
+                            timestamp = PacketClock.now(),
                             details = buildMatchDetails(rule, packetInfo)
                         )
                     )
@@ -439,7 +457,7 @@ object RuleEngine {
 
     /** True when the condition tree holds a predicate that needs the rule's source window. */
     private fun isTemporal(condition: Condition): Boolean = when (condition) {
-        is Condition.PacketRate, is Condition.UniqueDestinations -> true
+        is Condition.PacketRate, is Condition.ByteRate, is Condition.UniqueDestinations -> true
         is Condition.And -> condition.conditions.any(::isTemporal)
         is Condition.Or -> condition.conditions.any(::isTemporal)
         is Condition.Not -> isTemporal(condition.condition)
@@ -483,7 +501,8 @@ object RuleEngine {
             is Condition.HeaderEquals -> evaluateHeaderEquals(condition, packetInfo)
             is Condition.HeaderMatches -> evaluateHeaderMatches(condition, packetInfo)
             is Condition.PacketRate -> if (window == null) assume else evaluatePacketRate(condition, window)
-            is Condition.UniqueDestinations -> if (window == null) assume else evaluateUniqueDestinations(condition, window)
+            is Condition.ByteRate -> if (window == null) assume else evaluateByteRate(condition, window, packetInfo)
+            is Condition.UniqueDestinations -> if (window == null) assume else evaluateUniqueDestinations(condition, window, packetInfo)
             is Condition.TimeSince -> evaluateTimeSince(condition)
             is Condition.And -> condition.conditions.all { evaluateCondition(it, packetInfo, payload, payloadStr, window, assume) }
             is Condition.Or -> condition.conditions.any { evaluateCondition(it, packetInfo, payload, payloadStr, window, assume) }
@@ -613,20 +632,25 @@ object RuleEngine {
         return condition.regex.containsMatchIn(headerValue)
     }
 
+    private fun evaluateByteRate(condition: Condition.ByteRate, window: SourceWindow, packetInfo: Map<String, Any>): Boolean {
+        val recentBytes = window.bytesSince(PacketClock.now() - condition.windowMs, packetInfo["destinationIp"]?.toString() ?: "")
+        return compareWithOperator(recentBytes.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(), condition.bytes.toInt(), condition.operator)
+    }
+
     private fun evaluatePacketRate(condition: Condition.PacketRate, window: SourceWindow): Boolean {
-        val recentPackets = window.countSince(System.currentTimeMillis() - condition.windowMs)
+        val recentPackets = window.countSince(PacketClock.now() - condition.windowMs)
         return compareWithOperator(recentPackets, condition.count, condition.operator)
     }
 
-    private fun evaluateUniqueDestinations(condition: Condition.UniqueDestinations, window: SourceWindow): Boolean {
-        val uniqueDests = window.uniqueDestinationsSince(System.currentTimeMillis() - condition.windowMs)
-        return compareWithOperator(uniqueDests, condition.count, condition.operator)
+    private fun evaluateUniqueDestinations(condition: Condition.UniqueDestinations, window: SourceWindow, packetInfo: Map<String, Any>): Boolean {
+        val uniqueDests = window.uniqueDestinationsSince(PacketClock.now() - condition.windowMs)
+        return compareWithOperator(uniqueDests, (condition.count * AppContext.limitFactor(packetInfo)).toInt(), condition.operator)
     }
 
     /** Time since the rule named by [Condition.TimeSince.event] last fired; never-fired counts as forever. */
     private fun evaluateTimeSince(condition: Condition.TimeSince): Boolean {
         val last = ruleState[condition.event]?.lastTriggered ?: 0L
-        val elapsed = if (last == 0L) Long.MAX_VALUE else System.currentTimeMillis() - last
+        val elapsed = if (last == 0L) Long.MAX_VALUE else PacketClock.now() - last
         return compareWithOperator(elapsed, condition.durationMs, condition.operator)
     }
 

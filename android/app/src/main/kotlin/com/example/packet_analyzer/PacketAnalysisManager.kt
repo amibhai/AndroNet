@@ -26,6 +26,7 @@ class PacketAnalysisManager(private val context: Context) {
     private val bytesLastSecond = AtomicLong(0L)
 
     private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val profileFile get() = File(context.filesDir, "app_profiles.tsv")
 
     companion object {
         @Volatile
@@ -68,7 +69,15 @@ class PacketAnalysisManager(private val context: Context) {
         // used to leave a second capture session without its periodic cleanup
         managerScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
+        // App profiles outlive a capture session, since an app's TLS habits do
+        try {
+            if (profileFile.exists()) AppProfiles.load(profileFile.readText())
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not read app profiles: ${e.message}")
+        }
+
         // Reset statistics
+        PacketClock.reset()
         TrafficStatistics.reset()
         AnomalyDetector.reset()
 
@@ -101,6 +110,12 @@ class PacketAnalysisManager(private val context: Context) {
 
         if (isPcapExporting) {
             finalizePcap()
+        }
+
+        try {
+            profileFile.writeText(AppProfiles.dump())
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not save app profiles: ${e.message}")
         }
 
         managerScope.cancel()
@@ -391,6 +406,8 @@ class PacketAnalysisManager(private val context: Context) {
             try {
                 TrafficStatistics.cleanup()
                 AnomalyDetector.cleanup()
+                // A killed process runs no shutdown code, so profiles are saved as they grow
+                profileFile.writeText(AppProfiles.dump())
                 Log.d(TAG, "Performed periodic cleanup")
 
             } catch (e: Exception) {

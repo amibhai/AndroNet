@@ -1,0 +1,63 @@
+{
+ "tag": "pixel",
+ "device": {
+  "manufacturer": "Google",
+  "model": "Pixel 8",
+  "android": "17"
+ },
+ "startedAt": "2026-11-06 21:17",
+ "spanHours": 62.03,
+ "coveredHours": 11.1,
+ "stillRunning": false,
+ "captureStarts": 1,
+ "captureStops": 0,
+ "rebootedDuringRun": false,
+ "heartbeats": 37,
+ "heartbeatHours": 6.17,
+ "longestHeartbeatGapHours": 1.58,
+ "alerts": 16,
+ "alertsPerDay": 34.6,
+ "byFinding": {
+  "RULE-007": 11,
+  "APP-001": 5
+ },
+ "appsWithAlerts": 7,
+ "unattributedAlerts": 0,
+ "bySeverity": {
+  "MEDIUM": 16
+ },
+ "skippedPackets": 0,
+ "packets": 648103,
+ "process": {
+  "processAgeHours": null,
+  "cpuSeconds": null,
+  "avgCpuPct": null,
+  "rssMiB": null,
+  "peakRssMiB": null
+ },
+ "crashReports": {
+  "data_app_crash": 1,
+  "data_app_native_crash": 0,
+  "data_app_anr": 0
+ },
+ "uptimeHours": 479.8,
+ "batteryLevelAtCollect": 68,
+ "alertsPerApp": {
+  "RULE-007": [
+   6,
+   2,
+   2,
+   1
+  ],
+  "APP-001": [
+   1,
+   1,
+   1,
+   1,
+   1
+  ]
+ },
+ "topAppRepeatHours": {
+  "RULE-007": 0.01
+ }
+}

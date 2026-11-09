@@ -1,0 +1,63 @@
+{
+ "tag": "oppo",
+ "device": {
+  "manufacturer": "OPPO",
+  "model": "CPH2127",
+  "android": "12"
+ },
+ "startedAt": "2026-11-06 21:02",
+ "spanHours": 63.18,
+ "coveredHours": 29.72,
+ "stillRunning": false,
+ "captureStarts": 1,
+ "captureStops": 0,
+ "rebootedDuringRun": true,
+ "heartbeats": 63,
+ "heartbeatHours": 10.5,
+ "longestHeartbeatGapHours": 1.74,
+ "alerts": 21,
+ "alertsPerDay": 16.96,
+ "byFinding": {
+  "FLOW-003": 16,
+  "APP-001": 4,
+  "RULE-007": 1
+ },
+ "appsWithAlerts": 6,
+ "unattributedAlerts": 0,
+ "bySeverity": {
+  "MEDIUM": 21
+ },
+ "skippedPackets": 0,
+ "packets": 293655,
+ "process": {
+  "processAgeHours": null,
+  "cpuSeconds": null,
+  "avgCpuPct": null,
+  "rssMiB": null,
+  "peakRssMiB": null
+ },
+ "crashReports": {
+  "data_app_crash": 0,
+  "data_app_native_crash": 0,
+  "data_app_anr": 0
+ },
+ "uptimeHours": 32.67,
+ "batteryLevelAtCollect": 42,
+ "alertsPerApp": {
+  "FLOW-003": [
+   16
+  ],
+  "APP-001": [
+   1,
+   1,
+   1,
+   1
+  ],
+  "RULE-007": [
+   1
+  ]
+ },
+ "topAppRepeatHours": {
+  "FLOW-003": 1.04
+ }
+}

@@ -1,0 +1,53 @@
+{
+ "host": "192.168.1.8",
+ "detected": 4,
+ "total": 4,
+ "scenarios": [
+  {
+   "scenario": "http_exfil",
+   "detected": true,
+   "expected": [
+    "EXFIL-001",
+    "RULE-007"
+   ],
+   "alerts": {
+    "EXFIL-001": 1,
+    "RULE-007": 1
+   }
+  },
+  {
+   "scenario": "shell_on_dns_port",
+   "detected": true,
+   "expected": [
+    "FLOW-002"
+   ],
+   "alerts": {
+    "FLOW-002": 1
+   }
+  },
+  {
+   "scenario": "dns_failed_lookups",
+   "detected": true,
+   "expected": [
+    "FLOW-005"
+   ],
+   "alerts": {
+    "FLOW-005": 1
+   }
+  },
+  {
+   "scenario": "dns_failed_lookups",
+   "detected": true,
+   "expected": [
+    "FLOW-005"
+   ],
+   "alerts": {
+    "FLOW-005": 1
+   }
+  }
+ ],
+ "outside": {},
+ "testProcessKills": 0,
+ "logRestarts": 0,
+ "rssMiB": 213
+}

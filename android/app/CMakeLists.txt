@@ -21,9 +21,32 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/main/jni
 )
 
+# zdtun's connection limits are constants in its source, chosen for a desktop gateway. It resets a TCP
+# connection after 60 s of silence, and phone apps hold quiet connections open for push messages. So the
+# build compiles a copy with the limits RFC 4787 and RFC 5382 ask of a NAT, 2 minutes for UDP and
+# 2 h 4 min for established TCP, and with room to hold those connections. The submodule stays as published.
+set(ZDTUN_LIMITED ${CMAKE_CURRENT_BINARY_DIR}/zdtun_limited.c)
+file(READ ${CMAKE_SOURCE_DIR}/src/main/zdtun/zdtun.c ZDTUN_TEXT)
+foreach(LIMIT
+    "UDP_TIMEOUT_SEC 30|UDP_TIMEOUT_SEC 120"
+    "TCP_TIMEOUT_SEC 60|TCP_TIMEOUT_SEC 7440"
+    "MAX_NUM_SOCKETS 128|MAX_NUM_SOCKETS 512"
+    "NUM_SOCKETS_AFTER_PURGE 96|NUM_SOCKETS_AFTER_PURGE 384")
+    string(REPLACE "|" ";" LIMIT_PARTS "${LIMIT}")
+    list(GET LIMIT_PARTS 0 LIMIT_OLD)
+    list(GET LIMIT_PARTS 1 LIMIT_NEW)
+    string(FIND "${ZDTUN_TEXT}" "#define ${LIMIT_OLD}" LIMIT_AT)
+    if(LIMIT_AT EQUAL -1)
+        message(FATAL_ERROR "zdtun.c no longer defines ${LIMIT_OLD}: review the limits set here")
+    endif()
+    string(REPLACE "#define ${LIMIT_OLD}" "#define ${LIMIT_NEW}" ZDTUN_TEXT "${ZDTUN_TEXT}")
+endforeach()
+file(WRITE ${ZDTUN_LIMITED} "${ZDTUN_TEXT}")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/main/zdtun/zdtun.c)
+
 # zdtun source files
 set(ZDTUN_SOURCES
-    ${CMAKE_SOURCE_DIR}/src/main/zdtun/zdtun.c
+    ${ZDTUN_LIMITED}
     ${CMAKE_SOURCE_DIR}/src/main/zdtun/utils.c
 )
 

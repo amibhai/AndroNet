@@ -22,6 +22,9 @@ os.environ.setdefault("ANDROID_SERIAL", "emulator-5554")
 import phone  # noqa: E402
 from live_attacks import ALERT, EXPECTED, alert_id  # noqa: E402
 
+# Needs to know which app sent a packet, which only the VPN path can tell
+VPN_ONLY = {"tls_library_switch"}
+
 EVAL = pathlib.Path(__file__).resolve().parents[1]
 HOST = "10.0.2.2"  # the emulator's alias for the laptop
 
@@ -94,7 +97,8 @@ def main():
     print(phone.harness(f"livegen --host {HOST} {only} --out {phone.D}/live.txt", timeout=1500)[-200:], flush=True)
     for line in phone.shell(f"cat {phone.D}/live.txt").splitlines():
         name, start, end = line.split()
-        windows.append((name, int(start), int(end), EXPECTED.get(name, set())))
+        if name not in VPN_ONLY:
+            windows.append((name, int(start), int(end), EXPECTED.get(name, set())))
 
     for name, (trace, expected) in INJECTED.items():
         if args.only and name not in args.only:

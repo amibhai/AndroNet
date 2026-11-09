@@ -47,6 +47,21 @@ object LiveGen {
         Thread.sleep(50)
     }
 
+    /** A complete, well-formed ClientHello. The lab endpoint never answers it; only its shape matters. */
+    private fun clientHello(cipherA: Int, cipherB: Int): ByteArray {
+        fun u16(v: Int) = byteArrayOf((v shr 8).toByte(), v.toByte())
+        fun ext(type: Int, data: ByteArray) = u16(type) + u16(data.size) + data
+        val ciphers = u16(cipherA) + u16(cipherB)
+        val name = "lab.example".toByteArray()
+        val extensions = ext(0, u16(name.size + 3) + byteArrayOf(0) + u16(name.size) + name) +
+            ext(10, u16(2) + u16(0x001d)) + ext(13, u16(2) + u16(0x0403)) +
+            ext(43, byteArrayOf(2) + u16(0x0304))
+        val body = u16(0x0303) + rng.nextBytes(32) + byteArrayOf(0) + u16(ciphers.size) + ciphers + byteArrayOf(1, 0) +
+            u16(extensions.size) + extensions
+        val handshake = byteArrayOf(1, 0, (body.size shr 8).toByte(), body.size.toByte()) + body
+        return byteArrayOf(22, 3, 1) + u16(handshake.size) + handshake
+    }
+
     private fun talk(host: String, port: Int, lines: List<ByteArray>, gapMs: Long = 150) {
         try {
             Socket().use { s ->
@@ -115,7 +130,8 @@ object LiveGen {
     }
 
     private fun scenarios(host: String): Map<String, () -> Unit> = linkedMapOf(
-        "port_scan_connect" to { connectStorm(host, (1..300).toList(), 120, 1500) },
+        // Skips the lab shell on port 53, which greets whoever connects and has its own scenario
+        "port_scan_connect" to { connectStorm(host, (1..300).filter { it != 53 }, 120, 1500) },
         "syn_flood" to { connectStorm(host, List(900) { 9 }, 180, 1500) },
         "http_sqli" to {
             http(host, "GET", "/item.php?id=1%20UNION%20SELECT%201,2,3--")
@@ -196,6 +212,41 @@ object LiveGen {
             repeat(16) {
                 talk(host, 22, listOf("SSH-2.0-OpenSSH_9.6\r\n".toByteArray()), gapMs = 60)
             }
+        },
+        // What an implant does when it has no signature to give away. Harmless bytes, lab host only.
+        "opaque_c2" to {
+            talk(host, 4444, listOf(rng.nextBytes(300), rng.nextBytes(200)))
+        },
+        "shell_on_dns_port" to {
+            talk(host, 53, listOf("dir c:\\windows\\system32\n".toByteArray(), "exit\n".toByteArray()))
+        },
+        "beacon_bare_address" to {
+            repeat(14) {
+                talk(host, 18082, listOf("check-in\n".toByteArray()), gapMs = 20)
+                Thread.sleep(11000)
+            }
+        },
+        "dns_txt_channel" to {
+            val dst = InetAddress.getByName(host)
+            DatagramSocket().use { sock ->
+                repeat(6) { i ->
+                    dnsQuery(dst, sock, "c.$i.txt-lab.example", 16)
+                    Thread.sleep(800)
+                }
+            }
+        },
+        "dns_failed_lookups" to {
+            val dst = InetAddress.getByName(host)
+            DatagramSocket().use { sock ->
+                repeat(40) {
+                    dnsQuery(dst, sock, "${base32(14)}.nx-lab.example", 1)
+                    Thread.sleep(100)
+                }
+            }
+        },
+        "tls_library_switch" to {
+            repeat(24) { talk(host, 18443, listOf(clientHello(cipherA = 0x1301, cipherB = 0x1302)), gapMs = 20) }
+            talk(host, 18443, listOf(clientHello(cipherA = 0xc030, cipherB = 0xc02f)), gapMs = 20)
         },
         "shellcode" to {
             http(host, "POST", "/vuln.cgi", body = ByteArray(64) { 0x90.toByte() } + byteArrayOf(0x31, 0xC0.toByte(), 0x50, 0x68, 0x2F, 0x2F, 0x73, 0x68))

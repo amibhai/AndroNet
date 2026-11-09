@@ -1,0 +1,12 @@
+{
+ "benign_phone_dev3": {
+  "hellos": 1745,
+  "distinctJa4": 27,
+  "distinctCipherLists": 4
+ },
+ "benign_phone_test_00": {
+  "hellos": 1280,
+  "distinctJa4": 14,
+  "distinctCipherLists": 3
+ }
+}

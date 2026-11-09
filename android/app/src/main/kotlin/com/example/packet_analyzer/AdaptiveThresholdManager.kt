@@ -19,9 +19,9 @@ class AdaptiveThresholdManager {
         // Absolute floor values — thresholds can never fall below these,
         // regardless of how quiet the observed baseline is
         const val FLOOR_PORT_SCAN = 8
-        const val FLOOR_SYN_FLOOD = 30
+        const val FLOOR_SYN_FLOOD = 50
         // Browsing on a real phone peaks at 45 new connections a second during page loads
-        const val FLOOR_CONNECTION_RATE = 60
+        const val FLOOR_CONNECTION_RATE = 100
         const val FLOOR_DNS_QUERY_RATE = 10
         const val FLOOR_ARP_RATE = 3
 
@@ -30,7 +30,7 @@ class AdaptiveThresholdManager {
 
         const val DEFAULT_PORT_SCAN = 20
         const val DEFAULT_SYN_FLOOD = 100
-        const val DEFAULT_CONNECTION_RATE = 60
+        const val DEFAULT_CONNECTION_RATE = 100
         const val DEFAULT_DNS_QUERY_RATE = 30
         const val DEFAULT_ARP_RATE = 10
     }
@@ -74,7 +74,7 @@ class AdaptiveThresholdManager {
     private var ceilingArpRate = DEFAULT_ARP_RATE
 
     fun startLearning() {
-        learningStartTime = System.currentTimeMillis()
+        learningStartTime = PacketClock.now()
         isLearning = true
         learningComplete = false
         observedPortScansPerWindow.clear()
@@ -86,7 +86,7 @@ class AdaptiveThresholdManager {
 
     fun isInLearningPeriod(): Boolean {
         if (!isLearning) return false
-        return System.currentTimeMillis() - learningStartTime < LEARNING_PERIOD_MS
+        return PacketClock.now() - learningStartTime < LEARNING_PERIOD_MS
     }
 
     fun recordObservation(

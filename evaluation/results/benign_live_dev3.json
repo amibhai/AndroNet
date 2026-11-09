@@ -1,0 +1,16 @@
+{
+ "tag": "dev3",
+ "sites": 35,
+ "seconds": 1139,
+ "alerts": {
+  "L1:DNS_TUNNELING": 3,
+  "L1:CONNECTION_FLOOD": 1
+ },
+ "alertsByApp": {
+  "Chrome": 4
+ },
+ "cpuPercent": 7.8,
+ "rssMiB": 120,
+ "exportFiles": 3,
+ "exportPackets": 110285
+}

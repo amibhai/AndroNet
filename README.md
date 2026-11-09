@@ -74,12 +74,30 @@ measured phone traffic and are listed with their floors:
 
 | Detector | Trigger | Severity |
 |---|---|---|
-| Port Scan | distinct destination ports from one source in 10 s (floor 8, default 20) | High |
-| SYN Flood | SYN packets to one target per second (floor 30, default 100) | Critical |
-| Connection Flooding | new connections from one source per second (60) | High |
-| DNS Tunneling | query name longer than 50 characters | Medium |
-| ARP Spoofing | IP-to-MAC binding changes (root mode) | Critical |
+| Port Scan | distinct destination ports from one app in 10 s (floor 8, default 20) | High |
+| SYN Flood | SYN packets to one target per second (floor 50, default 100) | Critical |
+| Distributed Flood | 300 packets per second at one target, half from distinct sources (HyperLogLog) | Critical |
+| Connection Flooding | new connections from one app per second (100, three times that for a browser) | High |
+| DNS Tunneling | 10 query names over 50 characters under one zone in 60 s | Medium |
+| ARP Spoofing | IP-to-MAC binding changes, or one MAC claiming two addresses (root mode) | Critical |
 | Malformed TCP | SYN set together with FIN or RST | Medium |
+
+Detectors count per app where the platform names one (VPN mode, Android 10 and later), and per source
+address otherwise, and alerts name the app. Detection that needs no decryption:
+
+| Detector | Trigger | Severity |
+|---|---|---|
+| `APP-001` New TLS library | an app settled on its cipher lists presents a new one, from its JA4 fingerprint | Medium |
+| `FLOW-001` Opaque flow | a first payload that looks uniformly random, on a port with no expected encryption | Medium |
+| `FLOW-002` Protocol mismatch | a first payload on port 22, 53 or 80 that does not speak that port's protocol | Medium |
+| `FLOW-003` Beacon | regular gaps between bursts, to an address no DNS name explains | Medium |
+| `FLOW-004` TXT channel | 3 TXT answers of 100 bytes or more under one zone in 60 s | High |
+| `FLOW-005` Failed lookups | 20 distinct names failing to resolve for one app in 60 s | Medium |
+
+While capture runs in VPN mode, AndroNet refuses DNS over TLS and DNS over HTTPS to its tunnel resolvers,
+so that Android falls back to plain DNS and names reach detection. **DNS therefore leaves the phone
+unencrypted during capture.** A strict Private DNS server, if you chose one, is left alone, and the DNS
+detectors then see nothing.
 
 Measured accuracy, cost and energy, including what AndroNet misses, are in [`evaluation/`](evaluation/README.md).
 
@@ -99,7 +117,7 @@ Alerts surface instantly as in-app SnackBar notifications with severity, type, s
 | Signal | Threshold | Detects |
 |---|---|---|
 | DNS payload entropy | > 6.2 | dnscat2, iodine tunneling |
-| ICMP payload entropy | > 6.0 | icmptunnel, ptunnel covert channels |
+| ICMP echo payload entropy | > 6.0 | icmptunnel, ptunnel covert channels |
 | Outgoing HTTP or DNS entropy | > 7.6 | Data exfiltration |
 | Suspicious encoding | 7.2–7.6 | Flagged at medium severity |
 
@@ -362,8 +380,6 @@ Attach `bug-report.zip` when opening a GitHub issue.
 ## Roadmap
 
 - [ ] Root mode on physical rooted hardware, which has only run on an emulator so far
-- [ ] A faster relay, the main throughput gap against PCAPdroid
-- [ ] Detectors for the measured misses: spoofed floods, poisoning already underway, low-rate DNS channels
 - [ ] Cross-device portability testing across the NetHunter-supported device matrix
 - [ ] Historical session storage and diffing between captures (sqflite is already a dependency, currently unused for this)
 - [ ] In-app packet search across IP/domain/payload/app, beyond the existing protocol filters

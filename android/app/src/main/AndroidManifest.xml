@@ -4,11 +4,14 @@
 
     <!-- Network permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Naming the app behind a flow needs other apps to be visible, which Android 11+ hides by default -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- Capture runs as a special-use foreground service. Android 15 and later stop a data-sync one after six hours a day. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
@@ -65,17 +68,24 @@
             android:name=".ZdtunVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:exported="false"
-            android:foregroundServiceType="dataSync">
+            android:foregroundServiceType="specialUse">
             <intent-filter>
                 <action android:name="android.net.VpnService" />
             </intent-filter>
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Local VPN that analyses the device's own traffic for attacks, for as long as the user keeps it on" />
         </service>
 
         <service
             android:name=".NetHunterService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="dataSync" />
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Rooted packet capture that analyses the device's own traffic for attacks, for as long as the user keeps it on" />
+        </service>
 
         <meta-data
             android:name="flutterEmbedding"

@@ -1,0 +1,4 @@
+learning period: waiting 62 s
+dns_failed_lookups 3051 ms
+OK   dns_failed_lookups         {'FLOW-005': 1}
+detected 1/1; alerts outside any window: {}; app rss=225 MiB; test processes killed: 0

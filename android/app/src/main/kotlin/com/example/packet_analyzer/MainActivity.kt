@@ -300,6 +300,16 @@ class MainActivity : FlutterFragmentActivity() {
         handleAutomationIntent(intent)
     }
 
+    override fun onStart() {
+        super.onStart()
+        UiStream.visible = true
+    }
+
+    override fun onStop() {
+        UiStream.visible = false
+        super.onStop()
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleAutomationIntent(intent)
@@ -323,6 +333,8 @@ class MainActivity : FlutterFragmentActivity() {
                 }
                 ZdtunVpnService.skipAnalysis = intent.getStringExtra("analysis") == "off"
                 ZdtunVpnService.skipUi = intent.getStringExtra("ui") == "off"
+                ZdtunVpnService.soak = intent.getStringExtra("soak") == "on"
+                AppContext.identityEnabled = intent.getStringExtra("identity") != "off"
                 setupAnomalyListener()
                 startService(Intent(this, ZdtunVpnService::class.java))
                 startAnomalyDetection()
@@ -473,6 +485,8 @@ class MainActivity : FlutterFragmentActivity() {
             AnomalyDetector.AnomalyType.MALFORMED_PACKET -> "Malformed Packet Detected"
             AnomalyDetector.AnomalyType.HIGH_ENTROPY_PAYLOAD -> "High Entropy Payload Detected"
             AnomalyDetector.AnomalyType.COVERT_CHANNEL -> "Covert Channel Detected"
+            AnomalyDetector.AnomalyType.ANALYSIS_OVERLOAD -> "Analysis Overloaded"
+            AnomalyDetector.AnomalyType.DISTRIBUTED_FLOOD -> "Distributed Flood Detected"
         }
     }
     

@@ -20,12 +20,13 @@ object PacketRecord {
         packet: ByteArray,
         isOutgoing: Boolean,
         captureMode: String,
-        resolver: OwningAppResolver? = null
+        resolver: OwningAppResolver? = null,
+        timestampMs: Long = System.currentTimeMillis()
     ): Map<String, Any>? {
         if (packet.isEmpty()) return null
         return when ((packet[0].toInt() shr 4) and 0x0F) {
-            4 -> parseIpv4Packet(packet, isOutgoing, captureMode, resolver)
-            6 -> parseIpv6Packet(packet, isOutgoing, captureMode, resolver)
+            4 -> parseIpv4Packet(packet, isOutgoing, captureMode, resolver, timestampMs)
+            6 -> parseIpv6Packet(packet, isOutgoing, captureMode, resolver, timestampMs)
             else -> null
         }
     }
@@ -54,7 +55,8 @@ object PacketRecord {
         packet: ByteArray,
         isOutgoing: Boolean,
         captureMode: String,
-        resolver: OwningAppResolver?
+        resolver: OwningAppResolver?,
+        timestampMs: Long
     ): Map<String, Any>? {
         if (packet.size < 20) return null
 
@@ -112,7 +114,7 @@ object PacketRecord {
             "sourcePort" to sourcePort,
             "destinationPort" to destPort,
             "size" to packet.size,
-            "timestamp" to System.currentTimeMillis(),
+            "timestamp" to timestampMs,
             "payload" to "",
             "direction" to if (isOutgoing) "outgoing" else "incoming",
             "appName" to appName,
@@ -155,7 +157,8 @@ object PacketRecord {
         packet: ByteArray,
         isOutgoing: Boolean,
         captureMode: String,
-        resolver: OwningAppResolver?
+        resolver: OwningAppResolver?,
+        timestampMs: Long
     ): Map<String, Any>? {
         if (packet.size < 40) return null
 
@@ -205,7 +208,7 @@ object PacketRecord {
             "sourcePort" to sourcePort,
             "destinationPort" to destPort,
             "size" to packet.size,
-            "timestamp" to System.currentTimeMillis(),
+            "timestamp" to timestampMs,
             "payload" to "",
             "direction" to if (isOutgoing) "outgoing" else "incoming",
             "appName" to appName,

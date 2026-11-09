@@ -1,0 +1,300 @@
+{
+ "sources": {
+  "android/app/src/main/kotlin/com/example/packet_analyzer/AdaptiveThresholdManager.kt": "ecdeb0cb68644680c49a9ad6ede9dc5a20e3e708626a845c9567f8d0447ca9af",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/AnalysisQueue.kt": "685a31f184595981996bdc550719ab6511854513a0f8b04f1a1468cf07402025",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/AnomalyDetector.kt": "9bcccb6d7e2df84a76cb7dc284840439a82699d18c8c915104dc1a3879a3875c",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/AppContext.kt": "980e91c2f22735799b82fcdb8bdd6fceca57e63a237dc9d9537ba6419278135c",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/DnsVisibility.kt": "b60245b5c6b92dde327bd87e7ceec2e97a5726d1eda13996da99fb93b5ce233a",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/DomainTracker.kt": "7e7a79c6dde5f109b2f18ae8ef21ed74cac22e11d918d815b5c5972d8555ba54",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/FlowDetectors.kt": "6a7e36e1af5427eed5c2e4955e86886dc8e61435cc9228c3f00d30c40573815f",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/FlowTable.kt": "97e2a09a14aa9067d60e9548efb5be4101f5c2b3dad54adb434453c69d796c8e",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/LibpcapBridge.kt": "ed511997565d833c8472599e440dd9d567eb3dd8750314ed9abec43f8e330c00",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/MainActivity.kt": "c7f20e74dd1be12047608dd5a47b46f791fdedc6d26911084178e9ec06afea46",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/NetHunterService.kt": "93ef0eadc01c0d6eb7d59540393adbd5af88206c1a40771ed69320d01d8ac075",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/PacketAnalysisManager.kt": "5288c78b9b97213eb45d612eb21708a114e7cf1e216bd53cc35fa6ac5e357db1",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/PacketClock.kt": "8518427500cd34c74455e8123130b6f99ba1a2f54885412f34f7d63fd2c6d2da",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/PacketDissector.kt": "f9b12b89dc4cbd16b757a18457488b30166f5d65900db3e1c3335ee1ae4fe593",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/PacketPipeline.kt": "fdd83b5cdb1d7959357c78a84d3dba552ddd74468301c049c32b8a02d68f78df",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/PacketRecord.kt": "11b9d6e6374d601c57c5e6e98306d1b324228180fdf983462a80593920aeffb6",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/PayloadAnalyzer.kt": "919fabff5338bc728d81b52e7df4a4b5a920799b53b4af00e6f644a22c54499a",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/PcapWriter.kt": "a2b71c9f5a9596d7e382ca132e022bd6317b2d851527ee6e156226c119ac87d1",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/RootChecker.kt": "abae9004cf6656a1719c8b06f68d9b158b9b2930cc2f83f8b7a9bb2d396879f0",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/RuleEngine.kt": "e5bc8af8c467d832871861e48e6d7b9db85d54449eacf0dd5400f4337a7b2ff5",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/SignatureDatabase.kt": "bbb0ae9dacb08546159d94d26a80643914e1809f45d01b8942610d7bc64ca293",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/SoakLog.kt": "2ecdb5fe07864d572a71ec57a9e0aeb0bb9ded64d5f92a4c8bc7be415238b75e",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/TlsFingerprint.kt": "e936041e27e9b4026de994bb24de3d71370549cfff226a25a515792de34be5b8",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/TrafficStatistics.kt": "4a2771389be44f285740f0b402a513ab80c715a7a475dbe1775c943e77891191",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/UiStream.kt": "c18c3f50e3e6de28523eeb2a00aeccaa77d85b74adba3139d4116d04cd64196b",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/ZdtunVpn.kt": "9c2763853d49e4ef76aa996c68819fc151e1d2e0fc2c8d237e1351dccf0edd73",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/ZdtunVpnService.kt": "f74563694c9883d00a31b82139ecf9dc6b11bc8fd2cff530489201d10cc4df2d",
+  "android/app/src/main/jni/zdtun_vpn.c": "e02629597a4dee241a5274a9e1e1fa26beb5df67051103cbe2084cf52bc99966",
+  "android/app/src/main/jni/capture_helper.c": "1cdf2d289325ac6d38c215161e317030b8bc2ee233c224ab69cce1333ebf33e4",
+  "android/app/src/main/AndroidManifest.xml": "0a87447beb8bacdadf0f0d1c854487c70b5fe13b3660529feb61cba6a3e0da64",
+  "evaluation/scripts/test_manifest_v2.py": "6ed9cc18781c7860e64d8282618300aea261f3ba36d86f219db9c82a691d72a0",
+  "evaluation/scripts/score.py": "c1cbe4172aa17319a96c2b960f6c0c0f89dbc428eccfcba41e8ffa580db66a9d",
+  "evaluation/harness/src/com/andronet/eval/ReplayMain.kt": "1bd06cd330daecf7fc373983954022445197a0a151ef72aa74e43de0db37984b",
+  "evaluation/harness/pipeline_current/CurrentPipeline.kt": "84004393156effcf3ca74d02695008aa9637a6fc710c7d78395ed9439cad5296"
+ },
+ "builds": {
+  "evaluation/build/current/harness.dex": "3f3e1c16188b54f8c141f1aa5c596b8195853379b1f304b35db3ede36f3e67f1",
+  "evaluation/build/current/harness.jar": "7e2c9d78361f009b0a61ae8181e5269cc8ac0b846f37a657166b39b500496d29",
+  "evaluation/build/v140/harness.dex": "7426e54e391c2374daca78201b69ca4573f2d33398a0ad7338394a2b7cde5791",
+  "evaluation/build/andronet-eval-arm64.apk": "df662810dce6195b4e3a7af4c797cb9f40897e6afcad82697d8a92be157c3283",
+  "evaluation/build/andronet-eval-x64.apk": "52ad72d5ae44175b0afe0fad14fc84741ef49349c83f3d9e5b5db2daebe80ef2"
+ },
+ "freshSet": {
+  "atk_fresh_rat_androidtester.pcap": {
+   "sha256": "af22b503852390d914d0581e6f4cc1ebeb03203c7005464438a4708c22c59045",
+   "bytes": 80764516,
+   "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT01_AndroidTester/RAT01_AndroidTester.pcap"
+  },
+  "atk_fresh_rat_droidjack.pcap": {
+   "sha256": "b8699b14248559f83a37b9c217ff99126f79e661a417cb8d9f4237f87412f4cc",
+   "bytes": 55012115,
+   "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT02_DroidJack/RAT02_DroidJack.pcap"
+  },
+  "atk_fresh_rat_hawkshaw.pcap": {
+   "sha256": "07a30d492c3dcdcb2c1f21389d8c2a8586ff100bbd39a90f324998b54fc2c2a4",
+   "bytes": 75644900,
+   "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT03_HawkShaw/RAT03_HawkShaw.pcap"
+  },
+  "atk_fresh_rat_spymax.pcap": {
+   "sha256": "6d98366749513310e59686dfc7dc5370a058d1c59ebe8862214d310341fcf01b",
+   "bytes": 162451395,
+   "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT04_SpyMAX/RAT04_SpyMAX.pcap"
+  },
+  "atk_fresh_rat_androrat.pcap": {
+   "sha256": "7794fc607b077ee4d2efac88b04f440e7f8bfdef8abe707f87f56e58c64bfcfe",
+   "bytes": 31993787,
+   "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT05_AndroRAT/RAT05_AndroRAT.pcap"
+  },
+  "atk_fresh_rat_saefko.pcap": {
+   "sha256": "2df7a2270cb2360aa502b9e50e6509a49d37dd80b773d83a7f2ade21c4c15424",
+   "bytes": 48994258,
+   "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT06_Saefko/RAT06_Saefko.pcap"
+  },
+  "atk_fresh_rat_ahmyth.pcap": {
+   "sha256": "244aad2114e0576e5d80e0006f912f5d7fc099cc4b8dcfad2b402d2a32ccac3b",
+   "bytes": 40480768,
+   "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT07_AhMyth/RAT07_AhMyth.pcap"
+  },
+  "atk_fresh_rat_cli_androrat.pcap": {
+   "sha256": "53aa15da212b3fb0d0589e50a4b2b07590b2128c828125ae93addd6bb6270515",
+   "bytes": 1214633,
+   "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT08_cli_AndroRAT/RAT08_cli_AndroRAT.pcap"
+  },
+  "atk_fresh_flood_tcp_synack_reflection.pcap": {
+   "sha256": "9339d7bc9d78e04a189b027890355d0b3c2687a720c32606acfa31d5325cd87e",
+   "bytes": 643499,
+   "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.TCP.reflection.SYNACK.pcap"
+  },
+  "atk_fresh_flood_tcp_syn_amp.pcapng": {
+   "sha256": "4ee88c005948234120dd9a1ce76168d763c42babd8aae54bf0d98d4ae336c97a",
+   "bytes": 72058,
+   "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.TCP.syn.optionallyACK.optionallysamePort.pcapng"
+  },
+  "atk_fresh_flood_udp_dnsany.pcap": {
+   "sha256": "7278d2805bf987d2c7e2ca5dc4663fe363f5c930c0b130817d7c74eceb8e37ab",
+   "bytes": 6449745,
+   "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.UDP.DNSANY.pcap"
+  },
+  "atk_fresh_flood_udp_ubnt.pcapng": {
+   "sha256": "0e2a81903ee2d883c34d56c0441437edee35f1d660282f69d257df9999810641",
+   "bytes": 12364048,
+   "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.UDP.UBNT.src10001.pcapng"
+  },
+  "atk_fresh_flood_udp_bacnet.pcapng": {
+   "sha256": "0070a4212ddab4a7ab96ce46f0d5f8ed5218c14a21873367e322a88b2b8e7849",
+   "bytes": 2988589,
+   "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.UDP.bacnet.IOT.37810.pcapng"
+  },
+  "atk_fresh_flood_udp_isakmp.pcap": {
+   "sha256": "87dabcb3a45ce7cef89ed3a19234a2112f5813dbd0bd52fb34f497a58cfaa8fa",
+   "bytes": 1043832,
+   "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.UDP.isakmp.pcap"
+  },
+  "atk_fresh_flood_udp_manyprotocols.pcapng": {
+   "sha256": "f457afe279369661043e55a9da2a233bb7051b155fc95a2b75f6ae3f8de44d9d",
+   "bytes": 42446666,
+   "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.UDP.manyprotocols.pcapng"
+  },
+  "atk_fresh_flood_udp_memcached_ntp_cldap.pcap": {
+   "sha256": "a7e89cad6fcaa08d5f5cdc8a35ca916b39909c9e4558ee557ab9d12598548a6d",
+   "bytes": 29371615,
+   "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.UDP.memcached.ntp.cldap.pcap"
+  },
+  "atk_fresh_flood_udp_snmp.pcapng": {
+   "sha256": "752df931f30ee5528a6670c4257c6cfce6df49c0de836e8bd4091ebf743e926c",
+   "bytes": 1125839,
+   "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.UDP.snmp.src161.pcapng"
+  },
+  "atk_fresh_flood_dns_rrsig_fragmented.pcap": {
+   "sha256": "db8b55f728bd3828e0669190ddfd828d588db180a3f6b315a1677336719933c8",
+   "bytes": 2088278,
+   "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.dns.RRSIG.fragmented.pcap"
+  },
+  "atk_fresh_flood_ip_randomproto.pcap": {
+   "sha256": "690faa5227b773177c91557366376016b744f5850f375a821bb514a4f027b5fe",
+   "bytes": 7750476,
+   "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/pkt.IPV4.randomprotofield.pcap"
+  },
+  "atk_fresh_flood_tcp_dominate.pcapng": {
+   "sha256": "28fdcec8473ec418fb4440db514470107b0792733b9fce55d8d47d588a3ae526",
+   "bytes": 750779,
+   "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/pkt.TCP.DOMINATE.syn.ecn.cwr.pcapng"
+  },
+  "atk_fresh_flood_udp_fragmented.pcap": {
+   "sha256": "8d24931b3117292516d4a861a431e27ad7f2aea7a2551991aebdd863bd309a14",
+   "bytes": 28922892,
+   "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/pkt.UDP.fragmented.pcap"
+  },
+  "atk_fresh_flood_udp_null.pcapng": {
+   "sha256": "9ffcddce39021c7f4959ee33300b759735edc50eb16956c973024ccc874662cc",
+   "bytes": 5744966,
+   "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/pkt.UDP.null.pcapng"
+  },
+  "atk_fresh_flood_udp_rdm.pcapng": {
+   "sha256": "76be8a217992d5e5e157ce53af8573f2645cef55c65f09ab8785f26d0ba8a795",
+   "bytes": 6714522,
+   "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/pkt.UDP.rdm.fixedlength.pcapng"
+  },
+  "atk_fresh_c2_foudre_dga.pcapng": {
+   "sha256": "08cc76efbbeeb1eed155964622dcdf512dff166bb0a9fe55ddbc8e18434a2138",
+   "bytes": 9896,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Command and Control/C2_Foudre_Backdoor_DGA.pcapng"
+  },
+  "atk_fresh_win_psloggedon.pcapng": {
+   "sha256": "52756f0264a796d3d3309d0d1745988f01d51caa04f0cf09f291292825a3f176",
+   "bytes": 96300,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Discovery/Discovery_PsLoggedOn_remotelocalusers_enum_winreg_lsarpc_dcerpc_smb.pcapng"
+  },
+  "atk_fresh_win_netshareenum.pcapng": {
+   "sha256": "47901d303a065065d190c6eeb6ba29f4ff054c088a6c93d14ed6f21d626bc9ca",
+   "bytes": 11004,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Discovery/Discovery_dcerp_srvsvc_NetShareEnum.pcapng"
+  },
+  "atk_fresh_win_rpcdump.pcapng": {
+   "sha256": "6fd35023f899acfc5fb23a7f1e57dc585ea4e46a75df39551b14820be9d47e9f",
+   "bytes": 47148,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Discovery/Discovery_impacket_rpcdump.pcapng"
+  },
+  "atk_fresh_win_samr.pcapng": {
+   "sha256": "77f24fdbea8cca3e0c6e46708e886598a6bad239c7f9bc38c5d91ca5b6131bc2",
+   "bytes": 14132,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Discovery/Discovery_privgroups_domain_admins_samr_lookupnames_req.pcapng"
+  },
+  "atk_fresh_win_zerologon.pcapng": {
+   "sha256": "2b28eb1189069f26a7d83c02351f2fb8f700d4101a4f8ae2eefebe9fd9da81c2",
+   "bytes": 811252,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/CVE-2020-1472_Zerologon_RPC_NetLogon_NullChallenge_SecChan_6_from_nonDC_to_DC.pcapng"
+  },
+  "atk_fresh_win_sigred.pcapng": {
+   "sha256": "e4db1a2f919418f77b4ef293e9c72f8b0a28982c8e6764d29a10cb00710271f4",
+   "bytes": 70940,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/Exploit_DoS_cve-2020-1350_dns_sig_maxspl0it.pcapng"
+  },
+  "atk_fresh_win_wmi.pcapng": {
+   "sha256": "7626d813c7511db8a05b014872b32068e1e2a5cd7f7b2233b826a8f959779586",
+   "bytes": 109992,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/LM_WMI_ProcessCallCreate.pcapng"
+  },
+  "atk_fresh_win_dcom.pcapng": {
+   "sha256": "d5b268ca4960b9a9d87581bc046d8ff0a884c564e35beb45ab6d71f39ebc0de7",
+   "bytes": 19188,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/LM_dcom_mmc20.application_dcerpc.pcapng"
+  },
+  "atk_fresh_win_sharprdp.pcapng": {
+   "sha256": "4a558f4fd4ea0fd2c4885dc2f779b7b5eedbf0f8f54aba1a4bc02689520038be",
+   "bytes": 267732,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/LM_rdp_sharprdp.pcapng"
+  },
+  "atk_fresh_win_smbexec.pcapng": {
+   "sha256": "6581987a31be6839fe594172bcc1f567d1dd3086d41c0c6c6811c8644127d92b",
+   "bytes": 22088,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/LM_smbexec_smb_dcerpc_svcctl_epm.pcapng"
+  },
+  "atk_fresh_win_skeleton.pcapng": {
+   "sha256": "d4356faa3df2f575219a84233524276606d331ce2f4cec1fc9a2d315f7b2062b",
+   "bytes": 13500,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/lm_mimikazt_skeleton_kerberos_rc4_etype.pcapng"
+  },
+  "atk_fresh_win_zerologon_scan.pcapng": {
+   "sha256": "6c4d3a3d4ab0a84bc69d5f254225d0e8400da42bd1d5614b9a96b42b7373e907",
+   "bytes": 73776,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/zerologon_mimikatz_ntlm_privacy_scan_and_exploit_encrypted.pcapng"
+  },
+  "atk_fresh_win_eventservice.pcapng": {
+   "sha256": "a2793a2bad294a5472207bb969eea85db356613d3eae8a460cd9b1980e9451f9",
+   "bytes": 7824,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Evasion/DE_byt3bl33d3r_remote_eventservice_crash.pcapng"
+  },
+  "atk_fresh_win_spoolsample.pcapng": {
+   "sha256": "cac9937ac9b4e172b21920c207629aa8e8fc591d46d44cfee2857caadd26ad4b",
+   "bytes": 16596,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/CredAccess/CA_LM_SpoolSample_SMB_BiAuth.pcapng"
+  },
+  "atk_fresh_win_kerbrute.pcapng": {
+   "sha256": "f30458cef193fcbf9a96cf69c385062d731a0827fed518a0d64cd59f319453e9",
+   "bytes": 11060,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/CredAccess/CA_kerbrute_passwordspray_kerberos_AS-REQ.pcapng"
+  },
+  "atk_fresh_win_masterkey.pcapng": {
+   "sha256": "8750a4f528de113e4ddb423bf2bae8911f42aa33af930ba2cb99f3f7f798e0ac",
+   "bytes": 11340,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/CredAccess/CA_masterkey_rpc_protectedstorage.pcapng"
+  },
+  "atk_fresh_win_backupkey.pcapng": {
+   "sha256": "139135166ab9e78d8cf5f1b1788315adbbd36c371ab920368ecd022e3c8719a5",
+   "bytes": 5424,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/CredAccess/CredAccess_BackupMasterKey_LSARPC_43_RetrievePrivateData.pcapng"
+  },
+  "atk_fresh_win_dcshadow.pcapng": {
+   "sha256": "0c670a70e243e5498b6c8de24a99542a0e952d09ab722501b248b385d5596f91",
+   "bytes": 25940,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/CredAccess/DCShadow_add_primarygroupid_512_to_std_account.pcapng"
+  },
+  "atk_fresh_win_dcsync.pcapng": {
+   "sha256": "d406c65e7805700838c84bc2567e875bf8802f289c831c836834f1c3e802c4dc",
+   "bytes": 11024,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/CredAccess/DCSync_krbtgt_dcerpc_smb.pcapng"
+  },
+  "atk_fresh_win_pwdreset.pcapng": {
+   "sha256": "6a11a675f6d4216b3770ee54731dc673609f96fee0a550936f842585f76da4f3",
+   "bytes": 18980,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/CredAccess/Remote_Pwd_Reset_RPC_Admin_Mimikatz_PostZeroLogon.pcapng"
+  },
+  "atk_fresh_win_smbghost.pcapng": {
+   "sha256": "e97738f6034bb305b0d3f97ef6c6c11443f01aaee27b9d57abaff22ae4413a03",
+   "bytes": 2364,
+   "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/PrivEsc/CVE-2020-0796_SMBGhost_PrivEsc_Loopback_traffic.pcapng"
+  }
+ },
+ "amendments": [
+  {
+   "date": "2026-11-04",
+   "why": "Version 1.5.1. Three defects found after the frozen second-cycle run. (1) FLOW-003: a connection outlived the five-minute DNS entry naming its address and then read as unnamed; the flow check on the fresh captures exposed it, so those captures can no longer test the fix. (2) The relay reset any TCP connection silent for 60 s, found by reading zdtun and confirmed by idle_probe.py; limits now follow RFC 4787 and RFC 5382 and zdtun holds 512 sockets. (3) The owner cache was keyed by local port alone, so a reused port could name the wrong app. Only (1) can change a replay verdict. Frozen hashes and builds stay as recorded.",
+   "sources": {
+    "android/app/src/main/kotlin/com/example/packet_analyzer/FlowDetectors.kt": "516947fef65f9d6c2b36c420cd02501ca8dedc63326c608dedd70c8509e13828",
+    "android/app/src/main/kotlin/com/example/packet_analyzer/ZdtunVpnService.kt": "c10d0a3f422e38fa365017c19fa22463848604059168badb8544a60e2acf9880",
+    "android/app/src/main/zdtun/zdtun.c": "033d19eb706d2669ca1fe94b9d0903f8a93ca45f70d79a6f227e6553193eb33d",
+    "android/app/CMakeLists.txt": "11aaef0babac9f2d8d6467a9d4b41dbd492bf045d067d25dae1010f98e23e4a0"
+   },
+   "builds": {
+    "evaluation/build/v151/harness.dex": "ba3d835ec683197f2f6e8ad4e0d7b11cd135ad4e361ed71c9a5147a92281d94f",
+    "evaluation/build/v151/harness.jar": "643d850986d417a9c72ba8e2d6744bbfcd3d5d1ee61cf604446ab5f9f8767aab",
+    "evaluation/build/andronet-eval-arm64-v151.apk": "901971d6ac04a95af97e91f3459dc521cd7c1ce82bc833bd1cc118db3c7b0ad6",
+    "evaluation/build/andronet-eval-x64-v151.apk": "761d1d96284d5ff20d6a05122d8330b21420267f25d73cb1eae7037b0c994999"
+   }
+  },
+  {
+   "date": "2026-11-09",
+   "why": "Version 1.5.2. Both capture services become special-use foreground services instead of data-sync ones. Android 15 and later allow a data-sync foreground service six hours of running time a day and crash an app that keeps one running longer; the everyday-use run on the Pixel 8 ended in that crash after 6.0 hours of process runtime (results/soak_pixel_crashes.json). Only the manifest changes; detection code and the harness builds are those of 1.5.1.",
+   "sources": {
+    "android/app/src/main/AndroidManifest.xml": "3ccbaecf3671f04053dd67d39cb5318053bef9ce1cb97f68222f58685bdfb197"
+   },
+   "builds": {
+    "evaluation/build/andronet-eval-arm64-v152.apk": "d73293c67f0e413fc9abe627a9ac5bfb0eb2477b82520e11f8d04a99b49c02b3"
+   }
+  }
+ ]
+}

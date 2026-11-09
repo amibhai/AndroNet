@@ -1,0 +1,7 @@
+[
+ {
+  "timestamp": "2026-11-07 08:23:28.143+0530",
+  "processRuntimeHours": 6.003,
+  "exception": "android.app.RemoteServiceException$ForegroundServiceDidNotStopInTimeException: A foreground service of type dataSync did not stop within its timeout: ComponentInfo{com.example.packet_analyzer.eval/com.example.packet_analyzer.ZdtunVpnService}"
+ }
+]

@@ -1,0 +1,11 @@
+{
+ "tag": "fresh_pixel",
+ "sites": 20,
+ "seconds": 786,
+ "alerts": {},
+ "alertsByApp": {},
+ "cpuPercent": 13.0,
+ "rssMiB": 127,
+ "exportFiles": 4,
+ "exportPackets": 139506
+}

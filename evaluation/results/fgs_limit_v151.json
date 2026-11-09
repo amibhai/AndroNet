@@ -1,0 +1,12 @@
+{
+ "build": "v151",
+ "versionName": "1.5.1",
+ "apkSha256": "901971d6ac04a95af97e91f3459dc521cd7c1ce82bc833bd1cc118db3c7b0ad6",
+ "limitMinutes": 5.0,
+ "waitedMinutes": 8.0,
+ "sameProcess": false,
+ "tunnelUp": false,
+ "newCrashReports": 1,
+ "exception": "android.app.RemoteServiceException$ForegroundServiceDidNotStopInTimeException: A foreground service of type dataSync did not stop within its timeout: ComponentInfo{com.example.packet_analyzer.eval/com.example.packet_analyzer.ZdtunVpnService}",
+ "limitAfterRestoreMs": 21600000
+}

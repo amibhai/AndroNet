@@ -1,0 +1,12 @@
+{
+ "build": "v152",
+ "versionName": "1.5.2",
+ "apkSha256": "d73293c67f0e413fc9abe627a9ac5bfb0eb2477b82520e11f8d04a99b49c02b3",
+ "limitMinutes": 5.0,
+ "waitedMinutes": 8.0,
+ "sameProcess": true,
+ "tunnelUp": true,
+ "newCrashReports": 0,
+ "exception": null,
+ "limitAfterRestoreMs": 21600000
+}

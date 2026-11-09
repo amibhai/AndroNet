@@ -1,0 +1,21 @@
+{
+ "host": "192.168.1.8",
+ "detected": 1,
+ "total": 1,
+ "scenarios": [
+  {
+   "scenario": "dns_failed_lookups",
+   "detected": true,
+   "expected": [
+    "FLOW-005"
+   ],
+   "alerts": {
+    "FLOW-005": 1
+   }
+  }
+ ],
+ "outside": {},
+ "testProcessKills": 0,
+ "logRestarts": 0,
+ "rssMiB": 225
+}

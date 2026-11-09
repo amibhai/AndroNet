@@ -254,16 +254,35 @@ class RuleEngineTest {
         assertFalse(matches(packet(protocol = "TCP", destPort = 3333), payload).hasRule("RULE-006"))
     }
 
-    // ---- RULE-007 Suspicious Outbound Traffic (PacketRate + PayloadSize) ----
+    // ---- RULE-007 Suspicious Outbound Traffic (ByteRate + PayloadSize) ----
 
     @Test
     fun `outbound transfer rule fires for large payloads at high rate`() {
         val payload = ByteArray(2000) { 0x42 }
         var result = emptyList<RuleEngine.RuleMatch>()
-        repeat(501) {
+        repeat(600) {
             result = matches(packet(protocol = "TCP", destPort = 54321, destIp = "198.51.100.5"), payload)
         }
         assertTrue(result.hasRule("RULE-007"))
+    }
+
+    @Test
+    fun `outbound transfer rule counts bytes, so large segments take fewer packets`() {
+        val payload = ByteArray(10000) { 0x42 }
+        var result = emptyList<RuleEngine.RuleMatch>()
+        repeat(110) {
+            result = matches(packet(protocol = "TCP", destPort = 54324, destIp = "198.51.100.7"), payload)
+        }
+        assertTrue(result.hasRule("RULE-007"))
+    }
+
+    @Test
+    fun `outbound transfer rule does not add up flows to many destinations`() {
+        val payload = ByteArray(2000) { 0x42 }
+        repeat(600) { i ->
+            val result = matches(packet(protocol = "TCP", destPort = 54325, destIp = "198.51.100.${i % 200}"), payload)
+            assertFalse(result.hasRule("RULE-007"))
+        }
     }
 
     @Test

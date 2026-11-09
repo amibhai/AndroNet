@@ -1,0 +1,249 @@
+{
+ "atk_fresh_rat_androidtester": {
+  "controllerPort": 1337,
+  "streams": 12,
+  "streamsWithHandshake": 12,
+  "firstPayloads": [
+   {
+    "bytes": 1349,
+    "bitsPerByte": 4.1,
+    "printableShare": 0.35,
+    "longestPrintableRun": 10,
+    "first6Printable": false,
+    "fromClient": true
+   },
+   {
+    "bytes": 1348,
+    "bitsPerByte": 4.1,
+    "printableShare": 0.36,
+    "longestPrintableRun": 5,
+    "first6Printable": false,
+    "fromClient": true
+   },
+   {
+    "bytes": 67,
+    "bitsPerByte": 2.78,
+    "printableShare": 0.33,
+    "longestPrintableRun": 9,
+    "first6Printable": false,
+    "fromClient": true
+   },
+   {
+    "bytes": 67,
+    "bitsPerByte": 2.78,
+    "printableShare": 0.33,
+    "longestPrintableRun": 9,
+    "first6Printable": false,
+    "fromClient": true
+   }
+  ],
+  "dnsAnswers": 1,
+  "sawTwitterAnswer": false
+ },
+ "atk_fresh_rat_droidjack": {
+  "controllerPort": "1337",
+  "streams": 2,
+  "streamsWithHandshake": 2,
+  "firstPayloads": [
+   {
+    "bytes": 6,
+    "bitsPerByte": 0.83,
+    "printableShare": 0.0,
+    "longestPrintableRun": 0,
+    "first6Printable": false,
+    "fromClient": false
+   },
+   {
+    "bytes": 6,
+    "bitsPerByte": 0.83,
+    "printableShare": 0.0,
+    "longestPrintableRun": 0,
+    "first6Printable": false,
+    "fromClient": false
+   }
+  ],
+  "dnsAnswers": 54,
+  "sawTwitterAnswer": true
+ },
+ "atk_fresh_rat_hawkshaw": {
+  "controllerPort": "443",
+  "streams": 0,
+  "streamsWithHandshake": 0,
+  "firstPayloads": [],
+  "dnsAnswers": 4,
+  "sawTwitterAnswer": false
+ },
+ "atk_fresh_rat_spymax": {
+  "controllerPort": 8000,
+  "streams": 15,
+  "streamsWithHandshake": 15,
+  "firstPayloads": [
+   {
+    "bytes": 119,
+    "bitsPerByte": 2.82,
+    "printableShare": 0.38,
+    "longestPrintableRun": 4,
+    "first6Printable": false,
+    "fromClient": true
+   },
+   {
+    "bytes": 130,
+    "bitsPerByte": 2.97,
+    "printableShare": 0.43,
+    "longestPrintableRun": 4,
+    "first6Printable": false,
+    "fromClient": true
+   },
+   {
+    "bytes": 1349,
+    "bitsPerByte": 3.88,
+    "printableShare": 0.36,
+    "longestPrintableRun": 11,
+    "first6Printable": false,
+    "fromClient": true
+   },
+   {
+    "bytes": 161,
+    "bitsPerByte": 3.25,
+    "printableShare": 0.33,
+    "longestPrintableRun": 6,
+    "first6Printable": false,
+    "fromClient": true
+   }
+  ],
+  "dnsAnswers": 73,
+  "sawTwitterAnswer": true
+ },
+ "atk_fresh_rat_androrat": {
+  "controllerPort": "1337",
+  "streams": 3,
+  "streamsWithHandshake": 3,
+  "firstPayloads": [
+   {
+    "bytes": 270,
+    "bitsPerByte": 2.96,
+    "printableShare": 0.7,
+    "longestPrintableRun": 20,
+    "first6Printable": false,
+    "fromClient": true
+   },
+   {
+    "bytes": 270,
+    "bitsPerByte": 2.96,
+    "printableShare": 0.7,
+    "longestPrintableRun": 20,
+    "first6Printable": false,
+    "fromClient": true
+   },
+   {
+    "bytes": 270,
+    "bitsPerByte": 2.96,
+    "printableShare": 0.7,
+    "longestPrintableRun": 20,
+    "first6Printable": false,
+    "fromClient": true
+   }
+  ],
+  "dnsAnswers": 42,
+  "sawTwitterAnswer": true
+ },
+ "atk_fresh_rat_saefko": {
+  "controllerPort": 6667,
+  "streams": 28,
+  "streamsWithHandshake": 28,
+  "firstPayloads": [
+   {
+    "bytes": 63,
+    "bitsPerByte": 3.81,
+    "printableShare": 0.97,
+    "longestPrintableRun": 61,
+    "first6Printable": true,
+    "fromClient": false
+   },
+   {
+    "bytes": 24,
+    "bitsPerByte": 3.29,
+    "printableShare": 0.96,
+    "longestPrintableRun": 23,
+    "first6Printable": true,
+    "fromClient": true
+   },
+   {
+    "bytes": 62,
+    "bitsPerByte": 3.77,
+    "printableShare": 0.97,
+    "longestPrintableRun": 60,
+    "first6Printable": true,
+    "fromClient": false
+   },
+   {
+    "bytes": 24,
+    "bitsPerByte": 3.46,
+    "printableShare": 0.96,
+    "longestPrintableRun": 23,
+    "first6Printable": true,
+    "fromClient": true
+   }
+  ],
+  "dnsAnswers": 111,
+  "sawTwitterAnswer": true
+ },
+ "atk_fresh_rat_ahmyth": {
+  "controllerPort": 8000,
+  "streams": 12,
+  "streamsWithHandshake": 12,
+  "firstPayloads": [
+   {
+    "bytes": 268,
+    "bitsPerByte": 3.81,
+    "printableShare": 0.96,
+    "longestPrintableRun": 108,
+    "first6Printable": true,
+    "fromClient": true
+   },
+   {
+    "bytes": 327,
+    "bitsPerByte": 3.9,
+    "printableShare": 0.94,
+    "longestPrintableRun": 135,
+    "first6Printable": true,
+    "fromClient": true
+   },
+   {
+    "bytes": 268,
+    "bitsPerByte": 3.81,
+    "printableShare": 0.96,
+    "longestPrintableRun": 108,
+    "first6Printable": true,
+    "fromClient": true
+   },
+   {
+    "bytes": 327,
+    "bitsPerByte": 3.87,
+    "printableShare": 0.94,
+    "longestPrintableRun": 135,
+    "first6Printable": true,
+    "fromClient": true
+   }
+  ],
+  "dnsAnswers": 41,
+  "sawTwitterAnswer": true
+ },
+ "atk_fresh_rat_cli_androrat": {
+  "controllerPort": 1337,
+  "streams": 1,
+  "streamsWithHandshake": 1,
+  "firstPayloads": [
+   {
+    "bytes": 51,
+    "bitsPerByte": 3.78,
+    "printableShare": 0.98,
+    "longestPrintableRun": 50,
+    "first6Printable": true,
+    "fromClient": true
+   }
+  ],
+  "dnsAnswers": 0,
+  "sawTwitterAnswer": false
+ }
+}

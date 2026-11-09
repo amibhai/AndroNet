@@ -1,0 +1,7 @@
+{
+ "tag": "oppo",
+ "bootReason": "reboot,ota",
+ "buildAtCollect": "CPH2127_11_F.32",
+ "buildAtStart": "CPH2127_11_F.31",
+ "uptimeHoursAtCollect": 32.67
+}

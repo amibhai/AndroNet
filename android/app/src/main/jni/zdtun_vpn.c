@@ -105,7 +105,7 @@ static void protect_socket_callback(zdtun_t *tun, socket_t sock) {
  */
 JNIEXPORT jboolean JNICALL
 Java_com_example_packet_1analyzer_ZdtunVpn_nativeInit(JNIEnv *env, jobject thiz,
-                                                        jobject vpn_service, jint tunfd) {
+                                                        jobject vpn_service, jint tunfd, jint mtu) {
     LOGI("Initializing zdtun");
 
     // Save JVM reference
@@ -159,8 +159,8 @@ Java_com_example_packet_1analyzer_ZdtunVpn_nativeInit(JNIEnv *env, jobject thiz,
         return JNI_FALSE;
     }
 
-    // Set MTU
-    zdtun_set_mtu(g_ctx.tun, 1500);
+    // Must match the MTU given to VpnService.Builder
+    zdtun_set_mtu(g_ctx.tun, mtu);
 
     LOGI("zdtun initialized successfully");
     return JNI_TRUE;

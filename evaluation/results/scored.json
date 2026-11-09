@@ -837,5 +837,817 @@
     "packets": 46654
    }
   }
+ },
+ "accuracy_v15_dev_host": {
+  "pipeline": "current",
+  "thresholds": "shipped",
+  "view": "root",
+  "recall": {
+   "detected": 17,
+   "total": 19,
+   "byLayer": {
+    "L1": 9,
+    "L2": 4,
+    "L3": 4,
+    "L4": 2
+   }
+  },
+  "untargeted": {
+   "atk_wsnmap_ACK_scan_on_port_80": {
+    "alerts": {},
+    "packets": 6
+   },
+   "atk_wsnmap_ACK_scan_on_port_80_2": {
+    "alerts": {
+     "L1:ARP_SPOOFING": 2
+    },
+    "packets": 20
+   },
+   "atk_ms04_011_exploit": {
+    "alerts": {
+     "RULE-008": 1
+    },
+    "packets": 16
+   },
+   "atk_rat_infected": {
+    "alerts": {},
+    "packets": 779
+   },
+   "atk_aurora_exploit": {
+    "alerts": {},
+    "packets": 39
+   },
+   "atk_cryptowall_c2": {
+    "alerts": {},
+    "packets": 162
+   },
+   "atk_sessionhijack": {
+    "alerts": {},
+    "packets": 134
+   },
+   "atk_dcerpc_scan": {
+    "alerts": {},
+    "packets": 700
+   },
+   "atk_psexec_lateral": {
+    "alerts": {},
+    "packets": 264
+   }
+  },
+  "benign": {
+   "packets": 1011720,
+   "flaggedPackets": 215,
+   "packetFPR": 0.0002125093899497885,
+   "alerts": 215,
+   "alertsPer1000": 0.2125093899497885,
+   "seconds": 96972199.77303301,
+   "alertsPerHour": 0.007981668991851019,
+   "byAlert": {
+    "RULE-003": 66,
+    "RULE-002": 4,
+    "L1:SYN_FLOOD": 30,
+    "L1:CONNECTION_FLOOD": 1,
+    "RULE-007": 17,
+    "EXP-002": 5,
+    "RULE-005": 1,
+    "EXFIL-001": 2,
+    "FLOW-002": 3,
+    "FLOW-001": 16,
+    "L1:PORT_SCAN": 12,
+    "FLOW-003": 40,
+    "C2-003": 18
+   },
+   "byLayer": {
+    "L1": 43,
+    "L2": 25,
+    "L3": 88,
+    "L4": 59
+   },
+   "perTrace": {
+    "benign_bigFlows": {
+     "packets": 791615,
+     "flagged": 189,
+     "alerts": {
+      "RULE-003": 66,
+      "RULE-002": 4,
+      "L1:SYN_FLOOD": 30,
+      "L1:CONNECTION_FLOOD": 1,
+      "RULE-007": 17,
+      "EXP-002": 5,
+      "RULE-005": 1,
+      "EXFIL-001": 2,
+      "FLOW-002": 3,
+      "FLOW-001": 14,
+      "L1:PORT_SCAN": 6,
+      "FLOW-003": 40
+     },
+     "seconds": 299.999827
+    },
+    "benign_dhcp": {
+     "packets": 4,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 0.070345
+    },
+    "benign_http_espn": {
+     "packets": 956,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 2.047482
+    },
+    "benign_http_gzip": {
+     "packets": 10,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 0.022715
+    },
+    "benign_irc_skype": {
+     "packets": 2257,
+     "flagged": 23,
+     "alerts": {
+      "L1:PORT_SCAN": 6,
+      "FLOW-001": 2,
+      "C2-003": 15
+     },
+     "seconds": 322.749776
+    },
+    "benign_irc_zeek": {
+     "packets": 34,
+     "flagged": 3,
+     "alerts": {
+      "C2-003": 3
+     },
+     "seconds": 54.52451
+    },
+    "benign_lotsofweb": {
+     "packets": 12899,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 93.748446
+    },
+    "benign_smb1_suricata": {
+     "packets": 36,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 0.749845
+    },
+    "benign_smb_win10": {
+     "packets": 1000,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 668.680229
+    },
+    "benign_ssh_zeek": {
+     "packets": 1797,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 96970194.886085
+    },
+    "benign_telnet": {
+     "packets": 92,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 39.571274
+    },
+    "benign_phone_test_00": {
+     "packets": 201020,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 522.722499
+    }
+   }
+  },
+  "captures": {
+   "atk_portscan_synscan": {
+    "class": "port_scan",
+    "detected": true,
+    "hits": [
+     "L1:PORT_SCAN"
+    ],
+    "alerts": {
+     "L1:SYN_FLOOD": 1,
+     "L1:CONNECTION_FLOOD": 1,
+     "L1:PORT_SCAN": 1
+    },
+    "packets": 2011
+   },
+   "atk_portscan_ppa": {
+    "class": "port_scan",
+    "detected": true,
+    "hits": [
+     "L1:PORT_SCAN"
+    ],
+    "alerts": {
+     "L1:PORT_SCAN": 1
+    },
+    "packets": 29
+   },
+   "atk_wsnmap_standard_scan": {
+    "class": "port_scan",
+    "detected": true,
+    "hits": [
+     "L1:PORT_SCAN"
+    ],
+    "alerts": {
+     "L1:SYN_FLOOD": 2,
+     "L1:CONNECTION_FLOOD": 2,
+     "RULE-005": 1,
+     "L1:PORT_SCAN": 3
+    },
+    "packets": 2004
+   },
+   "atk_wsnmap_OS_scan": {
+    "class": "port_scan",
+    "detected": true,
+    "hits": [
+     "L1:PORT_SCAN"
+    ],
+    "alerts": {
+     "L1:SYN_FLOOD": 2,
+     "L1:CONNECTION_FLOOD": 2,
+     "RULE-005": 1,
+     "L1:PORT_SCAN": 3
+    },
+    "packets": 2056
+   },
+   "atk_wsnmap_OS_scan_succesful": {
+    "class": "port_scan",
+    "detected": true,
+    "hits": [
+     "L1:PORT_SCAN"
+    ],
+    "alerts": {
+     "L1:SYN_FLOOD": 1,
+     "L1:MALFORMED_PACKET": 1,
+     "L1:CONNECTION_FLOOD": 1,
+     "RULE-005": 1,
+     "L1:PORT_SCAN": 1
+    },
+    "packets": 2052
+   },
+   "atk_wsnmap_zombie_scan": {
+    "class": "port_scan",
+    "detected": true,
+    "hits": [
+     "L1:PORT_SCAN"
+    ],
+    "alerts": {
+     "L1:PORT_SCAN": 1
+    },
+    "packets": 42
+   },
+   "atk_nmap_version_zeek": {
+    "class": "port_scan",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 547
+   },
+   "atk_synflood_spoofed": {
+    "class": "syn_flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD",
+     "L1:SYN_FLOOD"
+    ],
+    "alerts": {
+     "L1:SYN_FLOOD": 2,
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 37841
+   },
+   "atk_icmp_flood_large": {
+    "class": "icmp_abuse",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 10000
+   },
+   "atk_arp_poison": {
+    "class": "arp_spoof",
+    "detected": true,
+    "hits": [
+     "L1:ARP_SPOOFING"
+    ],
+    "alerts": {
+     "L1:ARP_SPOOFING": 1
+    },
+    "packets": 165
+   },
+   "atk_sqli_dvwa": {
+    "class": "sql_injection",
+    "detected": true,
+    "hits": [
+     "EXP-001",
+     "RULE-002"
+    ],
+    "alerts": {
+     "RULE-002": 3,
+     "EXP-001": 2
+    },
+    "packets": 35
+   },
+   "atk_sqli_dvwa_passwords": {
+    "class": "sql_injection",
+    "detected": true,
+    "hits": [
+     "EXP-001",
+     "RULE-002"
+    ],
+    "alerts": {
+     "RULE-002": 1,
+     "EXP-001": 1
+    },
+    "packets": 12
+   },
+   "atk_traversal_dvwa": {
+    "class": "path_traversal",
+    "detected": true,
+    "hits": [
+     "EXP-002"
+    ],
+    "alerts": {
+     "EXP-002": 1
+    },
+    "packets": 10
+   },
+   "atk_dnstunnel_remoteshell": {
+    "class": "dns_tunnel",
+    "detected": true,
+    "hits": [
+     "FLOW-002"
+    ],
+    "alerts": {
+     "FLOW-002": 2
+    },
+    "packets": 62
+   },
+   "atk_dnstunnel_txt_c2": {
+    "class": "dns_tunnel",
+    "detected": true,
+    "hits": [
+     "FLOW-004"
+    ],
+    "alerts": {
+     "FLOW-004": 1
+    },
+    "packets": 270
+   },
+   "atk_meterpreter_rdp_tunnel": {
+    "class": "meterpreter",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 2
+    },
+    "packets": 1221
+   },
+   "atk_ftp_bruteforce_zeek": {
+    "class": "bruteforce",
+    "detected": true,
+    "hits": [
+     "RULE-005"
+    ],
+    "alerts": {
+     "RULE-005": 4
+    },
+    "packets": 606
+   },
+   "atk_ssh_guessing_zeek": {
+    "class": "bruteforce",
+    "detected": true,
+    "hits": [
+     "RULE-005"
+    ],
+    "alerts": {
+     "RULE-005": 2
+    },
+    "packets": 431
+   },
+   "atk_wannacry_eternalblue": {
+    "class": "smb_worm",
+    "detected": true,
+    "hits": [
+     "NET-001"
+    ],
+    "alerts": {
+     "RULE-007": 5,
+     "L1:ARP_SPOOFING": 12,
+     "NET-001": 14,
+     "FLOW-001": 1
+    },
+    "packets": 46654
+   }
+  }
+ },
+ "accuracy_v151_dev_host": {
+  "pipeline": "current",
+  "thresholds": "shipped",
+  "view": "root",
+  "recall": {
+   "detected": 17,
+   "total": 19,
+   "byLayer": {
+    "L1": 9,
+    "L2": 4,
+    "L3": 4,
+    "L4": 2
+   }
+  },
+  "untargeted": {
+   "atk_wsnmap_ACK_scan_on_port_80": {
+    "alerts": {},
+    "packets": 6
+   },
+   "atk_wsnmap_ACK_scan_on_port_80_2": {
+    "alerts": {
+     "L1:ARP_SPOOFING": 2
+    },
+    "packets": 20
+   },
+   "atk_ms04_011_exploit": {
+    "alerts": {
+     "RULE-008": 1
+    },
+    "packets": 16
+   },
+   "atk_rat_infected": {
+    "alerts": {},
+    "packets": 779
+   },
+   "atk_aurora_exploit": {
+    "alerts": {},
+    "packets": 39
+   },
+   "atk_cryptowall_c2": {
+    "alerts": {},
+    "packets": 162
+   },
+   "atk_sessionhijack": {
+    "alerts": {},
+    "packets": 134
+   },
+   "atk_dcerpc_scan": {
+    "alerts": {},
+    "packets": 700
+   },
+   "atk_psexec_lateral": {
+    "alerts": {},
+    "packets": 264
+   }
+  },
+  "benign": {
+   "packets": 1011720,
+   "flaggedPackets": 213,
+   "packetFPR": 0.00021053255841537184,
+   "alerts": 213,
+   "alertsPer1000": 0.21053255841537183,
+   "seconds": 96972199.77303301,
+   "alertsPerHour": 0.007907420908205894,
+   "byAlert": {
+    "RULE-003": 66,
+    "RULE-002": 4,
+    "L1:SYN_FLOOD": 30,
+    "L1:CONNECTION_FLOOD": 1,
+    "RULE-007": 17,
+    "EXP-002": 5,
+    "RULE-005": 1,
+    "EXFIL-001": 2,
+    "FLOW-002": 3,
+    "FLOW-001": 16,
+    "L1:PORT_SCAN": 12,
+    "FLOW-003": 38,
+    "C2-003": 18
+   },
+   "byLayer": {
+    "L1": 43,
+    "L2": 25,
+    "L3": 88,
+    "L4": 57
+   },
+   "perTrace": {
+    "benign_bigFlows": {
+     "packets": 791615,
+     "flagged": 187,
+     "alerts": {
+      "RULE-003": 66,
+      "RULE-002": 4,
+      "L1:SYN_FLOOD": 30,
+      "L1:CONNECTION_FLOOD": 1,
+      "RULE-007": 17,
+      "EXP-002": 5,
+      "RULE-005": 1,
+      "EXFIL-001": 2,
+      "FLOW-002": 3,
+      "FLOW-001": 14,
+      "L1:PORT_SCAN": 6,
+      "FLOW-003": 38
+     },
+     "seconds": 299.999827
+    },
+    "benign_dhcp": {
+     "packets": 4,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 0.070345
+    },
+    "benign_http_espn": {
+     "packets": 956,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 2.047482
+    },
+    "benign_http_gzip": {
+     "packets": 10,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 0.022715
+    },
+    "benign_irc_skype": {
+     "packets": 2257,
+     "flagged": 23,
+     "alerts": {
+      "L1:PORT_SCAN": 6,
+      "FLOW-001": 2,
+      "C2-003": 15
+     },
+     "seconds": 322.749776
+    },
+    "benign_irc_zeek": {
+     "packets": 34,
+     "flagged": 3,
+     "alerts": {
+      "C2-003": 3
+     },
+     "seconds": 54.52451
+    },
+    "benign_lotsofweb": {
+     "packets": 12899,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 93.748446
+    },
+    "benign_smb1_suricata": {
+     "packets": 36,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 0.749845
+    },
+    "benign_smb_win10": {
+     "packets": 1000,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 668.680229
+    },
+    "benign_ssh_zeek": {
+     "packets": 1797,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 96970194.886085
+    },
+    "benign_telnet": {
+     "packets": 92,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 39.571274
+    },
+    "benign_phone_test_00": {
+     "packets": 201020,
+     "flagged": 0,
+     "alerts": {},
+     "seconds": 522.722499
+    }
+   }
+  },
+  "captures": {
+   "atk_portscan_synscan": {
+    "class": "port_scan",
+    "detected": true,
+    "hits": [
+     "L1:PORT_SCAN"
+    ],
+    "alerts": {
+     "L1:SYN_FLOOD": 1,
+     "L1:CONNECTION_FLOOD": 1,
+     "L1:PORT_SCAN": 1
+    },
+    "packets": 2011
+   },
+   "atk_portscan_ppa": {
+    "class": "port_scan",
+    "detected": true,
+    "hits": [
+     "L1:PORT_SCAN"
+    ],
+    "alerts": {
+     "L1:PORT_SCAN": 1
+    },
+    "packets": 29
+   },
+   "atk_wsnmap_standard_scan": {
+    "class": "port_scan",
+    "detected": true,
+    "hits": [
+     "L1:PORT_SCAN"
+    ],
+    "alerts": {
+     "L1:SYN_FLOOD": 2,
+     "L1:CONNECTION_FLOOD": 2,
+     "RULE-005": 1,
+     "L1:PORT_SCAN": 3
+    },
+    "packets": 2004
+   },
+   "atk_wsnmap_OS_scan": {
+    "class": "port_scan",
+    "detected": true,
+    "hits": [
+     "L1:PORT_SCAN"
+    ],
+    "alerts": {
+     "L1:SYN_FLOOD": 2,
+     "L1:CONNECTION_FLOOD": 2,
+     "RULE-005": 1,
+     "L1:PORT_SCAN": 3
+    },
+    "packets": 2056
+   },
+   "atk_wsnmap_OS_scan_succesful": {
+    "class": "port_scan",
+    "detected": true,
+    "hits": [
+     "L1:PORT_SCAN"
+    ],
+    "alerts": {
+     "L1:SYN_FLOOD": 1,
+     "L1:MALFORMED_PACKET": 1,
+     "L1:CONNECTION_FLOOD": 1,
+     "RULE-005": 1,
+     "L1:PORT_SCAN": 1
+    },
+    "packets": 2052
+   },
+   "atk_wsnmap_zombie_scan": {
+    "class": "port_scan",
+    "detected": true,
+    "hits": [
+     "L1:PORT_SCAN"
+    ],
+    "alerts": {
+     "L1:PORT_SCAN": 1
+    },
+    "packets": 42
+   },
+   "atk_nmap_version_zeek": {
+    "class": "port_scan",
+    "detected": false,
+    "hits": [],
+    "alerts": {},
+    "packets": 547
+   },
+   "atk_synflood_spoofed": {
+    "class": "syn_flood",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD",
+     "L1:SYN_FLOOD"
+    ],
+    "alerts": {
+     "L1:SYN_FLOOD": 2,
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 37841
+   },
+   "atk_icmp_flood_large": {
+    "class": "icmp_abuse",
+    "detected": true,
+    "hits": [
+     "L1:DISTRIBUTED_FLOOD"
+    ],
+    "alerts": {
+     "L1:DISTRIBUTED_FLOOD": 1
+    },
+    "packets": 10000
+   },
+   "atk_arp_poison": {
+    "class": "arp_spoof",
+    "detected": true,
+    "hits": [
+     "L1:ARP_SPOOFING"
+    ],
+    "alerts": {
+     "L1:ARP_SPOOFING": 1
+    },
+    "packets": 165
+   },
+   "atk_sqli_dvwa": {
+    "class": "sql_injection",
+    "detected": true,
+    "hits": [
+     "EXP-001",
+     "RULE-002"
+    ],
+    "alerts": {
+     "RULE-002": 3,
+     "EXP-001": 2
+    },
+    "packets": 35
+   },
+   "atk_sqli_dvwa_passwords": {
+    "class": "sql_injection",
+    "detected": true,
+    "hits": [
+     "EXP-001",
+     "RULE-002"
+    ],
+    "alerts": {
+     "RULE-002": 1,
+     "EXP-001": 1
+    },
+    "packets": 12
+   },
+   "atk_traversal_dvwa": {
+    "class": "path_traversal",
+    "detected": true,
+    "hits": [
+     "EXP-002"
+    ],
+    "alerts": {
+     "EXP-002": 1
+    },
+    "packets": 10
+   },
+   "atk_dnstunnel_remoteshell": {
+    "class": "dns_tunnel",
+    "detected": true,
+    "hits": [
+     "FLOW-002"
+    ],
+    "alerts": {
+     "FLOW-002": 2
+    },
+    "packets": 62
+   },
+   "atk_dnstunnel_txt_c2": {
+    "class": "dns_tunnel",
+    "detected": true,
+    "hits": [
+     "FLOW-004"
+    ],
+    "alerts": {
+     "FLOW-004": 1
+    },
+    "packets": 270
+   },
+   "atk_meterpreter_rdp_tunnel": {
+    "class": "meterpreter",
+    "detected": false,
+    "hits": [],
+    "alerts": {
+     "RULE-007": 2
+    },
+    "packets": 1221
+   },
+   "atk_ftp_bruteforce_zeek": {
+    "class": "bruteforce",
+    "detected": true,
+    "hits": [
+     "RULE-005"
+    ],
+    "alerts": {
+     "RULE-005": 4
+    },
+    "packets": 606
+   },
+   "atk_ssh_guessing_zeek": {
+    "class": "bruteforce",
+    "detected": true,
+    "hits": [
+     "RULE-005"
+    ],
+    "alerts": {
+     "RULE-005": 2
+    },
+    "packets": 431
+   },
+   "atk_wannacry_eternalblue": {
+    "class": "smb_worm",
+    "detected": true,
+    "hits": [
+     "NET-001"
+    ],
+    "alerts": {
+     "RULE-007": 5,
+     "L1:ARP_SPOOFING": 12,
+     "NET-001": 14,
+     "FLOW-001": 1
+    },
+    "packets": 46654
+   }
+  }
  }
 }

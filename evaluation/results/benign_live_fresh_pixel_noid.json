@@ -1,0 +1,15 @@
+{
+ "tag": "fresh_pixel_noid",
+ "sites": 20,
+ "seconds": 812,
+ "alerts": {
+  "RULE-001": 2
+ },
+ "alertsByApp": {
+  "(unattributed)": 2
+ },
+ "cpuPercent": 13.0,
+ "rssMiB": 109,
+ "exportFiles": 2,
+ "exportPackets": 98403
+}

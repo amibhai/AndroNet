@@ -5,16 +5,16 @@
   python run_replay.py --build current  --set dev --where phone --thresholds shipped
 """
 import argparse
-import json
 import os
 import pathlib
 import subprocess
-import sys
 import tempfile
+import time
+
+import phone
 
 EVAL = pathlib.Path(__file__).resolve().parents[1]
 TRACES = EVAL / "traces"
-ENV = dict(os.environ, MSYS_NO_PATHCONV="1")
 PHONE_DIR = "/data/local/tmp/andronet_eval"
 
 
@@ -26,7 +26,13 @@ def stdlib_jar():
 def discover(which, extra_dirs):
     """name -> (path, label). Labels come from the file name prefix, fixed in fetch_traces.py."""
     items = {}
-    dirs = [TRACES / which] + [pathlib.Path(d) for d in extra_dirs]
+    # A set may come entirely from extra folders, as the second cycle's does. A named extra folder that
+    # is not there would drop its traces without a word; on Windows a path such as /d/x resolves to
+    # C:\d\x, so write D:/x.
+    absent = [d for d in extra_dirs if not pathlib.Path(d).is_dir()]
+    if absent:
+        raise SystemExit(f"no such trace folder: {absent}")
+    dirs = [d for d in [TRACES / which] if d.is_dir()] + [pathlib.Path(d) for d in extra_dirs]
     for d in dirs:
         for p in sorted(d.glob("*")):
             if p.suffix.lower() not in (".pcap", ".pcapng", ".cap", ".gz"):
@@ -37,10 +43,6 @@ def discover(which, extra_dirs):
             elif stem.startswith("benign_"):
                 items[stem] = (p, "benign")
     return items
-
-
-def adb(*args, **kw):
-    return subprocess.run(["adb", *args], env=ENV, check=True, **kw)
 
 
 def main():
@@ -79,20 +81,30 @@ def main():
                         "--out", str(out), "--alerts", str(alerts)], check=True)
         os.unlink(f.name)
     else:
-        adb("shell", f"mkdir -p {PHONE_DIR}/t")
-        adb("push", str(build / "harness.dex"), f"{PHONE_DIR}/{args.build}.dex", stdout=subprocess.DEVNULL)
+        phone.shell(f"mkdir -p {PHONE_DIR}/t; rm -f {PHONE_DIR}/replay_done")
+        phone.adb("push", str(build / "harness.dex"), f"{PHONE_DIR}/{args.build}.dex")
         for k, (p, lbl) in items.items():
-            adb("push", str(p), f"{PHONE_DIR}/t/{p.name}", stdout=subprocess.DEVNULL)
+            phone.adb("push", str(p), f"{PHONE_DIR}/t/{p.name}")
         spec = ",".join(f"{k}={PHONE_DIR}/t/{p.name}:{lbl}" for k, (p, lbl) in items.items())
         specfile = pathlib.Path(tempfile.gettempdir()) / "andronet.spec"
         specfile.write_text(spec)
-        adb("push", str(specfile), f"{PHONE_DIR}/spec.txt", stdout=subprocess.DEVNULL)
-        adb("shell", f"CLASSPATH={PHONE_DIR}/{args.build}.dex app_process / com.andronet.eval.ReplayMainKt accuracy "
-                     f"--specfile {PHONE_DIR}/spec.txt --thresholds {args.thresholds} --view {args.view} "
-                     f"--out {PHONE_DIR}/acc.json --alerts {PHONE_DIR}/alerts.tsv")
-        adb("pull", f"{PHONE_DIR}/acc.json", str(out), stdout=subprocess.DEVNULL)
-        adb("pull", f"{PHONE_DIR}/alerts.tsv", str(alerts), stdout=subprocess.DEVNULL)
-        adb("shell", f"rm -rf {PHONE_DIR}/t {PHONE_DIR}/acc.json {PHONE_DIR}/alerts.tsv")
+        phone.adb("push", str(specfile), f"{PHONE_DIR}/spec.txt")
+        # Detached from this shell, so a dropped cable costs a wait and does not end a long replay
+        phone.shell(f"nohup sh -c 'CLASSPATH={PHONE_DIR}/{args.build}.dex app_process / com.andronet.eval.ReplayMainKt accuracy "
+                    f"--specfile {PHONE_DIR}/spec.txt --thresholds {args.thresholds} --view {args.view} "
+                    f"--out {PHONE_DIR}/acc.json --alerts {PHONE_DIR}/alerts.tsv; echo $? > {PHONE_DIR}/replay_done' "
+                    f"> {PHONE_DIR}/replay.log 2>&1 &")
+        while True:
+            time.sleep(10)
+            done = phone.shell(f"cat {PHONE_DIR}/replay_done 2>/dev/null", check=False).strip()
+            if done:
+                break
+        if done != "0":
+            print(phone.shell(f"tail -n 20 {PHONE_DIR}/replay.log", check=False))
+            raise SystemExit(f"replay ended with {done}")
+        phone.adb("pull", f"{PHONE_DIR}/acc.json", str(out))
+        phone.adb("pull", f"{PHONE_DIR}/alerts.tsv", str(alerts))
+        phone.shell(f"rm -rf {PHONE_DIR}/t {PHONE_DIR}/acc.json {PHONE_DIR}/alerts.tsv {PHONE_DIR}/replay_done {PHONE_DIR}/replay.log")
     print("wrote", out)
 
 

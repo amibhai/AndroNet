@@ -38,7 +38,7 @@ object DomainTracker {
             // Store IP -> Domain mapping
             val domainInfo = DomainInfo(
                 domain = cleanDomain,
-                timestamp = System.currentTimeMillis(),
+                timestamp = PacketClock.now(),
                 ttl = ttl
             )
             ipToDomain[cleanIp] = domainInfo
@@ -67,7 +67,7 @@ object DomainTracker {
             val domainInfo = ipToDomain[cleanIp] ?: return null
 
             // Check if entry has expired
-            val age = System.currentTimeMillis() - domainInfo.timestamp
+            val age = PacketClock.now() - domainInfo.timestamp
             if (age > domainInfo.ttl) {
                 // Expired, remove it
                 ipToDomain.remove(cleanIp)
@@ -208,7 +208,7 @@ object DomainTracker {
      */
     private fun cleanupOldEntries() {
         try {
-            val now = System.currentTimeMillis()
+            val now = PacketClock.now()
             val expiredIps = mutableListOf<String>()
 
             // Find expired entries

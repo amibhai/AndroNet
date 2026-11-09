@@ -1,35 +1,35 @@
 {
  "syn": {
   "portsAnswered": 1000,
-  "start": 1793684828,
-  "end": 1793684829,
+  "start": 1793789743,
+  "end": 1793789745,
   "nmapTail": [
    "Not shown: 1000 closed tcp ports (reset)",
    "MAC Address: FA:29:15:CB:79:B8 (Unknown)",
    "",
-   "Nmap done: 1 IP address (1 host up) scanned in 1.48 seconds"
+   "Nmap done: 1 IP address (1 host up) scanned in 1.67 seconds"
   ]
  },
  "null": {
   "portsAnswered": 1000,
-  "start": 1793684835,
-  "end": 1793684836,
+  "start": 1793789750,
+  "end": 1793789751,
   "nmapTail": [
    "Not shown: 1000 closed tcp ports (reset)",
    "MAC Address: FA:29:15:CB:79:B8 (Unknown)",
    "",
-   "Nmap done: 1 IP address (1 host up) scanned in 1.59 seconds"
+   "Nmap done: 1 IP address (1 host up) scanned in 1.38 seconds"
   ]
  },
  "xmas": {
   "portsAnswered": 1000,
-  "start": 1793684849,
-  "end": 1793684851,
+  "start": 1793789760,
+  "end": 1793789763,
   "nmapTail": [
    "Not shown: 1000 closed tcp ports (reset)",
    "MAC Address: FA:29:15:CB:79:B8 (Unknown)",
    "",
-   "Nmap done: 1 IP address (1 host up) scanned in 1.53 seconds"
+   "Nmap done: 1 IP address (1 host up) scanned in 2.75 seconds"
   ]
  },
  "scanAlerts": 0,

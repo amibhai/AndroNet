@@ -1,0 +1,14 @@
+{
+ "tests": 145,
+ "failures": 0,
+ "errors": 0,
+ "perClass": {
+  "AdaptiveThresholdTest": 11,
+  "EntropyTest": 18,
+  "PacketDissectorTest": 13,
+  "PayloadAnalyzerTest": 11,
+  "PipelineContractTest": 15,
+  "RuleEngineTest": 43,
+  "SignatureDatabaseTest": 34
+ }
+}

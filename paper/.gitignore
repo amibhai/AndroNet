@@ -6,3 +6,6 @@
 # Submission files, uploaded to CMT and not kept in the repository
 andronet_final.pdf
 andronet_source.zip
+# Answers to the reviews, which paraphrase confidential reviews; sent to the chairs only
+reviewer_response.md
+reviewer_response.template.md

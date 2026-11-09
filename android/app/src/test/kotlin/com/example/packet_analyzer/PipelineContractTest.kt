@@ -19,6 +19,7 @@ class PipelineContractTest {
 
     @Before
     fun setUp() {
+        PacketClock.reset()
         AnomalyDetector.reset()
         AnomalyDetector.adaptiveThresholds.reset()
         RuleEngine.clearState()
@@ -66,6 +67,70 @@ class PipelineContractTest {
     private val psh = 0x18
 
     private fun http(request: String) = tcpPacket(50000, 80, psh, request.toByteArray())
+
+    private val syn = 0x02
+
+    @Test
+    fun `a flow past its inspection depth skips payload matching and a new flow does not`() {
+        val request = "GET / HTTP/1.1\r\nHost: x\r\nUser-Agent: sqlmap/1.9#stable\r\n\r\n".toByteArray()
+        val filler = ByteArray(1400) { 0x41 }
+        repeat(FlowTable.DEPTH_CLEARTEXT / filler.size + 1) { run(tcpPacket(50000, 8000, psh, filler)) }
+        alerts.clear()
+
+        run(tcpPacket(50000, 8000, psh, request))
+        assertFalse(fired("RECON-003"))
+
+        run(tcpPacket(50001, 8000, psh, request))
+        assertTrue(fired("RECON-003"))
+    }
+
+    @Test
+    fun `depth is counted per direction, so a long download leaves the requests inspected`() {
+        val request = "GET / HTTP/1.1\r\nHost: x\r\nUser-Agent: sqlmap/1.9#stable\r\n\r\n".toByteArray()
+        val body = ByteArray(1400) { 0x41 }
+        repeat(FlowTable.DEPTH_CLEARTEXT / body.size + 1) { run(tcpPacket(8000, 50000, psh, body), outgoing = false) }
+
+        run(tcpPacket(50000, 8000, psh, request))
+        assertTrue(fired("RECON-003"))
+    }
+
+    @Test
+    fun `encrypted flows reach their depth sooner, and DNS and ICMP never do`() {
+        fun flow(protocol: String, srcPort: Int, dstPort: Int) = mapOf<String, Any>(
+            "protocol" to protocol, "sourceIp" to "192.0.2.10", "destinationIp" to "192.0.2.20",
+            "sourcePort" to srcPort, "destinationPort" to dstPort
+        )
+        val tls = flow("TCP", 50000, 443)
+        assertTrue(FlowTable.shouldInspect(tls, FlowTable.DEPTH_ENCRYPTED))
+        assertFalse(FlowTable.shouldInspect(tls, 100))
+
+        val dns = flow("UDP", 50000, 53)
+        repeat(1000) { assertTrue(FlowTable.shouldInspect(dns, 1000)) }
+
+        val icmp = flow("ICMP", 0, 0)
+        repeat(1000) { assertTrue(FlowTable.shouldInspect(icmp, 1000)) }
+    }
+
+    @Test
+    fun `a backlog analysed in one burst does not read as a flood`() {
+        // Captured at 5 per second over 30 seconds, analysed in far less than a second
+        repeat(150) { i ->
+            PacketClock.set(1_000_000L + i * 200L)
+            run(tcpPacket(40000 + i, 443, syn))
+        }
+        assertFalse(alerts.any { it.type == AnomalyDetector.AnomalyType.SYN_FLOOD })
+        assertFalse(alerts.any { it.type == AnomalyDetector.AnomalyType.CONNECTION_FLOOD })
+    }
+
+    @Test
+    fun `a real flood is still seen when analysis lags behind it`() {
+        // All captured within a second, whenever the analyser gets to them
+        repeat(150) { i ->
+            PacketClock.set(1_000_000L + i)
+            run(tcpPacket(40000 + i, 443, syn))
+        }
+        assertTrue(alerts.any { it.type == AnomalyDetector.AnomalyType.SYN_FLOOD })
+    }
 
     @Test
     fun `scanner user agent reaches the header signatures`() {

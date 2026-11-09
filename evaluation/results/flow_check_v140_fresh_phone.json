@@ -1,0 +1,334 @@
+{
+ "captures": {
+  "atk_fresh_rat_androidtester": {
+   "class": "android_rat",
+   "capture": false,
+   "flow": false,
+   "onAttack": {
+    "RULE-007": 21
+   },
+   "elsewhere": {
+    "L1:COVERT_CHANNEL": 25,
+    "RULE-010": 1
+   },
+   "unmatched": 0,
+   "example": {
+    "L1:COVERT_CHANNEL": "10.8.0.1>10.8.0.61:443",
+    "RULE-007": "10.8.0.61>147.32.83.234:1337",
+    "RULE-010": "10.8.0.1>10.8.0.61:443"
+   }
+  },
+  "atk_fresh_rat_droidjack": {
+   "class": "android_rat",
+   "capture": false,
+   "flow": false,
+   "onAttack": {},
+   "elsewhere": {
+    "L1:COVERT_CHANNEL": 11
+   },
+   "unmatched": 0,
+   "example": {
+    "L1:COVERT_CHANNEL": "10.8.0.57>157.240.30.18:42801"
+   }
+  },
+  "atk_fresh_rat_hawkshaw": {
+   "class": "android_rat",
+   "capture": false,
+   "flow": false,
+   "onAttack": {},
+   "elsewhere": {
+    "L1:COVERT_CHANNEL": 18,
+    "RULE-007": 1
+   },
+   "unmatched": 0,
+   "example": {
+    "L1:COVERT_CHANNEL": "10.8.0.1>10.8.0.249:443",
+    "RULE-007": "10.8.0.249>172.217.23.202:443"
+   }
+  },
+  "atk_fresh_rat_spymax": {
+   "class": "android_rat",
+   "capture": false,
+   "flow": false,
+   "onAttack": {
+    "RULE-007": 13
+   },
+   "elsewhere": {
+    "L1:COVERT_CHANNEL": 28
+   },
+   "unmatched": 0,
+   "example": {
+    "L1:COVERT_CHANNEL": "10.8.0.1>10.8.0.93:443",
+    "RULE-007": "10.8.0.93>147.32.83.181:8000"
+   }
+  },
+  "atk_fresh_rat_androrat": {
+   "class": "android_rat",
+   "capture": false,
+   "flow": false,
+   "onAttack": {},
+   "elsewhere": {
+    "L1:COVERT_CHANNEL": 5
+   },
+   "unmatched": 0,
+   "example": {
+    "L1:COVERT_CHANNEL": "10.8.0.1>10.8.0.137:443"
+   }
+  },
+  "atk_fresh_rat_saefko": {
+   "class": "android_rat",
+   "capture": true,
+   "flow": true,
+   "onAttack": {
+    "C2-003": 90
+   },
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {
+    "C2-003": "2001:5a0:40:50:66:110:9:37>2001:718:2:903:b877:48ae:9531:fbfc:33176"
+   }
+  },
+  "atk_fresh_rat_ahmyth": {
+   "class": "android_rat",
+   "capture": false,
+   "flow": false,
+   "onAttack": {
+    "RULE-002": 6
+   },
+   "elsewhere": {
+    "L1:COVERT_CHANNEL": 10
+   },
+   "unmatched": 0,
+   "example": {
+    "L1:COVERT_CHANNEL": "10.8.0.1>10.8.0.117:443",
+    "RULE-002": "10.8.0.117>147.32.83.230:8000"
+   }
+  },
+  "atk_fresh_rat_cli_androrat": {
+   "class": "android_rat",
+   "capture": false,
+   "flow": false,
+   "onAttack": {},
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {}
+  },
+  "atk_fresh_flood_tcp_synack_reflection": {
+   "class": "flood",
+   "capture": true,
+   "flow": true,
+   "onAttack": {
+    "RULE-010": 1
+   },
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {
+    "RULE-010": "172.99.233.20>10.10.10.10:51767"
+   }
+  },
+  "atk_fresh_flood_tcp_syn_amp": {
+   "class": "flood",
+   "capture": false,
+   "flow": false,
+   "onAttack": {
+    "L1:PORT_SCAN": 1
+   },
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {
+    "L1:PORT_SCAN": "178.238.236.27>10.10.10.10:8083"
+   }
+  },
+  "atk_fresh_flood_udp_dnsany": {
+   "class": "flood",
+   "capture": true,
+   "flow": true,
+   "onAttack": {
+    "L1:DNS_TUNNELING": 12,
+    "L1:COVERT_CHANNEL": 1,
+    "RULE-010": 1
+   },
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {
+    "L1:DNS_TUNNELING": "185.48.39.235>10.10.10.10:",
+    "L1:COVERT_CHANNEL": "172.99.233.16>10.10.10.10:60097",
+    "RULE-010": "172.99.233.16>10.10.10.10:12696"
+   }
+  },
+  "atk_fresh_flood_udp_ubnt": {
+   "class": "flood",
+   "capture": false,
+   "flow": false,
+   "onAttack": {},
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {}
+  },
+  "atk_fresh_flood_udp_bacnet": {
+   "class": "flood",
+   "capture": false,
+   "flow": false,
+   "onAttack": {},
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {}
+  },
+  "atk_fresh_flood_udp_isakmp": {
+   "class": "flood",
+   "capture": false,
+   "flow": false,
+   "onAttack": {},
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {}
+  },
+  "atk_fresh_flood_udp_manyprotocols": {
+   "class": "flood",
+   "capture": true,
+   "flow": true,
+   "onAttack": {
+    "L1:COVERT_CHANNEL": 2,
+    "RULE-010": 2
+   },
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {
+    "L1:COVERT_CHANNEL": "88.99.132.214>10.10.10.10:9987",
+    "RULE-010": "88.99.132.214>10.10.10.10:9987"
+   }
+  },
+  "atk_fresh_flood_udp_memcached_ntp_cldap": {
+   "class": "flood",
+   "capture": true,
+   "flow": true,
+   "onAttack": {
+    "RULE-010": 1,
+    "L1:DNS_TUNNELING": 446,
+    "L1:COVERT_CHANNEL": 1
+   },
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {
+    "RULE-010": "168.119.36.172>10.10.10.10:23156",
+    "L1:DNS_TUNNELING": "123.178.30.219>10.10.10.10:",
+    "L1:COVERT_CHANNEL": "168.119.36.172>10.10.10.10:23156"
+   }
+  },
+  "atk_fresh_flood_udp_snmp": {
+   "class": "flood",
+   "capture": false,
+   "flow": false,
+   "onAttack": {},
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {}
+  },
+  "atk_fresh_flood_dns_rrsig_fragmented": {
+   "class": "flood",
+   "capture": false,
+   "flow": false,
+   "onAttack": {
+    "L1:DNS_TUNNELING": 21,
+    "BRUTE-001": 1,
+    "RULE-005": 2
+   },
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {
+    "L1:DNS_TUNNELING": "36.91.157.217>10.10.10.10:",
+    "BRUTE-001": "107.189.30.134>10.10.10.10:22",
+    "RULE-005": "84.27.192.106>10.10.10.10:22"
+   }
+  },
+  "atk_fresh_flood_ip_randomproto": {
+   "class": "flood",
+   "capture": true,
+   "flow": true,
+   "onAttack": {
+    "RULE-010": 1
+   },
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {
+    "RULE-010": "37.153.157.25>10.10.10.10:"
+   }
+  },
+  "atk_fresh_flood_tcp_dominate": {
+   "class": "flood",
+   "capture": true,
+   "flow": true,
+   "onAttack": {
+    "L1:SYN_FLOOD": 1
+   },
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {
+    "L1:SYN_FLOOD": "157.206.168.137>10.10.10.10:30120"
+   }
+  },
+  "atk_fresh_flood_udp_fragmented": {
+   "class": "flood",
+   "capture": false,
+   "flow": false,
+   "onAttack": {
+    "RULE-007": 7
+   },
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {
+    "RULE-007": "88.85.109.124>10.10.10.10:"
+   }
+  },
+  "atk_fresh_flood_udp_null": {
+   "class": "flood",
+   "capture": false,
+   "flow": false,
+   "onAttack": {},
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {}
+  },
+  "atk_fresh_flood_udp_rdm": {
+   "class": "flood",
+   "capture": false,
+   "flow": false,
+   "onAttack": {
+    "RULE-007": 3
+   },
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {
+    "RULE-007": "134.209.44.67>10.10.10.10:20480"
+   }
+  },
+  "atk_fresh_c2_foudre_dga": {
+   "class": "dga_backdoor",
+   "capture": false,
+   "flow": false,
+   "onAttack": {},
+   "elsewhere": {},
+   "unmatched": 0,
+   "example": {}
+  }
+ },
+ "alertsOnAttack": 634,
+ "alertsElsewhere": 99,
+ "byClass": {
+  "android_rat": {
+   "flow": 1,
+   "capture": 1,
+   "total": 8
+  },
+  "flood": {
+   "flow": 6,
+   "capture": 6,
+   "total": 15
+  },
+  "dga_backdoor": {
+   "flow": 0,
+   "capture": 0,
+   "total": 1
+  }
+ }
+}

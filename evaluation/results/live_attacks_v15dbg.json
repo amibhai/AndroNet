@@ -1,0 +1,29 @@
+{
+ "host": "192.168.1.8",
+ "detected": 2,
+ "total": 2,
+ "scenarios": [
+  {
+   "scenario": "beacon_bare_address",
+   "detected": true,
+   "expected": [
+    "FLOW-003"
+   ],
+   "alerts": {
+    "FLOW-003": 1
+   }
+  },
+  {
+   "scenario": "tls_library_switch",
+   "detected": true,
+   "expected": [
+    "APP-001"
+   ],
+   "alerts": {
+    "APP-001": 1
+   }
+  }
+ ],
+ "outside": {},
+ "rssMiB": 148
+}

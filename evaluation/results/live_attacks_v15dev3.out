@@ -1,0 +1,14 @@
+learning period: waiting 62 s
+port_scan_connect 4084 ms
+syn_flood 6614 ms
+http_exfil 7886 ms
+shell_on_dns_port 415 ms
+dns_failed_lookups 3083 ms
+tls_library_switch 14767 ms
+OK   port_scan_connect          {'L1:PORT_SCAN': 1, 'L1:SYN_FLOOD': 1, 'L1:CONNECTION_FLOOD': 1}
+OK   syn_flood                  {'L1:SYN_FLOOD': 1, 'L1:CONNECTION_FLOOD': 1}
+OK   http_exfil                 {'EXFIL-001': 1, 'RULE-007': 1}
+OK   shell_on_dns_port          {'FLOW-002': 1}
+MISS dns_failed_lookups         {}
+OK   tls_library_switch         {'APP-001': 1}
+detected 5/6; alerts outside any window: {}; app rss=223 MiB; test processes killed: 0

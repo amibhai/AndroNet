@@ -1,0 +1,40 @@
+{
+ "tag": "pixel_nov4",
+ "device": {
+  "manufacturer": "Google",
+  "model": "Pixel 8",
+  "android": "17"
+ },
+ "startedAt": "2026-11-04 16:59",
+ "spanHours": 52.29,
+ "coveredHours": 0.59,
+ "stillRunning": false,
+ "captureStarts": 1,
+ "captureStops": 1,
+ "rebootedDuringRun": false,
+ "heartbeats": 4,
+ "heartbeatHours": 0.67,
+ "longestHeartbeatGapHours": 0.17,
+ "alerts": 0,
+ "alertsPerDay": 0.0,
+ "byFinding": {},
+ "appsWithAlerts": 0,
+ "unattributedAlerts": 0,
+ "bySeverity": {},
+ "skippedPackets": 0,
+ "packets": 11204,
+ "process": {
+  "processAgeHours": null,
+  "cpuSeconds": null,
+  "avgCpuPct": null,
+  "rssMiB": null,
+  "peakRssMiB": null
+ },
+ "crashReports": {
+  "data_app_crash": 0,
+  "data_app_native_crash": 0,
+  "data_app_anr": 0
+ },
+ "uptimeHours": 417.75,
+ "batteryLevelAtCollect": 46
+}

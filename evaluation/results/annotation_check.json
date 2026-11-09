@@ -1,6 +1,6 @@
 {
- "annotatedInTsharkVerbose": 703,
- "frameCommentPackets": 703,
- "annotationStringsInFile": 703,
- "capinfos": "\"annotation_check.pcapng\",\"pcapng\",\"rawip\",\"2747\""
+ "annotatedInTsharkVerbose": 1101,
+ "frameCommentPackets": 1101,
+ "annotationStringsInFile": 1101,
+ "capinfos": "\"annotation_check.pcapng\",\"pcapng\",\"rawip\",\"3864\""
 }

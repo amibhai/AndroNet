@@ -36,7 +36,7 @@ object PacketDissector {
 
     // Ports whose payload is ciphertext. Signature and rule payload predicates skip these
     // packets: a short byte pattern matches ciphertext at random often enough to matter.
-    private val ENCRYPTED_PORTS = setOf(443, 465, 563, 636, 853, 989, 990, 992, 993, 994, 995, 5061, 5223, 8443, 8883)
+    internal val ENCRYPTED_PORTS = setOf(443, 465, 563, 636, 853, 989, 990, 992, 993, 994, 995, 5061, 5223, 8443, 8883)
 
     private val HTTP_METHODS = listOf("GET ", "POST ", "PUT ", "HEAD ", "DELETE ", "OPTIONS ", "PATCH ", "TRACE ", "CONNECT ", "HTTP/")
 
@@ -58,9 +58,12 @@ object PacketDissector {
         "${packetInfo["sourceIp"]}:$sourcePort>${packetInfo["destinationIp"]}:$destPort"
 
     /** True when a TCP payload opens with an HTTP request or status line, whatever the port. */
-    private fun looksLikeHttp(payload: ByteArray): Boolean = HTTP_METHODS.any { token ->
+    internal fun looksLikeHttp(payload: ByteArray): Boolean = HTTP_METHODS.any { token ->
         payload.size >= token.length && token.indices.all { payload[it].toInt() == token[it].code }
     }
+
+    private fun looksLikeTlsRecord(p: ByteArray): Boolean =
+        p.size >= 5 && (p[0].toInt() and 0xFF) in 20..23 && p[1].toInt() == 3 && (p[2].toInt() and 0xFF) <= 4
 
     private fun hexPreview(payload: ByteArray, maxBytes: Int): String {
         val n = minOf(payload.size, maxBytes)
@@ -163,8 +166,10 @@ object PacketDissector {
                     }
                 }
 
-                // HTTPS traffic (limited info - encrypted)
-                protocol == "TCP" && (destPort == 443 || sourcePort == 443) -> {
+                // TLS: recognised by its first bytes as well as its port, since an implant can
+                // run it on any port it likes, and its ClientHello fingerprints it all the same
+                protocol == "TCP" && (destPort == 443 || sourcePort == 443 || looksLikeTlsRecord(payload)) -> {
+                    enrichedInfo["encrypted"] = true
                     val tlsData = parseTls(payload)
                     if (tlsData.isNotEmpty()) {
                         enrichedInfo["tlsData"] = tlsData
@@ -412,6 +417,10 @@ object PacketDissector {
                     if (sni != null) {
                         result["sni"] = sni
                     }
+                    TlsFingerprint.fromClientHello(payload)?.let {
+                        result["ja3"] = it.ja3
+                        result["ja4"] = it.ja4
+                    }
                 }
             }
 
@@ -508,6 +517,7 @@ object PacketDissector {
             }
 
             // Parse answers (if it's a response with answers)
+            if (qr == 1) result["answerBytes"] = buffer.remaining().toString()
             if (qr == 1 && anCount > 0 && queryName.isNotEmpty()) {
                 try {
                     val resolvedIps = parseDnsAnswers(buffer, anCount, queryType)

@@ -11,3 +11,5 @@ results/*.logcat
 results/benign_*.log
 # Runs replaced by a repeat, kept locally for reference
 results/superseded/
+# The emulator writes a large log with nothing in it worth keeping
+results/emulator.log

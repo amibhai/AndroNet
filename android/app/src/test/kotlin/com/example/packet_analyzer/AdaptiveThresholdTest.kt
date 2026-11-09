@@ -18,7 +18,7 @@ class AdaptiveThresholdTest {
     fun `initial thresholds equal defaults`() {
         assertEquals(20, manager.portScanThreshold)
         assertEquals(100, manager.synFloodThreshold)
-        assertEquals(60, manager.connectionRateThreshold)
+        assertEquals(100, manager.connectionRateThreshold)
         assertEquals(30, manager.dnsQueryRateThreshold)
         assertEquals(10, manager.arpRateThreshold)
     }
@@ -98,7 +98,7 @@ class AdaptiveThresholdTest {
         manager.reset()
         assertEquals(20, manager.portScanThreshold)
         assertEquals(100, manager.synFloodThreshold)
-        assertEquals(60, manager.connectionRateThreshold)
+        assertEquals(100, manager.connectionRateThreshold)
         assertEquals(30, manager.dnsQueryRateThreshold)
         assertEquals(10, manager.arpRateThreshold)
         assertFalse(manager.isInLearningPeriod())

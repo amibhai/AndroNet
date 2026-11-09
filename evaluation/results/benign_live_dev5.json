@@ -1,0 +1,20 @@
+{
+ "tag": "dev5",
+ "sites": 15,
+ "seconds": 661,
+ "alerts": {
+  "L1:CONNECTION_FLOOD": 2,
+  "RULE-007": 1,
+  "APP-001": 1,
+  "FLOW-005": 1,
+  "L1:SYN_FLOOD": 1
+ },
+ "alertsByApp": {
+  "Chrome": 4,
+  "Drive": 2
+ },
+ "cpuPercent": 14.2,
+ "rssMiB": 135,
+ "exportFiles": 2,
+ "exportPackets": 100912
+}

@@ -1,0 +1,11 @@
+{
+ "tag": "fresh_samsung",
+ "sites": 20,
+ "seconds": 745,
+ "alerts": {},
+ "alertsByApp": {},
+ "cpuPercent": 20.4,
+ "rssMiB": 100,
+ "exportFiles": 6,
+ "exportPackets": 179730
+}

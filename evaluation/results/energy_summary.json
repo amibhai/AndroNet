@@ -1,67 +1,64 @@
 {
- "capacityMah": 3960.0,
+ "capacityMah": 3990.0,
  "work": {
   "idle": {
    "andronet": {
-    "meanW": 0.9614041228686756,
-    "stdevW": 0.17536169588574638,
-    "mahPerHour": 215.2440519537176,
-    "pctPerHour": 5.435455857417111,
-    "cpuPct": 3.0495009924380843,
+    "meanW": 1.0898482855145066,
+    "stdevW": 0.030291248057672984,
+    "mahPerHour": 256.3805231138948,
+    "pctPerHour": 6.425577020398367,
+    "cpuPct": 2.609237507789031,
     "runs": 3,
     "pluggedRuns": 0
    },
    "none": {
-    "meanW": 0.8634438246652066,
-    "stdevW": 0.1353117602696246,
-    "mahPerHour": 221.6354129087125,
-    "pctPerHour": 5.596853861331124,
+    "meanW": 0.9402238204684956,
+    "stdevW": 0.08364854346618479,
+    "mahPerHour": 228.79039899022993,
+    "pctPerHour": 5.734095212787717,
     "cpuPct": 0.0,
-    "runs": 2,
-    "pluggedRuns": 1
+    "runs": 3,
+    "pluggedRuns": 0
    },
    "pcapdroid": {
-    "meanW": 0.8811471387519134,
-    "stdevW": 0.02130492059263528,
-    "mahPerHour": 201.52679229876554,
-    "pctPerHour": 5.089060411584988,
-    "cpuPct": 0.23520173926072407,
-    "runs": 2,
-    "pluggedRuns": 1
+    "meanW": 0.99212319322474,
+    "stdevW": 0.05214394237236589,
+    "mahPerHour": 215.39475384259597,
+    "pctPerHour": 5.398364757959799,
+    "cpuPct": 0.3889278638909443,
+    "runs": 3,
+    "pluggedRuns": 0
    }
   },
   "traffic": {
    "andronet": {
-    "meanW": 1.5876222644341134,
-    "stdevW": 0.0394404448085298,
-    "mahPerHour": 371.9035981542189,
-    "pctPerHour": 9.391505003894416,
-    "cpuPct": 99.53262770022296,
+    "meanW": 1.2642985013653734,
+    "stdevW": 0.13355991054986022,
+    "mahPerHour": 325.78424511172966,
+    "pctPerHour": 8.165018674479441,
+    "cpuPct": 20.710519500436593,
     "runs": 3,
     "pluggedRuns": 0
    },
    "none": {
-    "meanW": 1.095416036983949,
-    "stdevW": 0.03921697406400957,
-    "mahPerHour": 282.2444853896168,
-    "pctPerHour": 7.127385994687292,
+    "meanW": 1.265463517073351,
+    "stdevW": 0.04450003040073083,
+    "mahPerHour": 310.9652358564326,
+    "pctPerHour": 7.793614933745179,
     "cpuPct": 0.0,
     "runs": 3,
     "pluggedRuns": 0
    },
    "pcapdroid": {
-    "meanW": 1.1430375815898424,
-    "stdevW": 0.031751345094804276,
-    "mahPerHour": 281.70941909393923,
-    "pctPerHour": 7.11387421954392,
-    "cpuPct": 4.480622450610153,
+    "meanW": 1.336409000855651,
+    "stdevW": 0.058337420233281555,
+    "mahPerHour": 324.7728532536591,
+    "pctPerHour": 8.139670507610504,
+    "cpuPct": 5.023652366407107,
     "runs": 3,
     "pluggedRuns": 0
    }
   }
  },
- "excludedRuns": [
-  "none idle",
-  "pcapdroid idle"
- ]
+ "excludedRuns": []
 }

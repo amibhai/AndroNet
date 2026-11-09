@@ -1,0 +1,15 @@
+{
+ "tag": "dev6",
+ "sites": 15,
+ "seconds": 628,
+ "alerts": {
+  "APP-001": 1
+ },
+ "alertsByApp": {
+  "Google Play services": 1
+ },
+ "cpuPercent": 11.7,
+ "rssMiB": 133,
+ "exportFiles": 2,
+ "exportPackets": 122115
+}

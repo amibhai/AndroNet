@@ -16,10 +16,10 @@ ATTACKS = {
     "atk_wsnmap_ACK_scan_on_port_80": {"class": "port_scan_single_port", "expect": [], "source": "Wireshark sample captures"},
     "atk_wsnmap_ACK_scan_on_port_80_2": {"class": "port_scan_single_port", "expect": [], "source": "Wireshark sample captures"},
     "atk_wsnmap_zombie_scan": {"class": "port_scan", "expect": ["L1:PORT_SCAN", "RULE-001"], "source": "Wireshark sample captures"},
-    "atk_nmap_version_zeek": {"class": "port_scan", "expect": ["L1:PORT_SCAN", "RULE-001"], "source": "Zeek test suite"},
+    "atk_nmap_version_zeek": {"class": "port_scan", "expect": ["L1:PORT_SCAN", "RULE-001", "FLOW-002"], "source": "Zeek test suite"},
     # Floods
-    "atk_synflood_spoofed": {"class": "syn_flood", "expect": ["L1:SYN_FLOOD"], "source": "StopDDoS packet captures"},
-    "atk_icmp_flood_large": {"class": "icmp_abuse", "expect": ["RULE-010", "L1:COVERT_CHANNEL"], "source": "StopDDoS packet captures"},
+    "atk_synflood_spoofed": {"class": "syn_flood", "expect": ["L1:SYN_FLOOD", "L1:DISTRIBUTED_FLOOD"], "source": "StopDDoS packet captures"},
+    "atk_icmp_flood_large": {"class": "icmp_abuse", "expect": ["RULE-010", "L1:COVERT_CHANNEL", "L1:DISTRIBUTED_FLOOD"], "source": "StopDDoS packet captures"},
     # LAN manipulation
     "atk_arp_poison": {"class": "arp_spoof", "expect": ["L1:ARP_SPOOFING"], "source": "Sanders, Practical Packet Analysis"},
     # Web attacks
@@ -27,9 +27,9 @@ ATTACKS = {
     "atk_sqli_dvwa_passwords": {"class": "sql_injection", "expect": ["EXP-001", "RULE-002"], "source": "Sanders, Practical Packet Analysis"},
     "atk_traversal_dvwa": {"class": "path_traversal", "expect": ["EXP-002"], "source": "Sanders, Practical Packet Analysis"},
     # Tunnels and C2
-    "atk_dnstunnel_remoteshell": {"class": "dns_tunnel", "expect": ["L1:DNS_TUNNELING", "RULE-004"], "source": "Wireshark sample captures"},
-    "atk_dnstunnel_txt_c2": {"class": "dns_tunnel", "expect": ["L1:DNS_TUNNELING", "RULE-004"], "source": "Bousseaden, PCAP-ATTACK"},
-    "atk_meterpreter_rdp_tunnel": {"class": "meterpreter", "expect": ["MAL-001"], "source": "Bousseaden, PCAP-ATTACK"},
+    "atk_dnstunnel_remoteshell": {"class": "dns_tunnel", "expect": ["L1:DNS_TUNNELING", "RULE-004", "FLOW-002"], "source": "Wireshark sample captures"},
+    "atk_dnstunnel_txt_c2": {"class": "dns_tunnel", "expect": ["L1:DNS_TUNNELING", "RULE-004", "FLOW-004"], "source": "Bousseaden, PCAP-ATTACK"},
+    "atk_meterpreter_rdp_tunnel": {"class": "meterpreter", "expect": ["MAL-001", "FLOW-001"], "source": "Bousseaden, PCAP-ATTACK"},
     # Login guessing
     "atk_ftp_bruteforce_zeek": {"class": "bruteforce", "expect": ["RULE-005"], "source": "Zeek test suite"},
     "atk_ssh_guessing_zeek": {"class": "bruteforce", "expect": ["RULE-005", "BRUTE-001"], "source": "Zeek test suite"},

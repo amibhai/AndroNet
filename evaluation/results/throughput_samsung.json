@@ -1,0 +1,104 @@
+{
+ "no_capture": {
+  "down": [
+   75.6,
+   120.5,
+   131.1,
+   122.7
+  ],
+  "up": [
+   130.5,
+   122.4,
+   138.6,
+   132.0
+  ],
+  "cpu": [],
+  "rss": [],
+  "rttP50": [
+   29.0,
+   28.79
+  ],
+  "rttP95": [
+   31.19,
+   31.67
+  ],
+  "analysisSkipped": [
+   0,
+   0
+  ]
+ },
+ "pcapdroid": {
+  "down": [],
+  "up": [],
+  "cpu": [],
+  "rss": [],
+  "rttP50": [],
+  "rttP95": []
+ },
+ "pcapdroid_pcap_file": {
+  "down": [],
+  "up": [],
+  "cpu": [],
+  "rss": [],
+  "rttP50": [],
+  "rttP95": []
+ },
+ "andronet_forward": {
+  "down": [],
+  "up": [],
+  "cpu": [],
+  "rss": [],
+  "rttP50": [],
+  "rttP95": []
+ },
+ "andronet_analysis": {
+  "down": [],
+  "up": [],
+  "cpu": [],
+  "rss": [],
+  "rttP50": [],
+  "rttP95": []
+ },
+ "andronet_full": {
+  "down": [
+   95.9,
+   75.8,
+   106.5,
+   50.3
+  ],
+  "up": [
+   107.1,
+   137.3,
+   117.3,
+   153.6
+  ],
+  "cpu": [
+   34.4,
+   39.9
+  ],
+  "rss": [
+   211,
+   177
+  ],
+  "rttP50": [
+   38.07,
+   34.87
+  ],
+  "rttP95": [
+   130.69,
+   104.53
+  ],
+  "analysisSkipped": [
+   0,
+   0
+  ]
+ },
+ "andronet_foreground": {
+  "down": [],
+  "up": [],
+  "cpu": [],
+  "rss": [],
+  "rttP50": [],
+  "rttP95": []
+ }
+}

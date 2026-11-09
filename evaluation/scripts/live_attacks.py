@@ -42,6 +42,12 @@ EXPECTED = {
     "ssh_tool_banner": {"BRUTE-001"},
     "ssh_bruteforce": {"RULE-005"},
     "shellcode": {"RULE-008"},
+    "opaque_c2": {"FLOW-001"},
+    "shell_on_dns_port": {"FLOW-002"},
+    "beacon_bare_address": {"FLOW-003"},
+    "dns_txt_channel": {"FLOW-004"},
+    "dns_failed_lookups": {"FLOW-005"},
+    "tls_library_switch": {"APP-001"},
 }
 
 ALERT = re.compile(r"^\s*(\d+)\.(\d+)\s.*ANOMALY: (\S+) - (.*)$")
@@ -59,45 +65,50 @@ def main():
     ap.add_argument("--tag", default="dev")
     ap.add_argument("--only", default="")
     ap.add_argument("--learn", type=int, default=62, help="seconds to let the learning period pass")
+    ap.add_argument("--no-identity", action="store_true", help="run without app identity, to measure what it adds")
     args = ap.parse_args()
 
     phone.push_harness()
+    phone.quiet()
     phone.stop_andronet()
-    if not phone.start_andronet():
+    if not phone.start_andronet("--es identity off" if args.no_identity else ""):
         raise SystemExit("VPN did not come up")
     phone.home()
     print(f"learning period: waiting {args.learn} s", flush=True)
     time.sleep(args.learn)
     phone.adb("logcat", "-c")
 
-    # Streamed, not read back at the end: per-connection log lines rotate the phone's buffer
-    # within minutes, which would silently lose the alerts of the earliest scenarios.
-    log_path = EVAL / "results" / f"live_attacks_{args.tag}.logcat"
-    log_file = open(log_path, "wb")
-    streamer = subprocess.Popen(["adb", "logcat", "-v", "epoch", "-s", "PacketAnalysisManager:W"],
-                                env=phone.ENV, stdout=log_file, stderr=subprocess.DEVNULL)
+    log = phone.LogStream(EVAL / "results" / f"live_attacks_{args.tag}.logcat", "PacketAnalysisManager:W")
 
-    only = f"--only {args.only}" if args.only else ""
-    out = phone.harness(f"livegen --host {args.host} {only} --out {phone.D}/live.txt", timeout=1500)
-    print(out, flush=True)
+    # One process per scenario: Android can kill a test process under memory pressure, and a cable can
+    # drop. Either should cost one retry and not the rest of the run. Retries are counted and reported.
+    windows = []
+    kills = 0
+    for name in (args.only.split(",") if args.only else list(EXPECTED)):
+        for attempt in range(3):
+            try:
+                log.check()
+                if not phone.vpn_up():
+                    # Scenarios run now would all read as misses
+                    raise SystemExit("capture is not running: run abandoned")
+                print(phone.harness(f"livegen --host {args.host} --only {name} --out {phone.D}/live.txt", timeout=600).strip(), flush=True)
+                _, start, end = phone.shell(f"cat {phone.D}/live.txt").split()
+                windows.append((name, int(start), int(end)))
+                break
+            except subprocess.CalledProcessError as e:
+                kills += 1
+                print(f"{name}: test process ended with {e.returncode}, attempt {attempt + 1}", flush=True)
+                time.sleep(5)
     time.sleep(3)
 
-    windows = []
-    for line in phone.shell(f"cat {phone.D}/live.txt").splitlines():
-        name, start, end = line.split()
-        windows.append((name, int(start), int(end)))
-
-    streamer.terminate()
-    streamer.wait(5)
-    log_file.close()
-    log = log_path.read_text(encoding="utf-8", errors="replace")
+    log.close()
     pid = phone.pid_of(phone.EVAL_PKG)
     rss = phone.rss_kib(pid) // 1024
     phone.stop_andronet()
 
     results = {}
     other = {}
-    for raw in log.splitlines():
+    for raw in log.lines():
         m = ALERT.match(raw)
         if not m:
             continue
@@ -120,11 +131,13 @@ def main():
         ok = bool(hit)
         detected += ok
         table.append({"scenario": name, "detected": ok, "expected": sorted(EXPECTED.get(name, [])), "alerts": got})
-        print(f"{'OK  ' if ok else 'MISS'} {name:26s} {got}", flush=True)
-    print(f"detected {detected}/{len(windows)}; alerts outside any window: {other}; app rss={rss} MiB")
 
     (EVAL / "results" / f"live_attacks_{args.tag}.json").write_text(json.dumps(
-        {"host": args.host, "detected": detected, "total": len(windows), "scenarios": table, "outside": other, "rssMiB": rss}, indent=1))
+        {"host": args.host, "detected": detected, "total": len(windows), "scenarios": table, "outside": other, "testProcessKills": kills, "logRestarts": log.restarts, "rssMiB": rss}, indent=1))
+
+    for row in table:
+        print(f"{'OK  ' if row['detected'] else 'MISS'} {row['scenario']:26s} {row['alerts']}", flush=True)
+    print(f"detected {detected}/{len(windows)}; alerts outside any window: {other}; app rss={rss} MiB; test processes killed: {kills}")
 
 
 if __name__ == "__main__":

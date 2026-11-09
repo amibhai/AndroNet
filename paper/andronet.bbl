@@ -3,8 +3,8 @@
 \providecommand{\urlprefix}{URL }
 \providecommand{\doi}[1]{https://doi.org/#1}
 
-\bibitem{breakline}
-{aditya-p02}: Breakline: Adaptive mobile cyber-defense engine. \url{https://github.com/aditya-p02/Breakline}, last accessed 2026/11/03
+\bibitem{ja3}
+Althouse, J., Atkinson, J., Atkins, J.: {JA3}: A method for profiling {SSL/TLS} clients. \url{https://github.com/salesforce/ja3}, last accessed 2026/11/03
 
 \bibitem{vpnservice}
 {Android Developers}: {VpnService} {API} reference. \url{https://developer.android.com/reference/android/net/VpnService}, last accessed 2026/11/02
@@ -12,17 +12,17 @@
 \bibitem{baserate}
 Axelsson, S.: The base-rate fallacy and the difficulty of intrusion detection. ACM Transactions on Information and System Security  \textbf{3}(3),  186--205 (2000). \doi{10.1145/357830.357849}
 
+\bibitem{mischief}
+Babayeva, K.: {Android Mischief} dataset. Mendeley Data, version 1 (2021), \url{https://doi.org/10.17632/xbx2j63xfd.1}
+
 \bibitem{bousseaden}
 Bousseaden, S.: {PCAP-ATTACK}: Samples of post-exploitation techniques. \url{https://github.com/sbousseaden/PCAP-ATTACK}, last accessed 2026/11/02
 
 \bibitem{chen2021}
-Chen, G., Zhou, K., Peng, Y., Zhou, L., Zhang, Y.: A novel network intrusion prevention system based on android platform. International Journal of Internet Protocol Technology  \textbf{14}(2),  67--76 (2021). \doi{10.1504/IJIPT.2021.116254}
-
-\bibitem{ndpi}
-Deri, L., Martinelli, M., Bujlow, T., Cardigliano, A.: ndpi: Open-source high-speed deep packet inspection. In: 2014 International Wireless Communications and Mobile Computing Conference (IWCMC). pp. 617--622. IEEE (2014). \doi{10.1109/IWCMC.2014.6906427}
+Chen, G., Zhou, K., Peng, Y., Zhou, L., Zhang, Y.: A novel network intrusion prevention system based on {Android} platform. International Journal of Internet Protocol Technology  \textbf{14}(2),  67--76 (2021). \doi{10.1504/IJIPT.2021.116254}
 
 \bibitem{pcapdroid}
-Faranda, E.: {PCAPdroid}: No-root network monitor, firewall and {PCAP} dumper for android. Version 2.0.2, \url{https://github.com/emanuele-f/PCAPdroid}, last accessed 2026/11/02
+Faranda, E.: {PCAPdroid}: No-root network monitor, firewall and {PCAP} dumper for {Android}. Version 2.0.2, \url{https://github.com/emanuele-f/PCAPdroid}, last accessed 2026/11/02
 
 \bibitem{pcapdroiddocs}
 Faranda, E.: {PCAPdroid} user guide. \url{https://emanuele-f.github.io/PCAPdroid/}, last accessed 2026/11/02
@@ -30,29 +30,41 @@ Faranda, E.: {PCAPdroid} user guide. \url{https://emanuele-f.github.io/PCAPdroid
 \bibitem{zdtun}
 Faranda, E.: zdtun: Lightweight {TCP}/{UDP}/{ICMP} tunnelling library. \url{https://github.com/emanuele-f/zdtun}, last accessed 2026/11/02
 
+\bibitem{hyperloglog}
+Flajolet, P., Fusy, {\'E}., Gandouet, O., Meunier, F.: {HyperLogLog}: The analysis of a near-optimal cardinality estimation algorithm. In: 2007 Conference on Analysis of Algorithms (AofA 07). DMTCS Proceedings, vol.~AH, pp. 127--146 (2007). \doi{10.46298/dmtcs.3545}
+
+\bibitem{ja4}
+{FoxIO}: {JA4+} network fingerprinting. \url{https://github.com/FoxIO-LLC/ja4}, last accessed 2026/11/03
+
+\bibitem{hydradragon}
+{HydraDragon Antivirus}: {HydraDragonAV Mobile}: Network security. \url{https://github.com/HydraDragonAntivirus/HydraDragonAV-Mobile/wiki/Network-Security}, last accessed 2026/11/03
+
+\bibitem{khalemskii}
+Khalemskii, N.D., Beschastnyi, V.A.: Development of the malicious traffic detection system for mobile applications security. Discrete and Continuous Models and Applied Computational Science  \textbf{34}(2),  187--200 (2026)
+
 \bibitem{antmonitor}
-Le, A., Varmarken, J., Langhoff, S., Shuba, A., Gjoka, M., Markopoulou, A.: Antmonitor: A system for monitoring from mobile devices. In: 2015 ACM SIGCOMM Workshop on Crowdsourcing and Crowdsharing of Big (Internet) Data. pp. 15--20. ACM (2015). \doi{10.1145/2787394.2787396}
+Le, A., Varmarken, J., Langhoff, S., Shuba, A., Gjoka, M., Markopoulou, A.: {AntMonitor}: A system for monitoring from mobile devices. In: 2015 ACM SIGCOMM Workshop on Crowdsourcing and Crowdsharing of Big (Internet) Data. pp. 15--20. ACM (2015). \doi{10.1145/2787394.2787396}
+
+\bibitem{matousek}
+Matou{\v{s}}ek, P., Burgetov{\'a}, I., Ry{\v{s}}av{\'y}, O., Victor, M.: On reliability of {JA3} hashes for fingerprinting mobile applications. In: Digital Forensics and Cyber Crime (ICDF2C 2020). LNICST, vol.~351, pp. 1--22. Springer (2021). \doi{10.1007/978-3-030-68734-2_1}
 
 \bibitem{nethunter}
 {OffSec}: Kali {NetHunter} documentation. \url{https://www.kali.org/docs/nethunter/}, last accessed 2026/11/02
 
+\bibitem{suricata}
+{Open Information Security Foundation}: Suricata user guide. \url{https://docs.suricata.io/}, last accessed 2026/11/03
+
 \bibitem{bro}
 Paxson, V.: Bro: A system for detecting network intruders in real-time. Computer Networks  \textbf{31}(23--24),  2435--2463 (1999). \doi{10.1016/S1389-1286(99)00112-7}
 
-\bibitem{synguard}
-Rahouti, M., Xiong, K., Ghani, N., Shaikh, F.: {SYNGuard}: Dynamic threshold-based {SYN} flood attack detection and mitigation in software-defined networks. IET Networks  \textbf{10}(2),  76--87 (2021). \doi{10.1049/ntw2.12009}
+\bibitem{etopen}
+{Proofpoint}: {Emerging Threats Open} ruleset. \url{https://rules.emergingthreats.net/open/}, last accessed 2026/11/04
 
-\bibitem{lumen}
-Razaghpanah, A., Nithyanand, R., Vallina-Rodriguez, N., Sundaresan, S., Allman, M., Kreibich, C., Gill, P.: Apps, trackers, privacy, and regulators: A global study of the mobile tracking ecosystem. In: 25th Network and Distributed System Security Symposium (NDSS). Internet Society (2018). \doi{10.14722/ndss.2018.23353}
-
-\bibitem{haystack}
-Razaghpanah, A., Vallina-Rodriguez, N., Sundaresan, S., Kreibich, C., Gill, P., Allman, M., Paxson, V.: Haystack: In situ mobile traffic analysis in user space. arXiv:1510.01419 (2015)
+\bibitem{razaghpanah}
+Razaghpanah, A., Niaki, A.A., Vallina-Rodriguez, N., Sundaresan, S., Amann, J., Gill, P.: Studying {TLS} usage in {Android} apps. In: 13th International Conference on Emerging Networking Experiments and Technologies (CoNEXT '17). pp. 350--362. ACM (2017). \doi{10.1145/3143361.3143400}
 
 \bibitem{syrrak}
 {rcallaby}: Syrrak: On-device mobile intrusion detection system for {Android}. \url{https://github.com/rcallaby/Syrrak}, last accessed 2026/11/03
-
-\bibitem{ringsurvey}
-Ring, M., Wunderlich, S., Scheuring, D., Landes, D., Hotho, A.: A survey of network-based intrusion detection data sets. Computers \& Security  \textbf{86},  147--167 (2019). \doi{10.1016/j.cose.2019.06.005}
 
 \bibitem{snort}
 Roesch, M.: Snort: Lightweight intrusion detection for networks. In: 13th USENIX Systems Administration Conference (LISA '99). pp. 229--238. USENIX Association (1999)
@@ -60,40 +72,16 @@ Roesch, M.: Snort: Lightweight intrusion detection for networks. In: 13th USENIX
 \bibitem{androids}
 S{\'a}nchez, J.: Building the first {Android} {IDS} on network level. DeepSec 2013, slides, \url{https://deepsec.net/docs/Slides/2013/DeepSec_2013_Jaime_Sanchez_-_Building_The_First_Android_IDS_On_Network_Level.pdf}, last accessed 2026/11/03
 
-\bibitem{sanders}
-Sanders, C.: Practical Packet Analysis. No Starch Press, San Francisco, 3rd edn. (2017), capture files: \url{https://github.com/chrissanders/packets}, last accessed 2026/11/02
-
-\bibitem{sarhan}
-Sarhan, M., Layeghy, S., Portmann, M.: Towards a standard feature set for network intrusion detection system datasets. Mobile Networks and Applications  \textbf{27}(1),  357--370 (2022). \doi{10.1007/s11036-021-01843-0}
-
-\bibitem{siris}
-Siris, V.A., Papagalou, F.: Application of anomaly detection algorithms for detecting {SYN} flooding attacks. Computer Communications  \textbf{29}(9),  1433--1442 (2006). \doi{10.1016/j.comcom.2005.09.008}
-
 \bibitem{stopddos}
 {StopDDoS}: Packet captures of {DDoS} attacks. \url{https://github.com/StopDDoS/packet-captures}, last accessed 2026/11/02
-
-\bibitem{mta}
-Szili, D.: {PCAP} of {WannaCry} spreading using {EternalBlue}. Malware-Traffic-Analysis.net guest post, 18 May 2017, \url{https://www.malware-traffic-analysis.net/2017/05/18/index2.html}, last accessed 2026/11/02
 
 \bibitem{tcpreplay}
 {Tcpreplay project}: Sample captures. \url{https://tcpreplay.appneta.com/wiki/captures.html}, last accessed 2026/11/02
 
 \bibitem{repo}
-{The AndroNet authors}: {AndroNet}: Source code, evaluation harness and result files. Version 1.4.0, \url{https://github.com/amibhai/AndroNet}, last accessed 2026/11/02
+{The AndroNet authors}: {AndroNet}: Source code, evaluation harness and result files. Version 1.5.2, \url{https://github.com/amibhai/AndroNet}, last accessed 2026/11/09
 
-\bibitem{zeektraces}
-{The Zeek Project}: Zeek test suite traces. \url{https://github.com/zeek/zeek/tree/master/testing/btest/Traces}, last accessed 2026/11/02
-
-\bibitem{pcapng}
-Tuexen, M., Risso, F., Bongertz, J., Combs, G., Harris, G., Chaudron, E., Richardson, M.: {PCAP} next generation ({pcapng}) capture file format. IETF Internet-Draft draft-ietf-opsawg-pcapng, \url{https://datatracker.ietf.org/doc/draft-ietf-opsawg-pcapng/}, last accessed 2026/11/02
-
-\bibitem{wiresharksamples}
-{Wireshark Foundation}: Sample captures. \url{https://wiki.wireshark.org/SampleCaptures}, last accessed 2026/11/02
-
-\bibitem{mopeye}
-Wu, D., Chang, R.K.C., Li, W., Cheng, E.K.T., Gao, D.: Mopeye: Opportunistic monitoring of per-app mobile network performance. In: 2017 USENIX Annual Technical Conference (USENIX ATC '17). pp. 445--457. USENIX Association (2017)
-
-\bibitem{zimperium}
-{Zimperium}: Zimperium for {SOTI}: Enabling complete end-to-end mobile threat protection. Solution brief (2020), \url{https://lp.zimperium.com/hubfs/MTD/SB/GEN/SOTI_Zimperium_Solution_Brief.pdf}, last accessed 2026/11/03
+\bibitem{wu2023}
+Wu, M., Sippe, J., Sivakumar, D., Burg, J., Anderson, P., Wang, X., Bock, K., Houmansadr, A., Levin, D., Wustrow, E.: How the {Great Firewall of China} detects and blocks fully encrypted traffic. In: 32nd USENIX Security Symposium. pp. 2653--2670. USENIX Association (2023)
 
 \end{thebibliography}

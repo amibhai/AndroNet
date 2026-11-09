@@ -1,0 +1,651 @@
+{
+ "suricata": "Info: win32-service: Running as service: no\nThis is Suricata version 8.0.7 RELEASE",
+ "rules": 52849,
+ "rulesDownloaded": "2026-11-04",
+ "captures": {
+  "atk_fresh_c2_foudre_dga": {
+   "alerts": 4,
+   "signatures": {
+    "ET MALWARE Foudre Checkin M3": 1,
+    "ET INFO HTTP Request to a *.top domain": 1,
+    "ET MALWARE Foudre Checkin M2": 1,
+    "ET MALWARE Foudre Checkin M4": 1
+   },
+   "class": "dga_backdoor",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 4,
+   "onAttackSignatures": {
+    "ET MALWARE Foudre Checkin M3": 1,
+    "ET INFO HTTP Request to a *.top domain": 1,
+    "ET MALWARE Foudre Checkin M2": 1,
+    "ET MALWARE Foudre Checkin M4": 1
+   }
+  },
+  "atk_fresh_flood_dns_rrsig_fragmented": {
+   "alerts": 19,
+   "signatures": {
+    "ET SCAN Potential SSH Scan OUTBOUND": 5,
+    "GPL ICMP PING *NIX": 2,
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 146": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 39": 1,
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 288": 1,
+    "ET SCAN Potential SSH Scan": 1,
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 139": 1,
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 127": 1,
+    "ET SCAN Suspicious inbound to PostgreSQL port 5432": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 12": 1,
+    "ET DROP Dshield Block Listed Source group 1": 1,
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 265": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 24": 1,
+    "ET SCAN Suspicious inbound to MSSQL port 1433": 1
+   },
+   "class": "flood",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 19,
+   "onAttackSignatures": {
+    "ET SCAN Potential SSH Scan OUTBOUND": 5,
+    "GPL ICMP PING *NIX": 2,
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 146": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 39": 1,
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 288": 1,
+    "ET SCAN Potential SSH Scan": 1,
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 139": 1,
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 127": 1,
+    "ET SCAN Suspicious inbound to PostgreSQL port 5432": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 12": 1,
+    "ET DROP Dshield Block Listed Source group 1": 1,
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 265": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 24": 1,
+    "ET SCAN Suspicious inbound to MSSQL port 1433": 1
+   }
+  },
+  "atk_fresh_flood_ip_randomproto": {
+   "alerts": 22,
+   "signatures": {
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 34": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 35": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 29": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 37": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 38": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 9": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 36": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 42": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 3": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 69": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 44": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 67": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 48": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 27": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 71": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 43": 1
+   },
+   "class": "flood",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 22,
+   "onAttackSignatures": {
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 34": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 35": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 29": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 37": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 38": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 9": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 36": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 42": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 3": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 69": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 44": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 67": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 48": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 27": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 71": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 43": 1
+   }
+  },
+  "atk_fresh_flood_tcp_dominate": {
+   "alerts": 6,
+   "signatures": {
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 34": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 48": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 36": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 11": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 3": 1
+   },
+   "class": "flood",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 6,
+   "onAttackSignatures": {
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 34": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 48": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 36": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 11": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 3": 1
+   }
+  },
+  "atk_fresh_flood_tcp_syn_amp": {
+   "alerts": 2,
+   "signatures": {
+    "ET SCAN Suspicious inbound to MSSQL port 1433": 1,
+    "ET SCAN Suspicious inbound to PostgreSQL port 5432": 1
+   },
+   "class": "flood",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 2,
+   "onAttackSignatures": {
+    "ET SCAN Suspicious inbound to MSSQL port 1433": 1,
+    "ET SCAN Suspicious inbound to PostgreSQL port 5432": 1
+   }
+  },
+  "atk_fresh_flood_tcp_synack_reflection": {
+   "alerts": 35,
+   "signatures": {
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 44": 34,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 37": 1
+   },
+   "class": "flood",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 35,
+   "onAttackSignatures": {
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 44": 34,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 37": 1
+   }
+  },
+  "atk_fresh_flood_udp_bacnet": {
+   "alerts": 0,
+   "signatures": {},
+   "class": "flood",
+   "scoped": true,
+   "anywhere": false,
+   "onAttack": 0,
+   "onAttackSignatures": {}
+  },
+  "atk_fresh_flood_udp_dnsany": {
+   "alerts": 0,
+   "signatures": {},
+   "class": "flood",
+   "scoped": true,
+   "anywhere": false,
+   "onAttack": 0,
+   "onAttackSignatures": {}
+  },
+  "atk_fresh_flood_udp_fragmented": {
+   "alerts": 1,
+   "signatures": {
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 38": 1
+   },
+   "class": "flood",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 1,
+   "onAttackSignatures": {
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 38": 1
+   }
+  },
+  "atk_fresh_flood_udp_isakmp": {
+   "alerts": 11,
+   "signatures": {
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 3": 4,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 7": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 6": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 8": 1
+   },
+   "class": "flood",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 11,
+   "onAttackSignatures": {
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 3": 4,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 7": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 6": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 8": 1
+   }
+  },
+  "atk_fresh_flood_udp_manyprotocols": {
+   "alerts": 19301,
+   "signatures": {
+    "GPL RPC xdmcp info query": 19066,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 35": 34,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 48": 34,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 36": 20,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 34": 16,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 33": 13,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 38": 9,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 29": 7,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 37": 7,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 42": 5,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 67": 5,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 27": 4,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 25": 4,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 30": 4,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 68": 4,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 19": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 2": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 7": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 6": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 50": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 1": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 70": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 18": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 5": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 24": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 66": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 15": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 3": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 53": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 31": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 21": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 10": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 60": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 11": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 22": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 71": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 9": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 4": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 26": 1,
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 44": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 58": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 55": 1,
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 101": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 20": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 39": 1,
+    "ET DROP Dshield Block Listed Source group 1": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 44": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 47": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 54": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 40": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 16": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 41": 1
+   },
+   "class": "flood",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 19301,
+   "onAttackSignatures": {
+    "GPL RPC xdmcp info query": 19066,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 35": 34,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 48": 34,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 36": 20,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 34": 16,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 33": 13,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 38": 9,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 29": 7,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 37": 7,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 42": 5,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 67": 5,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 27": 4,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 25": 4,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 30": 4,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 68": 4,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 19": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 2": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 7": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 6": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 50": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 1": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 70": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 18": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 5": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 24": 3,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 66": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 15": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 3": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 53": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 31": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 21": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 10": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 60": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 11": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 22": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 71": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 9": 2,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 4": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 26": 1,
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 44": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 58": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 55": 1,
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 101": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 20": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 39": 1,
+    "ET DROP Dshield Block Listed Source group 1": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 44": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 47": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 54": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 40": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 16": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 41": 1
+   }
+  },
+  "atk_fresh_flood_udp_memcached_ntp_cldap": {
+   "alerts": 148,
+   "signatures": {
+    "ET DOS Possible NTP DDoS Multiple MON_LIST Seq 0 Response Spanning Multiple Packets IMPL 0x03": 144,
+    "ET Threatview.io High Confidence Cobalt Strike C2 IP group 11": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 37": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 35": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 33": 1
+   },
+   "class": "flood",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 148,
+   "onAttackSignatures": {
+    "ET DOS Possible NTP DDoS Multiple MON_LIST Seq 0 Response Spanning Multiple Packets IMPL 0x03": 144,
+    "ET Threatview.io High Confidence Cobalt Strike C2 IP group 11": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 37": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 35": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 33": 1
+   }
+  },
+  "atk_fresh_flood_udp_null": {
+   "alerts": 2,
+   "signatures": {
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 53": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 25": 1
+   },
+   "class": "flood",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 2,
+   "onAttackSignatures": {
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 53": 1,
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 25": 1
+   }
+  },
+  "atk_fresh_flood_udp_rdm": {
+   "alerts": 0,
+   "signatures": {},
+   "class": "flood",
+   "scoped": true,
+   "anywhere": false,
+   "onAttack": 0,
+   "onAttackSignatures": {}
+  },
+  "atk_fresh_flood_udp_snmp": {
+   "alerts": 1,
+   "signatures": {
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 147": 1
+   },
+   "class": "flood",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 1,
+   "onAttackSignatures": {
+    "ET CINS Active Threat Intelligence Poor Reputation IP group 147": 1
+   }
+  },
+  "atk_fresh_flood_udp_ubnt": {
+   "alerts": 0,
+   "signatures": {},
+   "class": "flood",
+   "scoped": true,
+   "anywhere": false,
+   "onAttack": 0,
+   "onAttackSignatures": {}
+  },
+  "atk_fresh_rat_ahmyth": {
+   "alerts": 56,
+   "signatures": {
+    "ET MALWARE Android Infostealer CnC Check-In": 21,
+    "ET MALWARE Android/AhMyth RAT Command Inbound (Files Manager)": 12,
+    "ET MALWARE Android/AhMyth RAT Init Checkin": 8,
+    "ET MALWARE Android/AhMyth RAT WebSocket Session": 4,
+    "ET MALWARE Android/AhMyth RAT Command Inbound (Location Manager)": 4,
+    "ET MALWARE Android/AhMyth RAT Command Inbound (Call Manager)": 4,
+    "ET MALWARE Android/AhMyth RAT Command Inbound (Contacts Manager)": 2,
+    "ET MALWARE Android/AhMyth RAT Command Inbound (SMS Manager)": 1
+   },
+   "class": "android_rat",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 56,
+   "onAttackSignatures": {
+    "ET MALWARE Android Infostealer CnC Check-In": 21,
+    "ET MALWARE Android/AhMyth RAT Command Inbound (Files Manager)": 12,
+    "ET MALWARE Android/AhMyth RAT Init Checkin": 8,
+    "ET MALWARE Android/AhMyth RAT WebSocket Session": 4,
+    "ET MALWARE Android/AhMyth RAT Command Inbound (Location Manager)": 4,
+    "ET MALWARE Android/AhMyth RAT Command Inbound (Call Manager)": 4,
+    "ET MALWARE Android/AhMyth RAT Command Inbound (Contacts Manager)": 2,
+    "ET MALWARE Android/AhMyth RAT Command Inbound (SMS Manager)": 1
+   }
+  },
+  "atk_fresh_rat_androidtester": {
+   "alerts": 12,
+   "signatures": {
+    "ET INFO Google DNS Over HTTPS Certificate Inbound": 12
+   },
+   "class": "android_rat",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 0,
+   "onAttackSignatures": {}
+  },
+  "atk_fresh_rat_androrat": {
+   "alerts": 0,
+   "signatures": {},
+   "class": "android_rat",
+   "scoped": true,
+   "anywhere": false,
+   "onAttack": 0,
+   "onAttackSignatures": {}
+  },
+  "atk_fresh_rat_cli_androrat": {
+   "alerts": 5,
+   "signatures": {
+    "ET DROP Spamhaus DROP Listed Traffic Inbound group 25": 1,
+    "ET SCAN Suspicious inbound to MSSQL port 1433": 1,
+    "ET SCAN Suspicious inbound to PostgreSQL port 5432": 1,
+    "ET SCAN Sipvicious Scan": 1,
+    "ET SCAN Sipvicious User-Agent Detected (friendly-scanner)": 1
+   },
+   "class": "android_rat",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 0,
+   "onAttackSignatures": {}
+  },
+  "atk_fresh_rat_droidjack": {
+   "alerts": 0,
+   "signatures": {},
+   "class": "android_rat",
+   "scoped": true,
+   "anywhere": false,
+   "onAttack": 0,
+   "onAttackSignatures": {}
+  },
+  "atk_fresh_rat_hawkshaw": {
+   "alerts": 13,
+   "signatures": {
+    "ET INFO Google DNS Over HTTPS Certificate Inbound": 10,
+    "ET INFO External IP Address Lookup Domain (ipify .org) in TLS SNI": 2,
+    "ET INFO External IP Lookup ip-api.com": 1
+   },
+   "class": "android_rat",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 0,
+   "onAttackSignatures": {}
+  },
+  "atk_fresh_rat_saefko": {
+   "alerts": 181,
+   "signatures": {
+    "ET CHAT IRC PONG response": 79,
+    "ET INFO Observed SSL Cert for Free Hosting Domain (*.000webhostapp .com)": 21,
+    "ET INFO Observed Free Hosting Domain (*.000webhostapp .com in DNS Lookup)": 18,
+    "ET CHAT IRC PING command": 18,
+    "ET CHAT IRC USER command": 15,
+    "ET CHAT IRC NICK command": 12,
+    "ET CHAT IRC PRIVMSG command": 11,
+    "ET INFO External IP Lookup Domain in DNS Lookup (ipinfo .io)": 3,
+    "ET INFO Possible External IP Lookup Domain Observed in SNI (ipinfo. io)": 2,
+    "ET INFO External IP Lookup SSL Cert Observed (ipinfo .io)": 2
+   },
+   "class": "android_rat",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 126,
+   "onAttackSignatures": {
+    "ET CHAT IRC PONG response": 74,
+    "ET CHAT IRC PING command": 17,
+    "ET CHAT IRC USER command": 14,
+    "ET CHAT IRC NICK command": 11,
+    "ET CHAT IRC PRIVMSG command": 10
+   }
+  },
+  "atk_fresh_rat_spymax": {
+   "alerts": 314,
+   "signatures": {
+    "GPL ICMP PING *NIX": 157,
+    "GPL ICMP PING BSDtype": 157
+   },
+   "class": "android_rat",
+   "scoped": true,
+   "anywhere": true,
+   "onAttack": 0,
+   "onAttackSignatures": {}
+  },
+  "atk_fresh_win_backupkey": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_dcom": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_dcshadow": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_dcsync": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_eventservice": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_kerbrute": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_masterkey": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_netshareenum": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_psloggedon": {
+   "alerts": 3,
+   "signatures": {
+    "ET INFO NTLM Session Setup Request - Negotiate": 1,
+    "ET INFO NTLMv1 Session Setup Response - Challenge": 1,
+    "ET INFO NTLM Session Setup Request - Auth": 1
+   }
+  },
+  "atk_fresh_win_pwdreset": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_rpcdump": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_samr": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_sharprdp": {
+   "alerts": 4,
+   "signatures": {
+    "ET INFO RDP - Response To External Host": 4
+   }
+  },
+  "atk_fresh_win_sigred": {
+   "alerts": 1,
+   "signatures": {
+    "ET INFO Suspicious Outbound SIG DNS Query": 1
+   }
+  },
+  "atk_fresh_win_skeleton": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_smbexec": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_smbghost": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_spoolsample": {
+   "alerts": 6,
+   "signatures": {
+    "ET INFO NTLM Session Setup Request - Negotiate": 2,
+    "ET INFO NTLMv1 Session Setup Response - Challenge": 2,
+    "ET INFO NTLM Session Setup Request - Auth": 2
+   }
+  },
+  "atk_fresh_win_wmi": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_zerologon": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "atk_fresh_win_zerologon_scan": {
+   "alerts": 0,
+   "signatures": {}
+  },
+  "benign_fresh_pixel": {
+   "alerts": 26,
+   "signatures": {
+    "ET INFO Session Traversal Utilities for NAT (STUN Binding Request On Non-Standard High Port)": 6,
+    "ET INFO Session Traversal Utilities for NAT (STUN Binding Request)": 6,
+    "ET INFO Session Traversal Utilities for NAT (STUN Binding Response)": 6,
+    "ET INFO External IP Lookup Domain (ipify .org) in DNS Lookup": 6,
+    "ET INFO External IP Address Lookup Domain (ipify .org) in TLS SNI": 2
+   }
+  },
+  "benign_fresh_samsung": {
+   "alerts": 30,
+   "signatures": {
+    "ET INFO Session Traversal Utilities for NAT (STUN Binding Request)": 6,
+    "ET INFO Session Traversal Utilities for NAT (STUN Binding Request On Non-Standard High Port)": 6,
+    "ET INFO Session Traversal Utilities for NAT (STUN Binding Response)": 6,
+    "ET INFO External IP Lookup Domain (ipify .org) in DNS Lookup": 6,
+    "ET INFO External IP Address Lookup Domain (ipify .org) in TLS SNI": 3,
+    "ET INFO Observed DNS Query to .biz TLD": 3
+   }
+  }
+ },
+ "recallOnAttack": 14,
+ "recallAnywhere": 18,
+ "scoped": 24,
+ "byClass": {
+  "dga_backdoor": {
+   "onAttack": 1,
+   "total": 1
+  },
+  "flood": {
+   "onAttack": 11,
+   "total": 15
+  },
+  "android_rat": {
+   "onAttack": 2,
+   "total": 8
+  }
+ },
+ "benignAlerts": {
+  "benign_fresh_pixel": 26,
+  "benign_fresh_samsung": 30
+ }
+}

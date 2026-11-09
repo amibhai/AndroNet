@@ -63,6 +63,20 @@ object AnomalyDetector {
     private val alertSuppression = ConcurrentHashMap<String, Long>()
     private const val ALERT_SUPPRESS_MS = 10_000L
 
+    // The app behind the packet being analysed; analysis runs on one thread
+    private var currentApp = ""
+
+    private const val HLL_REGISTERS = 256
+    private const val MAX_FLOOD_TARGETS = 64
+    private const val DISTRIBUTED_FLOOD_PACKETS = 300
+    private const val DISTRIBUTED_SOURCE_SHARE = 0.5
+    private const val ARP_MAC_WINDOW_MS = 60_000L
+    private const val MAX_ARP_ENTRIES = 4096
+    private const val DNS_LONG_NAME = 50
+    private const val DNS_ZONE_WINDOW_MS = 60_000L
+    private const val DNS_ZONE_LONG_NAMES = 10L
+    private const val MAX_DNS_ZONES = 256
+
     // Peak per-window counts since the last adaptive sample
     private val peakPorts = AtomicInteger(0)
     private val peakSyn = AtomicInteger(0)
@@ -83,7 +97,7 @@ object AnomalyDetector {
         var mean: Double = 0.0,
         var variance: Double = 0.0,
         var count: Int = 0,
-        var lastUpdate: Long = System.currentTimeMillis()
+        var lastUpdate: Long = PacketClock.now()
     )
 
     private data class TrafficStatistics(
@@ -112,6 +126,10 @@ object AnomalyDetector {
     private val synFloodTracker = ConcurrentHashMap<String, SynFloodTracker>()
     private val connectionTracker = ConcurrentHashMap<String, ConnectionRateTracker>()
     private val arpCache = ConcurrentHashMap<String, String>()
+    private val macClaims = ConcurrentHashMap<String, ConcurrentHashMap<String, Long>>()
+    private val longNames = object : LinkedHashMap<String, LongArray>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, LongArray>?) = size > MAX_DNS_ZONES
+    }
     private val dnsQueryTracker = DnsQueryTracker()
 
     data class Anomaly(
@@ -121,35 +139,36 @@ object AnomalyDetector {
         val sourceIp: String? = null,
         val destinationIp: String? = null,
         val details: Map<String, Any> = emptyMap(),
-        val timestamp: Long = System.currentTimeMillis()
+        val timestamp: Long = PacketClock.now()
     )
 
     enum class AnomalyType {
         PORT_SCAN, SYN_FLOOD, ARP_SPOOFING, DNS_TUNNELING, CONNECTION_FLOOD,
-        UNUSUAL_TRAFFIC, MALFORMED_PACKET, HIGH_ENTROPY_PAYLOAD, COVERT_CHANNEL
+        UNUSUAL_TRAFFIC, MALFORMED_PACKET, HIGH_ENTROPY_PAYLOAD, COVERT_CHANNEL, ANALYSIS_OVERLOAD,
+        DISTRIBUTED_FLOOD
     }
 
     enum class Severity { LOW, MEDIUM, HIGH, CRITICAL }
 
     private data class PortScanTracker(
         var ports: MutableSet<Int> = mutableSetOf(),
-        var firstSeen: Long = System.currentTimeMillis(),
-        var lastSeen: Long = System.currentTimeMillis()
+        var firstSeen: Long = PacketClock.now(),
+        var lastSeen: Long = PacketClock.now()
     )
 
     private data class SynFloodTracker(
         var synCount: Int = 0,
-        var windowStart: Long = System.currentTimeMillis()
+        var windowStart: Long = PacketClock.now()
     )
 
     private data class ConnectionRateTracker(
         var connections: Int = 0,
-        var windowStart: Long = System.currentTimeMillis()
+        var windowStart: Long = PacketClock.now()
     )
 
     private data class DnsQueryTracker(
         var queries: Int = 0,
-        var windowStart: Long = System.currentTimeMillis(),
+        var windowStart: Long = PacketClock.now(),
         var domains: MutableSet<String> = mutableSetOf()
     )
 
@@ -177,7 +196,7 @@ object AnomalyDetector {
     }
 
     fun calculateAnomalyScore(packetInfo: Map<String, Any>): Double {
-        val sourceIp = packetInfo["sourceIp"] as? String ?: ""
+        val sourceIp = AppContext.principal(packetInfo)
         val destIp = (packetInfo["destinationIp"] ?: packetInfo["destinationAddress"]) as? String ?: ""
 
         val portScanScore = portScans[sourceIp]?.let {
@@ -207,17 +226,21 @@ object AnomalyDetector {
             val destPort = (packetInfo["destinationPort"] as? Int) ?: 0
             val flags = packetInfo["flags"] as? String ?: ""
             val hasAck = flags.contains("ACK")
+            val principal = AppContext.principal(packetInfo)
+            currentApp = AppContext.app(packetInfo)
 
             // === 1. Basic Rule-Based Detection ===
             // These trackers also run during the learning period, when reportAnomaly mutes their
             // alerts: the baseline can only be learned from counters that are actually counting.
             // Probes and connection attempts leave ACK clear. Counting ACKed packets as well would
             // read a busy server's replies, each to its own ephemeral port, as a port scan.
-            if (protocol == "TCP" && destPort > 0 && !hasAck) detectPortScan(sourceIp, destPort, destIp)
+            if (protocol == "TCP" && destPort > 0 && !hasAck) detectPortScan(principal, destPort, destIp)
             if (protocol == "TCP" && flags.contains("SYN") && !hasAck) {
                 detectSynFlood(destIp)
-                detectConnectionFlood(sourceIp)
+                detectConnectionFlood(principal, AppContext.limitFactor(packetInfo))
             }
+            detectDistributedFlood(sourceIp, destIp, protocol, flags)
+            FlowDetectors.inspect(packetInfo, payload, ::reportAnomaly)
             sampleAdaptiveBaseline()
 
             // COMMIT 10: during the 60-second learning period never fire alerts,
@@ -310,7 +333,7 @@ object AnomalyDetector {
     // A per-packet sample of a counter still climbing inside its window lets an attack raise
     // its own threshold faster than the counter can reach it.
     private fun sampleAdaptiveBaseline() {
-        val now = System.currentTimeMillis()
+        val now = PacketClock.now()
         if (now - lastAdaptiveSample < ADAPTIVE_SAMPLE_MS) return
         lastAdaptiveSample = now
         adaptiveThresholds.recordObservation(
@@ -324,7 +347,7 @@ object AnomalyDetector {
 
     // === Basic Detection Functions ===
     private fun detectPortScan(sourceIp: String, port: Int, destIp: String) {
-        val now = System.currentTimeMillis()
+        val now = PacketClock.now()
         val tracker = portScans.getOrPut(sourceIp) { PortScanTracker() }
 
         if (now - tracker.firstSeen > PORT_SCAN_WINDOW_MS) {
@@ -349,7 +372,7 @@ object AnomalyDetector {
     }
 
     private fun detectSynFlood(targetIp: String) {
-        val now = System.currentTimeMillis()
+        val now = PacketClock.now()
         val tracker = synFloodTracker.getOrPut(targetIp) { SynFloodTracker() }
 
         if (now - tracker.windowStart > 1000) {
@@ -367,9 +390,9 @@ object AnomalyDetector {
         }
     }
 
-    private fun detectConnectionFlood(sourceIp: String) {
-        val now = System.currentTimeMillis()
-        val tracker = connectionTracker.getOrPut(sourceIp) { ConnectionRateTracker() }
+    private fun detectConnectionFlood(principal: String, limitFactor: Double) {
+        val now = PacketClock.now()
+        val tracker = connectionTracker.getOrPut(principal) { ConnectionRateTracker() }
 
         if (now - tracker.windowStart > 1000) {
             tracker.connections = 0
@@ -378,11 +401,73 @@ object AnomalyDetector {
         tracker.connections++
         peakConnections.accumulateAndGet(tracker.connections, ::maxOf)
         // COMMIT 7: use adaptive threshold
-        if (tracker.connections >= adaptiveThresholds.connectionRateThreshold) {
+        if (tracker.connections >= adaptiveThresholds.connectionRateThreshold * limitFactor) {
             reportAnomaly(
-                Anomaly(AnomalyType.CONNECTION_FLOOD, Severity.HIGH, "Connection flood detected", sourceIp = sourceIp)
+                Anomaly(AnomalyType.CONNECTION_FLOOD, Severity.HIGH, "Connection flood detected", sourceIp = principal)
             )
             tracker.connections = 0
+        }
+    }
+
+    // A spoofed flood gives every packet a new source, so no per-source count ever fills. What gives
+    // it away is many packets at one target from improbably many sources. The source count is a
+    // HyperLogLog sketch: constant memory, which a flood of new addresses cannot exhaust.
+    private class TargetSketch {
+        var windowStart = 0L
+        var packets = 0
+        val registers = ByteArray(HLL_REGISTERS)
+
+        fun clear(now: Long) {
+            windowStart = now
+            packets = 0
+            registers.fill(0)
+        }
+
+        fun add(source: String) {
+            var h = source.hashCode()
+            h = (h xor (h ushr 16)) * -0x7a143595
+            h = (h xor (h ushr 13)) * -0x3d4d51cb
+            h = h xor (h ushr 16)
+            val register = h ushr 24
+            val rank = (Integer.numberOfLeadingZeros(h shl 8 or 0x80) + 1).toByte()
+            if (rank > registers[register]) registers[register] = rank
+        }
+
+        fun distinctSources(): Double {
+            var sum = 0.0
+            var zeros = 0
+            for (r in registers) {
+                sum += 1.0 / (1L shl r.toInt())
+                if (r.toInt() == 0) zeros++
+            }
+            val m = HLL_REGISTERS.toDouble()
+            val estimate = 0.7182 * m * m / sum
+            return if (estimate <= 2.5 * m && zeros > 0) m * kotlin.math.ln(m / zeros) else estimate
+        }
+    }
+
+    private val targetSketches = object : LinkedHashMap<String, TargetSketch>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, TargetSketch>?) = size > MAX_FLOOD_TARGETS
+    }
+
+    private fun detectDistributedFlood(sourceIp: String, destIp: String, protocol: String, flags: String) {
+        // Replies carry ACK, so a busy server answering many clients does not count against them
+        if (protocol == "TCP" && flags.contains("ACK")) return
+        if (protocol != "TCP" && protocol != "UDP" && protocol != "ICMP") return
+        val now = PacketClock.now()
+        val sketch = targetSketches.getOrPut(destIp) { TargetSketch() }
+        if (now - sketch.windowStart > 1000) sketch.clear(now)
+        sketch.packets++
+        sketch.add(sourceIp)
+        if (sketch.packets >= DISTRIBUTED_FLOOD_PACKETS && sketch.distinctSources() >= sketch.packets * DISTRIBUTED_SOURCE_SHARE) {
+            reportAnomaly(
+                Anomaly(
+                    AnomalyType.DISTRIBUTED_FLOOD, Severity.CRITICAL,
+                    "Flood at one target from about ${sketch.distinctSources().toInt()} sources: spoofed or distributed",
+                    destinationIp = destIp
+                )
+            )
+            sketch.clear(now)
         }
     }
 
@@ -428,7 +513,7 @@ object AnomalyDetector {
         }
 
         // COMMIT 2: cooldown — same source suppressed for 30 s after an alert
-        val now = System.currentTimeMillis()
+        val now = PacketClock.now()
         val lastAlert = entropyAlertCooldown[sourceIp] ?: 0L
         if (now - lastAlert < ENTROPY_COOLDOWN_MS) return
         entropyAlertCooldown[sourceIp] = now
@@ -479,7 +564,7 @@ object AnomalyDetector {
         }
 
         // COMMIT 2: cooldown check
-        val now = System.currentTimeMillis()
+        val now = PacketClock.now()
         val lastAlert = entropyAlertCooldown[sourceIp] ?: 0L
         if (now - lastAlert < ENTROPY_COOLDOWN_MS) return
         entropyAlertCooldown[sourceIp] = now
@@ -517,11 +602,21 @@ object AnomalyDetector {
         }
     }
 
+    // CDNs and ad networks put hashes in their names, so one long name means nothing. A tunnel needs
+    // many of them under one zone to carry anything at all.
     private fun detectDnsTunneling(queryName: String, sourceIp: String, destinationIp: String) {
-        if (queryName.isEmpty()) return
-        if (queryName.length > 50) {
+        if (queryName.length <= DNS_LONG_NAME) return
+        val now = PacketClock.now()
+        val zone = queryName.trimEnd('.').split('.').takeLast(2).joinToString(".")
+        val burst = longNames.getOrPut(zone) { longArrayOf(now, 0L) }
+        if (now - burst[0] > DNS_ZONE_WINDOW_MS) {
+            burst[0] = now
+            burst[1] = 0L
+        }
+        burst[1]++
+        if (burst[1] >= DNS_ZONE_LONG_NAMES) {
             reportAnomaly(
-                Anomaly(AnomalyType.DNS_TUNNELING, Severity.MEDIUM, "Suspicious DNS query: $queryName", sourceIp, destinationIp)
+                Anomaly(AnomalyType.DNS_TUNNELING, Severity.MEDIUM, "Many long DNS names under $zone: possible tunnel", sourceIp, destinationIp)
             )
         }
     }
@@ -540,7 +635,7 @@ object AnomalyDetector {
         val hasRst = flags.contains("RST")
         if (!hasSyn || (!hasFin && !hasRst)) return
 
-        val now = System.currentTimeMillis()
+        val now = PacketClock.now()
         val cooldownKey = "malformed:$sourceIp"
         val lastAlert = entropyAlertCooldown[cooldownKey] ?: 0L
         if (now - lastAlert < ENTROPY_COOLDOWN_MS) return
@@ -561,6 +656,8 @@ object AnomalyDetector {
     private fun detectArpSpoofing(packetInfo: Map<String, Any>) {
         val senderIp = packetInfo["senderIp"] as? String ?: return
         val senderMac = packetInfo["senderMac"] as? String ?: return
+        // An address probe claims nothing: any number of machines may send them
+        if (senderIp == "0.0.0.0") return
         val cached = arpCache[senderIp]
         if (cached != null && cached != senderMac) {
             reportAnomaly(
@@ -568,6 +665,23 @@ object AnomalyDetector {
             )
         }
         arpCache[senderIp] = senderMac
+
+        // A capture that starts after the poisoning never sees a binding change, but the poisoner's
+        // MAC still claims two addresses: its own and the one it is impersonating. A machine falling
+        // back to a link-local address before DHCP answers is doing nothing of the kind.
+        if (senderIp.startsWith("169.254.")) return
+        val now = PacketClock.now()
+        val claims = macClaims.getOrPut(senderMac) { ConcurrentHashMap() }
+        claims[senderIp] = now
+        claims.entries.removeIf { now - it.value > ARP_MAC_WINDOW_MS }
+        if (claims.size >= 2) {
+            reportAnomaly(
+                Anomaly(
+                    AnomalyType.ARP_SPOOFING, Severity.CRITICAL,
+                    "One MAC claims ${claims.size} addresses: possible ARP poisoning", senderIp
+                )
+            )
+        }
     }
 
     // === COMMIT 8: Rate extraction — feed the adaptive threshold manager ===
@@ -580,7 +694,7 @@ object AnomalyDetector {
 
     // === COMMIT 2: Entropy cooldown maintenance ===
     private fun clearStaleEntropyCooldowns() {
-        val cutoff = System.currentTimeMillis() - 300_000L
+        val cutoff = PacketClock.now() - 300_000L
         entropyAlertCooldown.entries.removeIf { it.value < cutoff }
     }
 
@@ -589,15 +703,32 @@ object AnomalyDetector {
         if (adaptiveThresholds.isInLearningPeriod()) return
 
         val finding = anomaly.description.takeIf { it.startsWith("[") }?.substringBefore(']') ?: anomaly.type.name
-        val host = anomaly.sourceIp ?: anomaly.destinationIp ?: ""
+        val host = currentApp.ifEmpty { anomaly.sourceIp ?: anomaly.destinationIp ?: "" }
         val key = "$finding|$host"
-        val now = System.currentTimeMillis()
+        val now = PacketClock.now()
         val last = alertSuppression[key]
         if (last != null && now - last < ALERT_SUPPRESS_MS) return
         alertSuppression[key] = now
         if (alertSuppression.size > 4096) alertSuppression.entries.removeIf { now - it.value > ALERT_SUPPRESS_MS }
 
-        for (listener in anomalyListeners) listener(anomaly)
+        val named = if (currentApp.isEmpty()) anomaly else anomaly.copy(
+            description = "${anomaly.description} (app: $currentApp)",
+            details = anomaly.details + ("app" to currentApp)
+        )
+        for (listener in anomalyListeners) listener(named)
+    }
+
+    /** Skipped packets went unanalysed, and an attacker could cause that on purpose, so say so. */
+    fun reportAnalysisOverload(skippedPackets: Long) {
+        // This is about the analyser and not about whichever app happened to be last in the queue
+        currentApp = ""
+        reportAnomaly(
+            Anomaly(
+                AnomalyType.ANALYSIS_OVERLOAD, Severity.MEDIUM,
+                "Analysis skipped $skippedPackets packets under load",
+                details = mapOf("skippedPackets" to skippedPackets)
+            )
+        )
     }
 
     // === Stubs for future ML-based detection ===
@@ -609,6 +740,12 @@ object AnomalyDetector {
 
     // === Stats and Maintenance ===
     fun reset() {
+        FlowTable.reset()
+        FlowDetectors.reset()
+        targetSketches.clear()
+        macClaims.clear()
+        longNames.clear()
+        currentApp = ""
         portScans.clear()
         synFloodTracker.clear()
         connectionTracker.clear()
@@ -633,11 +770,15 @@ object AnomalyDetector {
 
     // === Cleanup ===
     fun cleanup() {
-        val now = System.currentTimeMillis()
+        val now = PacketClock.now()
         portScans.entries.removeAll { now - it.value.lastSeen > 20000 }
         synFloodTracker.entries.removeAll { now - it.value.windowStart > 10000 }
         connectionTracker.entries.removeAll { now - it.value.windowStart > 10000 }
         clearStaleEntropyCooldowns()
+
+        // A spoofed ARP storm could otherwise fill these with made-up addresses
+        if (arpCache.size > MAX_ARP_ENTRIES) arpCache.clear()
+        if (macClaims.size > MAX_ARP_ENTRIES) macClaims.clear()
 
         // highEntropyPacketCount/dnsHighEntropyCount have no per-entry timestamp
         // (they're plain consecutive-hit counters keyed by source IP), so unlike

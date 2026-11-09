@@ -81,19 +81,40 @@ def main():
     lines(3333, replies={b"subscribe": b'{"id":1,"result":[],"error":null}\n', b"login": b'{"id":1,"result":{"status":"OK"}}\n'})
     lines(4444, default=b"\x00\x00\x00\x08ack\n")
     lines(6667, b":irc.local NOTICE * :hello\r\n", default=b":irc.local 001 x :ok\r\n")
+    lines(53, b"Microsoft Windows XP [Version 5.1.2600]\r\n", default=b"C:\\>")
+    lines(18443, default=b"")
 
-    dns = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    dns.bind(("0.0.0.0", 53))
-
-    def dns_loop():
+    def dns_loop(dns):
         while True:
-            data, peer = dns.recvfrom(4096)
+            try:
+                data, peer = dns.recvfrom(4096)
+            except ConnectionResetError:
+                # Windows reports an earlier answer's ICMP error here
+                continue
             if len(data) >= 12:  # echo the question back as an empty answer
                 reply = bytearray(data)
                 reply[2] |= 0x80
+                if b"nx-lab" in data:
+                    reply[3] |= 0x03  # NXDOMAIN
+                elif b"txt-lab" in data:
+                    # One TXT answer of base64-looking text, the way a DNS command channel returns data
+                    text = b"QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVowMTIzNDU2Nzg5" * 4
+                    reply[6:8] = b"\x00\x01"
+                    reply += b"\xc0\x0c\x00\x10\x00\x01\x00\x00\x00\x3c"
+                    reply += (len(text) + 1).to_bytes(2, "big") + bytes([len(text)]) + text
                 dns.sendto(bytes(reply), peer)
 
-    threading.Thread(target=dns_loop, daemon=True).start()
+    # One socket per address, so that an answer leaves from the address the question came to. With two
+    # adapters on one network, a wildcard socket's source follows the interface metric, which Windows
+    # moves with link speed, and a client's connected UDP socket drops an answer from the other address.
+    for address in {*socket.gethostbyname_ex(socket.gethostname())[2], "127.0.0.1"}:
+        dns = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            dns.bind((address, 53))
+        except OSError as e:
+            print(f"no DNS on {address}: {e}", flush=True)
+            continue
+        threading.Thread(target=dns_loop, args=(dns,), daemon=True).start()
 
     print("live servers up", flush=True)
     time.sleep(args.seconds)

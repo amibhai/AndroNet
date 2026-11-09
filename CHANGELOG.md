@@ -9,6 +9,82 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.2] - 2026-11-09
+
+### 🐛 Fixed
+- **Capture no longer stops after six hours on Android 15 and later.** Both capture services were declared as
+  data-sync foreground services, which Android 15 and later allow six hours of running time a day. When the
+  time ran out, the app did not stop the service, so Android crashed it and protection ended without notice.
+  A day of everyday use on a Pixel 8 found this. Both services are now special-use foreground services,
+  which have no such limit. Detection code is unchanged from 1.5.1.
+
+---
+
+## [1.5.1] - 2026-11-04
+
+Three defects found after the frozen run of version 1.5.0. Its results stay in `evaluation/` as measured,
+with the changes recorded as an amendment in `evaluation/results/freeze_v15.json`.
+
+### 🐛 Fixed
+- **Quiet connections survive the tunnel.** zdtun reset any TCP connection silent for 60 seconds, which
+  made apps holding one open for push messages reconnect all day. The app now builds zdtun with the
+  limits RFC 4787 and RFC 5382 ask of a NAT (2 minutes for UDP, 2 h 4 min for established TCP), and room
+  for 512 sockets. The submodule stays as published; `android/app/CMakeLists.txt` compiles an adjusted copy.
+- **Beacon test (`FLOW-003`) no longer fires on named hosts.** A long-lived connection outlived the
+  five-minute DNS entry for its address and then read as unnamed. A name once seen for a destination now
+  stays good. On the unseen trojan captures this removed all 11 false alarms and lost no detection.
+- **Alerts name the right app.** The owner cache was keyed by local port alone, so a port reused by another
+  app could inherit the first app's name. The key now includes the remote end.
+
+---
+
+## [1.5.0] - 2026-11-03
+
+Detection that uses what only the phone knows, and a relay that no longer slows the phone down. See
+`evaluation/` for the measurements, which include a second held-out set.
+
+### ✨ Added
+- **App-aware detection.** Rate windows count per app instead of per source address, which on the VPN
+  path is the same for every packet. Browsers keep a wider limit, because page loads fan out, and every
+  alert names the app.
+- **Per-app TLS profiles** (`APP-001`): JA3 and JA4 client fingerprints from the ClientHello, with an
+  alert when a settled app presents a cipher list new to it. The profile keys on the cipher list because
+  full JA4 values change with ALPN and resumption: 27 values in one phone session came from 4 lists.
+- **Detection without decryption:** opaque first payloads on unusual ports (`FLOW-001`), well-known
+  ports not speaking their protocol (`FLOW-002`), beaconing to bare addresses (`FLOW-003`), DNS command
+  channels in TXT answers (`FLOW-004`) and bursts of failed lookups (`FLOW-005`). The first three report
+  once an hour per app and target, and port 5222 is excused from the opaque test, since WhatsApp's own
+  encrypted protocol runs there. `FLOW-005` counts distinct names, so that a page retrying one blocked
+  advertising host generates nothing.
+- **Spoofed and distributed floods** seen at their target, with a HyperLogLog sketch of distinct sources.
+- **ARP poisoning** seen from one MAC claiming two addresses, with no binding change needed.
+- **Patterns split across TCP segments** still match, through a short per-flow tail buffer.
+
+### 🔧 Changed
+- **Tunnel MTU 10000.** zdtun hands the client one segment per loop, so this one change took the
+  full app's download from 39 Mbit/s to more than 120.
+- **Analysis left the relay thread.** A bounded queue feeds it. Overflow never stalls forwarding, is
+  counted, and raises an alert, since an attacker could cause it on purpose.
+- **Inspection depth:** payload inspection stops after 64 KiB per flow and direction (8 KiB on encrypted
+  ports). Rates, sizes and headers continue, and export still gets whole packets.
+- **Detection runs on capture time**, so a backlog drained in one burst does not read as a flood.
+- **The per-packet UI stream pauses** while the app is in the background.
+- `RULE-007` counts bytes, since the MTU decides how many packets a megabyte takes. `RULE-005` fires
+  above 7 attempts per minute.
+- **Encrypted DNS is refused inside the tunnel** (DNS over TLS anywhere, DNS over HTTPS to the tunnel's
+  resolvers), so that Android falls back to plain DNS and names become visible to detection. While
+  capture runs, DNS leaves the phone unencrypted.
+
+### 🐛 Fixed
+- **Frame padding was read as payload,** because payload extraction ignored the IP length.
+- **App names could come back empty on Android 11+,** which hides other apps without
+  `QUERY_ALL_PACKAGES`.
+- **ARP address probes** from `0.0.0.0` read as a binding change.
+- **ICMP errors read as a covert channel,** since they quote the packet that caused them, often
+  ciphertext. Only echo messages now count as carrying ICMP data.
+
+---
+
 ## [1.4.0] - 2026-11-02
 
 Corrections from the first measured evaluation against labelled attack traffic on a physical

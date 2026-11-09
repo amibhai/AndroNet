@@ -461,7 +461,7 @@ object SignatureDatabase {
                 matches.add(
                     SignatureMatch(
                         signature = signature,
-                        timestamp = System.currentTimeMillis()
+                        timestamp = PacketClock.now()
                     )
                 )
             }

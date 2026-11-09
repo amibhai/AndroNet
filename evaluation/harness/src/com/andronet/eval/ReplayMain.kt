@@ -318,6 +318,24 @@ private fun heapAfterReplay(frames: List<Prepared>, thresholds: String): Map<Str
     return mapOf("beforeBytes" to before, "afterBytes" to after, "deltaBytes" to (after - before))
 }
 
+/** One line per ClientHello: frame number, JA3, JA4. check_fingerprints.py compares them with Wireshark's. */
+private fun printFingerprints(path: String) {
+    Pipeline.reset()
+    PcapReader(File(path)).use { reader ->
+        var frame = 0
+        while (true) {
+            val f = reader.read() ?: break
+            frame++
+            val unit = LinkLayer.strip(f) ?: continue
+            val record = Pipeline.buildRecord(unit, true, "root") ?: continue
+            val (enriched, _) = Pipeline.dissectAndEnrich(record, Pipeline.rawOf(unit))
+            val tls = enriched["tlsData"] as? Map<*, *> ?: continue
+            val ja3 = tls["ja3"] ?: continue
+            println("$frame $ja3 ${tls["ja4"]}")
+        }
+    }
+}
+
 fun main(args: Array<String>) {
     val mode = args.getOrNull(0) ?: "accuracy"
     fun opt(k: String, d: String? = null): String? {
@@ -339,6 +357,7 @@ fun main(args: Array<String>) {
             outPath = opt("out", "cost.json")!!,
             thresholds = opt("thresholds", "fixed")!!
         )
+        "fingerprints" -> printFingerprints(opt("trace")!!)
         "livegen" -> LiveGen.run(opt("host")!!, opt("only"), opt("out", "live.txt")!!, opt("settle", "11000")!!.toLong())
         "transfer" -> {
             val host = opt("host")!!

@@ -1,0 +1,10 @@
+learning period: waiting 62 s
+http_exfil 7923 ms
+shell_on_dns_port 343 ms
+dns_failed_lookups 3091 ms
+dns_failed_lookups 3053 ms
+OK   http_exfil                 {'EXFIL-001': 1, 'RULE-007': 1}
+OK   shell_on_dns_port          {'FLOW-002': 1}
+OK   dns_failed_lookups         {'FLOW-005': 1}
+OK   dns_failed_lookups         {'FLOW-005': 1}
+detected 4/4; alerts outside any window: {}; app rss=213 MiB; test processes killed: 0

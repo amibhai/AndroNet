@@ -1,0 +1,227 @@
+{
+ "atk_fresh_rat_androidtester.pcap": {
+  "sha256": "af22b503852390d914d0581e6f4cc1ebeb03203c7005464438a4708c22c59045",
+  "bytes": 80764516,
+  "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT01_AndroidTester/RAT01_AndroidTester.pcap"
+ },
+ "atk_fresh_rat_droidjack.pcap": {
+  "sha256": "b8699b14248559f83a37b9c217ff99126f79e661a417cb8d9f4237f87412f4cc",
+  "bytes": 55012115,
+  "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT02_DroidJack/RAT02_DroidJack.pcap"
+ },
+ "atk_fresh_rat_hawkshaw.pcap": {
+  "sha256": "07a30d492c3dcdcb2c1f21389d8c2a8586ff100bbd39a90f324998b54fc2c2a4",
+  "bytes": 75644900,
+  "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT03_HawkShaw/RAT03_HawkShaw.pcap"
+ },
+ "atk_fresh_rat_spymax.pcap": {
+  "sha256": "6d98366749513310e59686dfc7dc5370a058d1c59ebe8862214d310341fcf01b",
+  "bytes": 162451395,
+  "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT04_SpyMAX/RAT04_SpyMAX.pcap"
+ },
+ "atk_fresh_rat_androrat.pcap": {
+  "sha256": "7794fc607b077ee4d2efac88b04f440e7f8bfdef8abe707f87f56e58c64bfcfe",
+  "bytes": 31993787,
+  "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT05_AndroRAT/RAT05_AndroRAT.pcap"
+ },
+ "atk_fresh_rat_saefko.pcap": {
+  "sha256": "2df7a2270cb2360aa502b9e50e6509a49d37dd80b773d83a7f2ade21c4c15424",
+  "bytes": 48994258,
+  "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT06_Saefko/RAT06_Saefko.pcap"
+ },
+ "atk_fresh_rat_ahmyth.pcap": {
+  "sha256": "244aad2114e0576e5d80e0006f912f5d7fc099cc4b8dcfad2b402d2a32ccac3b",
+  "bytes": 40480768,
+  "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT07_AhMyth/RAT07_AhMyth.pcap"
+ },
+ "atk_fresh_rat_cli_androrat.pcap": {
+  "sha256": "53aa15da212b3fb0d0589e50a4b2b07590b2128c828125ae93addd6bb6270515",
+  "bytes": 1214633,
+  "url": "https://mcfp.felk.cvut.cz/publicDatasets/Android-Mischief-Dataset/AndroidMischiefDataset_v2/RAT08_cli_AndroRAT/RAT08_cli_AndroRAT.pcap"
+ },
+ "atk_fresh_flood_tcp_synack_reflection.pcap": {
+  "sha256": "9339d7bc9d78e04a189b027890355d0b3c2687a720c32606acfa31d5325cd87e",
+  "bytes": 643499,
+  "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.TCP.reflection.SYNACK.pcap"
+ },
+ "atk_fresh_flood_tcp_syn_amp.pcapng": {
+  "sha256": "4ee88c005948234120dd9a1ce76168d763c42babd8aae54bf0d98d4ae336c97a",
+  "bytes": 72058,
+  "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.TCP.syn.optionallyACK.optionallysamePort.pcapng"
+ },
+ "atk_fresh_flood_udp_dnsany.pcap": {
+  "sha256": "7278d2805bf987d2c7e2ca5dc4663fe363f5c930c0b130817d7c74eceb8e37ab",
+  "bytes": 6449745,
+  "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.UDP.DNSANY.pcap"
+ },
+ "atk_fresh_flood_udp_ubnt.pcapng": {
+  "sha256": "0e2a81903ee2d883c34d56c0441437edee35f1d660282f69d257df9999810641",
+  "bytes": 12364048,
+  "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.UDP.UBNT.src10001.pcapng"
+ },
+ "atk_fresh_flood_udp_bacnet.pcapng": {
+  "sha256": "0070a4212ddab4a7ab96ce46f0d5f8ed5218c14a21873367e322a88b2b8e7849",
+  "bytes": 2988589,
+  "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.UDP.bacnet.IOT.37810.pcapng"
+ },
+ "atk_fresh_flood_udp_isakmp.pcap": {
+  "sha256": "87dabcb3a45ce7cef89ed3a19234a2112f5813dbd0bd52fb34f497a58cfaa8fa",
+  "bytes": 1043832,
+  "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.UDP.isakmp.pcap"
+ },
+ "atk_fresh_flood_udp_manyprotocols.pcapng": {
+  "sha256": "f457afe279369661043e55a9da2a233bb7051b155fc95a2b75f6ae3f8de44d9d",
+  "bytes": 42446666,
+  "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.UDP.manyprotocols.pcapng"
+ },
+ "atk_fresh_flood_udp_memcached_ntp_cldap.pcap": {
+  "sha256": "a7e89cad6fcaa08d5f5cdc8a35ca916b39909c9e4558ee557ab9d12598548a6d",
+  "bytes": 29371615,
+  "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.UDP.memcached.ntp.cldap.pcap"
+ },
+ "atk_fresh_flood_udp_snmp.pcapng": {
+  "sha256": "752df931f30ee5528a6670c4257c6cfce6df49c0de836e8bd4091ebf743e926c",
+  "bytes": 1125839,
+  "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.UDP.snmp.src161.pcapng"
+ },
+ "atk_fresh_flood_dns_rrsig_fragmented.pcap": {
+  "sha256": "db8b55f728bd3828e0669190ddfd828d588db180a3f6b315a1677336719933c8",
+  "bytes": 2088278,
+  "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/amp.dns.RRSIG.fragmented.pcap"
+ },
+ "atk_fresh_flood_ip_randomproto.pcap": {
+  "sha256": "690faa5227b773177c91557366376016b744f5850f375a821bb514a4f027b5fe",
+  "bytes": 7750476,
+  "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/pkt.IPV4.randomprotofield.pcap"
+ },
+ "atk_fresh_flood_tcp_dominate.pcapng": {
+  "sha256": "28fdcec8473ec418fb4440db514470107b0792733b9fce55d8d47d588a3ae526",
+  "bytes": 750779,
+  "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/pkt.TCP.DOMINATE.syn.ecn.cwr.pcapng"
+ },
+ "atk_fresh_flood_udp_fragmented.pcap": {
+  "sha256": "8d24931b3117292516d4a861a431e27ad7f2aea7a2551991aebdd863bd309a14",
+  "bytes": 28922892,
+  "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/pkt.UDP.fragmented.pcap"
+ },
+ "atk_fresh_flood_udp_null.pcapng": {
+  "sha256": "9ffcddce39021c7f4959ee33300b759735edc50eb16956c973024ccc874662cc",
+  "bytes": 5744966,
+  "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/pkt.UDP.null.pcapng"
+ },
+ "atk_fresh_flood_udp_rdm.pcapng": {
+  "sha256": "76be8a217992d5e5e157ce53af8573f2645cef55c65f09ab8785f26d0ba8a795",
+  "bytes": 6714522,
+  "url": "https://raw.githubusercontent.com/StopDDoS/packet-captures/master/pkt.UDP.rdm.fixedlength.pcapng"
+ },
+ "atk_fresh_c2_foudre_dga.pcapng": {
+  "sha256": "08cc76efbbeeb1eed155964622dcdf512dff166bb0a9fe55ddbc8e18434a2138",
+  "bytes": 9896,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Command and Control/C2_Foudre_Backdoor_DGA.pcapng"
+ },
+ "atk_fresh_win_psloggedon.pcapng": {
+  "sha256": "52756f0264a796d3d3309d0d1745988f01d51caa04f0cf09f291292825a3f176",
+  "bytes": 96300,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Discovery/Discovery_PsLoggedOn_remotelocalusers_enum_winreg_lsarpc_dcerpc_smb.pcapng"
+ },
+ "atk_fresh_win_netshareenum.pcapng": {
+  "sha256": "47901d303a065065d190c6eeb6ba29f4ff054c088a6c93d14ed6f21d626bc9ca",
+  "bytes": 11004,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Discovery/Discovery_dcerp_srvsvc_NetShareEnum.pcapng"
+ },
+ "atk_fresh_win_rpcdump.pcapng": {
+  "sha256": "6fd35023f899acfc5fb23a7f1e57dc585ea4e46a75df39551b14820be9d47e9f",
+  "bytes": 47148,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Discovery/Discovery_impacket_rpcdump.pcapng"
+ },
+ "atk_fresh_win_samr.pcapng": {
+  "sha256": "77f24fdbea8cca3e0c6e46708e886598a6bad239c7f9bc38c5d91ca5b6131bc2",
+  "bytes": 14132,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Discovery/Discovery_privgroups_domain_admins_samr_lookupnames_req.pcapng"
+ },
+ "atk_fresh_win_zerologon.pcapng": {
+  "sha256": "2b28eb1189069f26a7d83c02351f2fb8f700d4101a4f8ae2eefebe9fd9da81c2",
+  "bytes": 811252,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/CVE-2020-1472_Zerologon_RPC_NetLogon_NullChallenge_SecChan_6_from_nonDC_to_DC.pcapng"
+ },
+ "atk_fresh_win_sigred.pcapng": {
+  "sha256": "e4db1a2f919418f77b4ef293e9c72f8b0a28982c8e6764d29a10cb00710271f4",
+  "bytes": 70940,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/Exploit_DoS_cve-2020-1350_dns_sig_maxspl0it.pcapng"
+ },
+ "atk_fresh_win_wmi.pcapng": {
+  "sha256": "7626d813c7511db8a05b014872b32068e1e2a5cd7f7b2233b826a8f959779586",
+  "bytes": 109992,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/LM_WMI_ProcessCallCreate.pcapng"
+ },
+ "atk_fresh_win_dcom.pcapng": {
+  "sha256": "d5b268ca4960b9a9d87581bc046d8ff0a884c564e35beb45ab6d71f39ebc0de7",
+  "bytes": 19188,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/LM_dcom_mmc20.application_dcerpc.pcapng"
+ },
+ "atk_fresh_win_sharprdp.pcapng": {
+  "sha256": "4a558f4fd4ea0fd2c4885dc2f779b7b5eedbf0f8f54aba1a4bc02689520038be",
+  "bytes": 267732,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/LM_rdp_sharprdp.pcapng"
+ },
+ "atk_fresh_win_smbexec.pcapng": {
+  "sha256": "6581987a31be6839fe594172bcc1f567d1dd3086d41c0c6c6811c8644127d92b",
+  "bytes": 22088,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/LM_smbexec_smb_dcerpc_svcctl_epm.pcapng"
+ },
+ "atk_fresh_win_skeleton.pcapng": {
+  "sha256": "d4356faa3df2f575219a84233524276606d331ce2f4cec1fc9a2d315f7b2062b",
+  "bytes": 13500,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/lm_mimikazt_skeleton_kerberos_rc4_etype.pcapng"
+ },
+ "atk_fresh_win_zerologon_scan.pcapng": {
+  "sha256": "6c4d3a3d4ab0a84bc69d5f254225d0e8400da42bd1d5614b9a96b42b7373e907",
+  "bytes": 73776,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Lateral Movement/zerologon_mimikatz_ntlm_privacy_scan_and_exploit_encrypted.pcapng"
+ },
+ "atk_fresh_win_eventservice.pcapng": {
+  "sha256": "a2793a2bad294a5472207bb969eea85db356613d3eae8a460cd9b1980e9451f9",
+  "bytes": 7824,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/Evasion/DE_byt3bl33d3r_remote_eventservice_crash.pcapng"
+ },
+ "atk_fresh_win_spoolsample.pcapng": {
+  "sha256": "cac9937ac9b4e172b21920c207629aa8e8fc591d46d44cfee2857caadd26ad4b",
+  "bytes": 16596,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/CredAccess/CA_LM_SpoolSample_SMB_BiAuth.pcapng"
+ },
+ "atk_fresh_win_kerbrute.pcapng": {
+  "sha256": "f30458cef193fcbf9a96cf69c385062d731a0827fed518a0d64cd59f319453e9",
+  "bytes": 11060,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/CredAccess/CA_kerbrute_passwordspray_kerberos_AS-REQ.pcapng"
+ },
+ "atk_fresh_win_masterkey.pcapng": {
+  "sha256": "8750a4f528de113e4ddb423bf2bae8911f42aa33af930ba2cb99f3f7f798e0ac",
+  "bytes": 11340,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/CredAccess/CA_masterkey_rpc_protectedstorage.pcapng"
+ },
+ "atk_fresh_win_backupkey.pcapng": {
+  "sha256": "139135166ab9e78d8cf5f1b1788315adbbd36c371ab920368ecd022e3c8719a5",
+  "bytes": 5424,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/CredAccess/CredAccess_BackupMasterKey_LSARPC_43_RetrievePrivateData.pcapng"
+ },
+ "atk_fresh_win_dcshadow.pcapng": {
+  "sha256": "0c670a70e243e5498b6c8de24a99542a0e952d09ab722501b248b385d5596f91",
+  "bytes": 25940,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/CredAccess/DCShadow_add_primarygroupid_512_to_std_account.pcapng"
+ },
+ "atk_fresh_win_dcsync.pcapng": {
+  "sha256": "d406c65e7805700838c84bc2567e875bf8802f289c831c836834f1c3e802c4dc",
+  "bytes": 11024,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/CredAccess/DCSync_krbtgt_dcerpc_smb.pcapng"
+ },
+ "atk_fresh_win_pwdreset.pcapng": {
+  "sha256": "6a11a675f6d4216b3770ee54731dc673609f96fee0a550936f842585f76da4f3",
+  "bytes": 18980,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/CredAccess/Remote_Pwd_Reset_RPC_Admin_Mimikatz_PostZeroLogon.pcapng"
+ },
+ "atk_fresh_win_smbghost.pcapng": {
+  "sha256": "e97738f6034bb305b0d3f97ef6c6c11443f01aaee27b9d57abaff22ae4413a03",
+  "bytes": 2364,
+  "url": "https://raw.githubusercontent.com/sbousseaden/PCAP-ATTACK/master/PrivEsc/CVE-2020-0796_SMBGhost_PrivEsc_Loopback_traffic.pcapng"
+ }
+}

@@ -1,14 +1,17 @@
 {
- "tests": 145,
+ "tests": 208,
  "failures": 0,
  "errors": 0,
  "perClass": {
   "AdaptiveThresholdTest": 11,
+  "AnalysisQueueTest": 6,
+  "DnsVisibilityTest": 4,
   "EntropyTest": 18,
+  "FlowDetectorsTest": 46,
   "PacketDissectorTest": 13,
   "PayloadAnalyzerTest": 11,
-  "PipelineContractTest": 15,
-  "RuleEngineTest": 43,
+  "PipelineContractTest": 20,
+  "RuleEngineTest": 45,
   "SignatureDatabaseTest": 34
  }
 }

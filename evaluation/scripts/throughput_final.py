@@ -30,6 +30,7 @@ PD = phone.PCAPDROID
 
 
 def start_pcapdroid(dump):
+    phone.guard_capture()
     phone.shell(f"am start -e action start -e pcap_dump_mode {dump} -e pcap_name eval.pcap -n {PD}/.activities.CaptureCtrl")
     ui.tap_text("ALLOW", timeout=6)
     for _ in range(20):
@@ -54,6 +55,8 @@ CONDITIONS = {
     "andronet_forward": (lambda: phone.start_andronet("--es analysis off --es ui off"), phone.stop_andronet, phone.EVAL_PKG),
     "andronet_analysis": (lambda: phone.start_andronet("--es ui off"), phone.stop_andronet, phone.EVAL_PKG),
     "andronet_full": (lambda: phone.start_andronet(""), phone.stop_andronet, phone.EVAL_PKG),
+    # The app on screen, so the per-packet UI stream runs. Everywhere else it is in the background.
+    "andronet_foreground": (lambda: phone.start_andronet(""), phone.stop_andronet, phone.EVAL_PKG),
 }
 
 
@@ -76,6 +79,7 @@ def main():
     args = ap.parse_args()
 
     phone.push_harness()
+    phone.quiet()
     phone.shell(f"am force-stop {phone.EVAL_PKG}; am force-stop {PD}", check=False)
     results = {name: {"down": [], "up": [], "cpu": [], "rss": [], "rttP50": [], "rttP95": []} for name in CONDITIONS}
     meta = {"rounds": 0, "failedStarts": {}, "killedDuringRtt": 0, "interrupted": {}}
@@ -113,7 +117,8 @@ def main():
                 print(name, "capture did not start twice; skipping this round", flush=True)
                 stop()
                 return
-        phone.home()
+        if name != "andronet_foreground":
+            phone.home()
         time.sleep(2)
         pid = phone.pid_of(pkg) if pkg else None
         j0 = phone.proc_jiffies(pid) if pid else 0
@@ -129,6 +134,7 @@ def main():
                     pass
 
         threading.Thread(target=watch, daemon=True).start()
+        phone.shell("logcat -c", check=False)
         down = rates("down", args.mb, 2)
         up = rates("up", args.mb, 2)
         busy_secs = time.time() - t0
@@ -142,6 +148,9 @@ def main():
             rtt = ""
         m = re.search(r"p50=([\d.]+) p95=([\d.]+)", rtt)
         env = environment()
+        # Throughput means little if analysis fell behind, so count what the queue reported skipping
+        log = phone.shell("logcat -d -s PacketAnalysisManager:W", check=False)
+        skipped = sum(int(n) for n in re.findall(r"Analysis skipped (\d+) packets", log))
         if stop:
             stop()
         # Only a condition that ran to the end counts, so a USB drop cannot leave half a sample
@@ -154,7 +163,8 @@ def main():
         if m:
             r["rttP50"].append(float(m.group(1)))
             r["rttP95"].append(float(m.group(2)))
-        print(f"[{round_no + 1}/{args.rounds}] {name:20s} down={down} up={up} cpu={cpu:.0f}% rss={peak[0] // 1024} rtt={m.group(1) if m else '?'} ms {env}", flush=True)
+        r.setdefault("analysisSkipped", []).append(skipped)
+        print(f"[{round_no + 1}/{args.rounds}] {name:20s} down={down} up={up} cpu={cpu:.0f}% rss={peak[0] // 1024} rtt={m.group(1) if m else '?'} ms skipped={skipped} {env}", flush=True)
         save()
 
     for round_no in range(args.rounds):

@@ -21,7 +21,7 @@ object ZdtunVpn {
     /**
      * Initialize zdtun with VPN service and TUN file descriptor
      */
-    external fun nativeInit(vpnService: Any, tunFd: Int): Boolean
+    external fun nativeInit(vpnService: Any, tunFd: Int, mtu: Int): Boolean
 
     /**
      * Handle a packet from TUN interface

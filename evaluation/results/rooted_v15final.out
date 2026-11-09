@@ -1,0 +1,59 @@
+med Install
+Success
+helper: 0  3996 nc -L -s 127.0.0.1 -p 5999 sh -c read cmd; exec $cmd
+10150  4056 sh /system/xbin/su -c /data/user/0/com.example.packet_analyzer.eval/files/capd --iface any --uid 1
+10150  4057 sh /system/xbin/su -c /data/user/0/com.example.packet_analyzer.eval/files/capd --iface any --uid 1
+10150  4069 capd --iface any --uid 10150
+learning period: waiting 62 s
+
+ssh_bruteforce 1165 ms
+opaque_c2 316 ms
+shell_on_dns_port 310 ms
+beacon_bare_address 161449 ms
+dns_txt_channel 4824 ms
+dns_failed_lookups 3071 ms
+tls_library_switch 13288 ms
+shellcode 64 ms
+
+inbound_nmap_syn sent=602 skipped=0
+inbound_nmap_fin sent=604 skipped=0
+inbound_nmap_null sent=602 skipped=0
+inbound_nmap_xmas sent=602 skipped=0
+inbound_nmap_synfin sent=602 skipped=0
+inbound_syn_flood sent=2000 skipped=0
+arp_spoof sent=31 skipped=0
+OK   port_scan_connect          {'L1:PORT_SCAN': 1, 'L1:SYN_FLOOD': 1, 'L1:CONNECTION_FLOOD': 1, 'RULE-005': 1}
+OK   syn_flood                  {'L1:SYN_FLOOD': 1, 'L1:CONNECTION_FLOOD': 1}
+OK   http_sqli                  {'EXP-001': 1, 'RULE-002': 1}
+OK   http_traversal             {'EXP-002': 1}
+OK   http_scanner_sqlmap_ua     {'RECON-003': 1, 'RULE-009': 1}
+OK   http_scanner_nikto_ua      {'RECON-002': 1, 'RULE-009': 1}
+OK   http_scanner_nmap_ua       {'RECON-001': 1, 'RULE-009': 1}
+OK   http_shellshock            {'EXP-003': 1, 'NET-002': 1}
+OK   http_rce                   {'EXP-003': 1}
+OK   http_xxe                   {'EXP-004': 1}
+OK   http_download              {'RULE-003': 1}
+OK   http_cobalt_beacon         {'MAL-003': 1}
+OK   http_exfil                 {'FLOW-003': 1, 'EXFIL-001': 1, 'RULE-007': 1}
+OK   dns_tunnel_fast            {'L1:DNS_TUNNELING': 2, 'RULE-004': 2}
+OK   dns_tunnel_slow            {'L1:DNS_TUNNELING': 3}
+OK   stratum_btc                {'RULE-006': 1}
+OK   stratum_xmrig              {'RULE-006': 1}
+OK   irc_bot                    {'C2-003': 1}
+OK   meterpreter                {'MAL-001': 1}
+OK   ssh_tool_banner            {'BRUTE-001': 1}
+OK   ssh_bruteforce             {'RULE-005': 1}
+OK   opaque_c2                  {'FLOW-001': 1}
+OK   shell_on_dns_port          {'FLOW-002': 1}
+OK   beacon_bare_address        {'FLOW-003': 1}
+OK   dns_txt_channel            {'FLOW-004': 1}
+OK   dns_failed_lookups         {'FLOW-005': 1}
+OK   shellcode                  {'RULE-008': 1}
+OK   inbound_nmap_syn           {'L1:PORT_SCAN': 1, 'L1:SYN_FLOOD': 1, 'L1:CONNECTION_FLOOD': 1}
+OK   inbound_nmap_fin           {'L1:ARP_SPOOFING': 1, 'L1:PORT_SCAN': 1}
+OK   inbound_nmap_null          {'L1:ARP_SPOOFING': 1, 'L1:PORT_SCAN': 1}
+OK   inbound_nmap_xmas          {'L1:ARP_SPOOFING': 1, 'L1:PORT_SCAN': 1}
+OK   inbound_nmap_synfin        {'L1:ARP_SPOOFING': 1, 'L1:MALFORMED_PACKET': 1, 'L1:PORT_SCAN': 1, 'L1:SYN_FLOOD': 1, 'L1:CONNECTION_FLOOD': 1}
+OK   inbound_syn_flood          {'L1:SYN_FLOOD': 1, 'L1:DISTRIBUTED_FLOOD': 1}
+OK   arp_spoof                  {'L1:ARP_SPOOFING': 2}
+detected 34/34; other alerts: {}; app alive: True; helper: '10150 sh /system/xbin/su -c /data/user/0'; helpers left after stop: 0

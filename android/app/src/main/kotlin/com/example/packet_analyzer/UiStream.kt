@@ -19,8 +19,11 @@ object UiStream {
     private val handler = Handler(Looper.getMainLooper())
     private val pending = AtomicInteger(0)
 
+    /** Whether the app is on screen. With nobody watching, the per-packet stream is pure cost. */
+    @Volatile var visible = true
+
     fun offer(sink: EventChannel.EventSink?, packet: Map<String, Any>) {
-        if (sink == null || pending.get() >= MAX_PENDING) return
+        if (!visible || sink == null || pending.get() >= MAX_PENDING) return
         pending.incrementAndGet()
         handler.post {
             try {

@@ -15,7 +15,7 @@ import phone
 
 EVAL = pathlib.Path(__file__).resolve().parents[1]
 NMAP = next((EVAL / "tools/nmap").rglob("nmap.exe"))
-PHONE_IP = "192.168.1.4"
+PHONE_IP = re.search(r"inet ([\d.]+)", phone.shell("ip -4 addr show wlan0")).group(1)
 LAB_IP = "192.168.1.8"
 
 

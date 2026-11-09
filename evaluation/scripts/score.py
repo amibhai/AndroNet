@@ -22,6 +22,8 @@ def load(path):
 
 
 def layer_of(alert):
+    if alert.startswith(("FLOW-", "APP-")):
+        return "L4"
     return "L1" if alert.startswith("L1:") else "L3" if alert.startswith("RULE-") else "L2"
 
 
@@ -36,14 +38,15 @@ def per_trace(result):
     return out
 
 
-def score(result):
+def score(result, attacks=None):
+    attacks = attacks or ATTACKS
     traces = per_trace(result)
     summary = {"pipeline": result["pipeline"], "thresholds": result["thresholds"], "view": result["view"]}
 
-    scoped = {k: v for k, v in ATTACKS.items() if v["expect"]}
+    scoped = {k: v for k, v in attacks.items() if v["expect"]}
     rows = {}
     detected = 0
-    by_layer = {"L1": 0, "L2": 0, "L3": 0}
+    by_layer = {"L1": 0, "L2": 0, "L3": 0, "L4": 0}
     scoped_present = 0
     for name, meta in scoped.items():
         if name not in traces:
@@ -57,7 +60,7 @@ def score(result):
         rows[name] = {"class": meta["class"], "detected": bool(hits), "hits": hits, "alerts": alerts, "packets": traces[name][0]}
     summary["recall"] = {"detected": detected, "total": scoped_present, "byLayer": by_layer}
 
-    untargeted = {k: traces[k] for k, v in ATTACKS.items() if not v["expect"] and k in traces}
+    untargeted = {k: traces[k] for k, v in attacks.items() if not v["expect"] and k in traces}
     summary["untargeted"] = {k: {"alerts": v[2], "packets": v[0]} for k, v in untargeted.items()}
 
     benign = {k: v for k, v in traces.items() if k.startswith("benign_")}
@@ -71,7 +74,7 @@ def score(result):
         for a, n in v[2].items():
             alerts_total[a] = alerts_total.get(a, 0) + n
     n_alerts = sum(alerts_total.values())
-    layer_alerts = {"L1": 0, "L2": 0, "L3": 0}
+    layer_alerts = {"L1": 0, "L2": 0, "L3": 0, "L4": 0}
     for a, n in alerts_total.items():
         layer_alerts[layer_of(a)] += n
     summary["benign"] = {
@@ -103,12 +106,19 @@ def show(s):
 
 
 def main():
+    args = sys.argv[1:]
+    # --fresh scores against the second held-out set
+    fresh = "--fresh" in args
+    attacks = None
+    if fresh:
+        from test_manifest_v2 import ATTACKS as FRESH
+        attacks = FRESH
     out = {}
-    for path in sys.argv[1:]:
-        s = score(load(path))
+    for path in (a for a in args if a != "--fresh"):
+        s = score(load(path), attacks)
         show(s)
         out[pathlib.Path(path).stem] = s
-    target = pathlib.Path(__file__).resolve().parents[1] / "results" / "scored.json"
+    target = pathlib.Path(__file__).resolve().parents[1] / "results" / ("scored_fresh.json" if fresh else "scored.json")
     existing = json.loads(target.read_text()) if target.exists() else {}
     existing.update(out)
     target.write_text(json.dumps(existing, indent=1))

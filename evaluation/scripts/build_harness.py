@@ -26,8 +26,10 @@ SOURCES = {
                  "PayloadAnalyzer.kt", "DomainTracker.kt", "AdaptiveThresholdManager.kt", "TrafficStatistics.kt"],
     "current": ["AnomalyDetector.kt", "SignatureDatabase.kt", "RuleEngine.kt", "PacketDissector.kt",
                 "PayloadAnalyzer.kt", "DomainTracker.kt", "AdaptiveThresholdManager.kt", "TrafficStatistics.kt",
-                "PacketRecord.kt", "PacketPipeline.kt"],
+                "PacketRecord.kt", "PacketPipeline.kt", "PacketClock.kt", "FlowTable.kt", "AppContext.kt", "FlowDetectors.kt",
+                "TlsFingerprint.kt"],
 }
+SOURCES["v151"] = SOURCES["current"]
 SOURCES["baseline_nowild"] = SOURCES["baseline"]
 SOURCES["baseline_nohex"] = SOURCES["baseline"]
 # The same text as "%02x".format per byte, built from a digit table
@@ -119,7 +121,7 @@ def main():
     kt_files = [str(p) for p in src.glob("*.kt")]
     kt_files += [str(p) for p in (EVAL / "harness/src").rglob("*.kt")]
     kt_files += [str(p) for p in (EVAL / "harness/stubs").rglob("*.kt")]
-    pipeline = "baseline" if which.startswith("baseline") else which
+    pipeline = "baseline" if which.startswith("baseline") else "current"
     kt_files += [str(p) for p in (EVAL / f"harness/pipeline_{pipeline}").rglob("*.kt")]
     run(["java", "-Xmx2g", "-cp", os.pathsep.join(COMPILER_CP), "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler",
          "-no-stdlib", "-no-reflect", "-nowarn", "-jvm-target", "17",

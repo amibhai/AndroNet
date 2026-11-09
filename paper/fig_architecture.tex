@@ -12,22 +12,23 @@
 ]
 % capture tier
 \node[box] (probe) at (6,2.45) {Root probe at launch};
-\node[box, minimum width=44mm] (vpn) at (2.4,1.05) {\textbf{Root-free path}\\VpnService, zdtun relay};
-\node[box, minimum width=44mm] (root) at (9.6,1.05) {\textbf{Rooted path}\\helper through \texttt{su}, AF\_PACKET};
+\node[box, minimum width=48mm] (vpn) at (2.4,1.05) {\textbf{Root-free path:} VpnService, zdtun relay,\\bounded queue; knows the owning app};
+\node[box, minimum width=48mm] (root) at (9.6,1.05) {\textbf{Rooted path:} helper through \texttt{su},\\AF\_PACKET; sees inbound and link layer};
 \draw[arr] (probe.west) -| node[note, above, pos=0.25] {no root} (vpn.north);
 \draw[arr] (probe.east) -| node[note, above, pos=0.25] {root} (root.north);
 
 % boundary
-\node[box, very thick, fill=black!12, minimum width=64mm] (record) at (6,-0.35) {\textbf{Canonical packet record}\\one builder, no capture-mode branches above it};
-\draw[arr] (vpn.south) |- (record.west);
-\draw[arr] (root.south) |- (record.east);
+\node[box, very thick, fill=black!12, minimum width=64mm] (record) at (6,-0.35) {\textbf{Canonical packet record}\\one builder, no capture-mode branches above it, owning app if known};
+\draw[arr] (vpn.south) -- (vpn.south |- record.north);
+\draw[arr] (root.south) -- (root.south |- record.north);
 
 % analysis tier
-\node[box, minimum width=30mm] (dpi) at (1.55,-1.85) {Protocol dissection};
-\node[box, minimum width=30mm] (l1) at (1.55,-3.05) {L1 statistical\\adaptive thresholds};
-\node[box, minimum width=30mm] (l2) at (5.0,-3.05) {L2 signatures\\18 entries};
-\node[box, minimum width=30mm] (l3) at (8.45,-3.05) {L3 rule engine\\per-source windows};
-\node[box, minimum width=20mm] (alerts) at (11.25,-3.05) {Aggregated\\alerts};
+\node[box, minimum width=30mm] (dpi) at (1.55,-1.85) {Protocol dissection,\\JA3 and JA4};
+\node[box, minimum width=23mm] (l1) at (0.75,-3.2) {L1 statistical\\per app};
+\node[box, minimum width=23mm] (l2) at (3.3,-3.2) {L2 signatures\\18 entries};
+\node[box, minimum width=23mm] (l3) at (5.85,-3.2) {L3 rule engine\\per-app windows};
+\node[box, minimum width=23mm] (l4) at (8.4,-3.2) {L4 flow and\\app detectors};
+\node[box, minimum width=20mm] (alerts) at (11.25,-3.2) {Aggregated\\alerts};
 \node[box, minimum width=30mm] (export) at (6.15,-1.85) {pcapng export};
 \node[box, minimum width=30mm] (ui) at (10.2,-1.85) {Flutter UI\\bounded, best-effort};
 
@@ -36,9 +37,12 @@
 \draw[arr] (dpi.north |- 0,-1.13) -- (dpi.north);
 \draw[arr] (export.north |- 0,-1.13) -- (export.north);
 \draw[arr] (ui.north |- 0,-1.13) -- (ui.north);
-\draw[arr] (dpi.south) -- (l1.north);
-\draw[arr] (l1.east) -- (l2.west);
-\draw[arr] (l2.east) -- (l3.west);
-\draw[arr] (l3.east) -- (alerts.west);
+% The layers are independent: dissection feeds each one, and each one feeds the alerts
+\draw[semithick] (dpi.south) -- (dpi.south |- 0,-2.55);
+\draw[semithick] (l1.north |- 0,-2.55) -- (l4.north |- 0,-2.55);
+\foreach \n in {l1,l2,l3,l4} \draw[arr] (\n.north |- 0,-2.55) -- (\n.north);
+\foreach \n in {l1,l2,l3,l4} \draw[semithick] (\n.south) -- (\n.south |- 0,-3.95);
+\draw[semithick] (l1.south |- 0,-3.95) -- (alerts.south |- 0,-3.95);
+\draw[arr] (alerts.south |- 0,-3.95) -- (alerts.south);
 \end{tikzpicture}
 \end{document}

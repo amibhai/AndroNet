@@ -1,6 +1,7 @@
 package com.andronet.eval
 
 import com.example.packet_analyzer.AnomalyDetector
+import com.example.packet_analyzer.AppProfiles
 import com.example.packet_analyzer.DomainTracker
 import com.example.packet_analyzer.PacketPipeline
 import com.example.packet_analyzer.PacketRecord
@@ -13,6 +14,7 @@ object Pipeline {
 
     fun reset() {
         AnomalyDetector.reset()
+        AppProfiles.reset()
         RuleEngine.clearState()
         AnomalyDetector.adaptiveThresholds.reset()
         DomainTracker.clear()
