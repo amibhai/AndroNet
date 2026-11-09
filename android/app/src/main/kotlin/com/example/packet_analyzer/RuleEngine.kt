@@ -30,6 +30,7 @@ object RuleEngine {
         data class IpEquals(val ip: String, val direction: Direction = Direction.DESTINATION) : Condition()
         data class IpInCidr(val cidr: String, val direction: Direction = Direction.DESTINATION) : Condition()
         data class FlagsContain(val flags: List<String>) : Condition()
+        data class DirectionEquals(val direction: String) : Condition()
 
         // Payload conditions
         data class PayloadSize(val operator: Operator, val size: Int) : Condition()
@@ -82,14 +83,58 @@ object RuleEngine {
     private val rules = mutableListOf<Rule>()
     private val ruleState = ConcurrentHashMap<String, RuleState>()
 
+    /**
+     * Recent packets from one source that already satisfied a rule's stateless conditions.
+     * Rate predicates count these and nothing else, so "more than 10 per second" means ten
+     * packets of the suspicious kind from this source, not ten packets of any kind from anyone.
+     */
+    class SourceWindow {
+        private val times = ArrayDeque<Long>()
+        private val destinations = ArrayDeque<String>()
+
+        fun add(now: Long, destination: String) {
+            times.addLast(now)
+            destinations.addLast(destination)
+            if (times.size > MAX_WINDOW_ENTRIES) {
+                times.removeFirst()
+                destinations.removeFirst()
+            }
+        }
+
+        fun countSince(start: Long): Int {
+            var n = 0
+            val it = times.asReversed().iterator()
+            while (it.hasNext() && it.next() >= start) n++
+            return n
+        }
+
+        fun uniqueDestinationsSince(start: Long): Int {
+            val seen = HashSet<String>()
+            val t = times.asReversed().iterator()
+            val d = destinations.asReversed().iterator()
+            while (t.hasNext() && t.next() >= start) seen.add(d.next())
+            return seen.size
+        }
+    }
+
+    private const val MAX_WINDOW_ENTRIES = 1000
+    private const val MAX_SOURCES_PER_RULE = 64
+
     data class RuleState(
         var lastTriggered: Long = 0,
         var triggerCount: Int = 0,
-        val eventHistory: MutableList<Long> = mutableListOf(),
-        // ArrayDeque (not ArrayList) — removeFirst() below is O(1); an
-        // ArrayList.removeAt(0) here would shift up to 1000 elements on
-        // every single packet, times 10 rules, once history fills up.
-        val packetHistory: ArrayDeque<Map<String, Any>> = ArrayDeque()
+        val windows: LinkedHashMap<String, SourceWindow> =
+            object : LinkedHashMap<String, SourceWindow>(16, 0.75f, true) {
+                override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, SourceWindow>?) =
+                    size > MAX_SOURCES_PER_RULE
+            }
+    )
+
+    private val SQLI_PATTERN = Regex(
+        "union(\\s+all)?\\s+select|'\\s*or\\s*'?\\d*'?\\s*=|\\bor\\s+\\d+\\s*=\\s*\\d+|" +
+            "'\\s*(--|#)|;\\s*(drop|delete|insert|update)\\s|\\b(sleep|benchmark)\\s*\\(|" +
+            "waitfor\\s+delay|information_schema|xp_cmdshell",
+        RegexOption.IGNORE_CASE
     )
 
     init {
@@ -109,13 +154,12 @@ object RuleEngine {
                     Condition.And(
                         listOf(
                             Condition.ProtocolEquals("TCP"),
-                            Condition.UniqueDestinations(Operator.GREATER_THAN, 15, 10000),
-                            Condition.Or(
-                                listOf(
-                                    Condition.FlagsContain(listOf("SYN")),
-                                    Condition.FlagsContain(listOf("NULL"))
-                                )
-                            )
+                            // A probe opens or pokes at a connection: SYN, FIN, NULL and Xmas scans
+                            // all leave ACK clear, while every packet of an open flow sets it
+                            Condition.Not(Condition.FlagsContain(listOf("ACK"))),
+                            // Browsing on a real phone reaches 80 distinct hosts in 10 s, so a
+                            // lower limit calls every page load a sweep
+                            Condition.UniqueDestinations(Operator.GREATER_THAN, 100, 10000)
                         )
                     )
                 ),
@@ -135,11 +179,11 @@ object RuleEngine {
                     Condition.And(
                         listOf(
                             Condition.ProtocolEquals("TCP"),
-                            Condition.PortEquals(80, Direction.DESTINATION),
+                            Condition.HeaderEquals("type", "request"),
                             Condition.Or(
                                 listOf(
-                                    Condition.UrlMatches(Regex(".*('|--|;|/\\*|\\*/|xp_|sp_|UNION|SELECT).*", RegexOption.IGNORE_CASE)),
-                                    Condition.PayloadMatches(Regex(".*(UNION.*SELECT|INSERT.*INTO|DELETE.*FROM|DROP.*TABLE).*", RegexOption.IGNORE_CASE))
+                                    Condition.UrlMatches(SQLI_PATTERN),
+                                    Condition.PayloadMatches(SQLI_PATTERN)
                                 )
                             )
                         )
@@ -161,7 +205,7 @@ object RuleEngine {
                     Condition.And(
                         listOf(
                             Condition.HttpMethod("GET"),
-                            Condition.UrlMatches(Regex(".*\\.(exe|scr|bat|cmd|vbs|ps1|dll|jar)$", RegexOption.IGNORE_CASE))
+                            Condition.UrlMatches(Regex("\\.(exe|scr|bat|cmd|vbs|ps1|dll|jar|apk)(\\?.*)?$", RegexOption.IGNORE_CASE))
                         )
                     )
                 ),
@@ -185,7 +229,8 @@ object RuleEngine {
                             Condition.Or(
                                 listOf(
                                     Condition.PayloadSize(Operator.GREATER_THAN, 128),
-                                    Condition.DomainMatches(Regex(".*[0-9a-f]{32,}.*")) // Long hex strings
+                                    // A single label this long is encoded data, hex or base32 alike
+                                    Condition.DomainMatches(Regex("(^|\\.)[0-9a-zA-Z]{32,}(\\.|$)"))
                                 )
                             ),
                             Condition.PacketRate(Operator.GREATER_THAN, 10, 1000)
@@ -215,7 +260,10 @@ object RuleEngine {
                                     Condition.PortEquals(23)   // Telnet
                                 )
                             ),
-                            Condition.PacketRate(Operator.GREATER_THAN, 20, 60000)
+                            // Counts connection attempts: one login session is many packets
+                            Condition.FlagsContain(listOf("SYN")),
+                            Condition.Not(Condition.FlagsContain(listOf("ACK"))),
+                            Condition.PacketRate(Operator.GREATER_THAN, 10, 60000)
                         )
                     )
                 ),
@@ -235,16 +283,11 @@ object RuleEngine {
                     Condition.And(
                         listOf(
                             Condition.ProtocolEquals("TCP"),
-                            Condition.Or(
-                                listOf(
-                                    Condition.PortEquals(3333),
-                                    Condition.PortEquals(4444),
-                                    Condition.PortEquals(5555),
-                                    Condition.PortEquals(7777),
-                                    Condition.PortEquals(8888)
-                                )
-                            ),
-                            Condition.PayloadContains("stratum")
+                            // The stratum wire format never says "stratum"; it says these.
+                            // Pools listen on any port, so the port is no use as a filter.
+                            Condition.PayloadMatches(
+                                Regex("mining\\.(subscribe|authorize|submit)|\"method\"\\s*:\\s*\"login\".*\"(agent|algo)\"|stratum\\+(tcp|ssl)://")
+                            )
                         )
                     )
                 ),
@@ -263,8 +306,9 @@ object RuleEngine {
                 conditions = listOf(
                     Condition.And(
                         listOf(
-                            Condition.PacketRate(Operator.GREATER_THAN, 100, 10000),
-                            Condition.PayloadSize(Operator.GREATER_THAN, 1024)
+                            Condition.DirectionEquals("outgoing"),
+                            Condition.PayloadSize(Operator.GREATER_THAN, 1024),
+                            Condition.PacketRate(Operator.GREATER_THAN, 500, 10000)
                         )
                     )
                 ),
@@ -283,9 +327,11 @@ object RuleEngine {
                 conditions = listOf(
                     Condition.Or(
                         listOf(
-                            Condition.PayloadMatches(Regex(".*\\x90{10,}.*")), // NOP sled
-                            Condition.PayloadMatches(Regex(".*\\xeb\\x0e.*")),  // JMP short
-                            Condition.PayloadContains("\\x31\\xc0\\x50\\x68") // Common shellcode
+                            Condition.PayloadMatches(Regex("\\x90{16,}")), // NOP sled
+                            // xor eax,eax; push eax; push imm32. Written as code points, since the
+                            // payload is matched as ISO-8859-1 text. A two-byte pattern such as
+                            // EB 0E would match ciphertext by chance in about 2% of full-size packets.
+                            Condition.PayloadContains("\u0031\u00c0\u0050\u0068")
                         )
                     )
                 ),
@@ -304,11 +350,11 @@ object RuleEngine {
                 conditions = listOf(
                     Condition.Or(
                         listOf(
-                            Condition.HeaderMatches("User-Agent", Regex(".*[Bb]ot.*")),
-                            Condition.HeaderMatches("User-Agent", Regex(".*[Ss]canner.*")),
-                            Condition.HeaderMatches("User-Agent", Regex(".*[Cc]rawler.*")),
-                            Condition.HeaderMatches("User-Agent", Regex(".*python.*", RegexOption.IGNORE_CASE)),
-                            Condition.HeaderMatches("User-Agent", Regex(".*curl.*", RegexOption.IGNORE_CASE))
+                            Condition.HeaderMatches("User-Agent", Regex("[Bb]ot")),
+                            Condition.HeaderMatches("User-Agent", Regex("[Ss]canner")),
+                            Condition.HeaderMatches("User-Agent", Regex("[Cc]rawler")),
+                            Condition.HeaderMatches("User-Agent", Regex("python|nikto|nmap|sqlmap", RegexOption.IGNORE_CASE)),
+                            Condition.HeaderMatches("User-Agent", Regex("curl", RegexOption.IGNORE_CASE))
                         )
                     )
                 ),
@@ -355,17 +401,22 @@ object RuleEngine {
             try {
                 val state = ruleState.getOrPut(rule.id) { RuleState() }
 
-                // Add packet to history
-                state.packetHistory.add(packetInfo)
-                if (state.packetHistory.size > 1000) {
-                    state.packetHistory.removeFirst()
+                // First pass ignores the rate predicates: a packet that fails here is not the
+                // kind this rule counts, so it never enters the rule's window.
+                if (!evaluateConditions(rule.conditions, packetInfo, payload, payloadStr, null)) continue
+
+                val hasTemporal = rule.conditions.any(::isTemporal)
+                var window: SourceWindow? = null
+                if (hasTemporal) {
+                    val source = packetInfo["sourceIp"]?.toString() ?: ""
+                    window = state.windows.getOrPut(source) { SourceWindow() }
+                    window.add(System.currentTimeMillis(), packetInfo["destinationIp"]?.toString() ?: "")
                 }
 
                 // Evaluate conditions
-                if (evaluateConditions(rule.conditions, packetInfo, payload, payloadStr, state)) {
+                if (!hasTemporal || evaluateConditions(rule.conditions, packetInfo, payload, payloadStr, window)) {
                     state.lastTriggered = System.currentTimeMillis()
                     state.triggerCount++
-                    state.eventHistory.add(System.currentTimeMillis())
 
                     matches.add(
                         RuleMatch(
@@ -386,16 +437,26 @@ object RuleEngine {
         return matches
     }
 
+    /** True when the condition tree holds a predicate that needs the rule's source window. */
+    private fun isTemporal(condition: Condition): Boolean = when (condition) {
+        is Condition.PacketRate, is Condition.UniqueDestinations -> true
+        is Condition.And -> condition.conditions.any(::isTemporal)
+        is Condition.Or -> condition.conditions.any(::isTemporal)
+        is Condition.Not -> isTemporal(condition.condition)
+        else -> false
+    }
+
+    /** With [window] null, rate predicates are assumed to hold, whichever polarity they sit under. */
     private fun evaluateConditions(
         conditions: List<Condition>,
         packetInfo: Map<String, Any>,
         payload: ByteArray?,
         payloadStr: String?,
-        state: RuleState
+        window: SourceWindow?
     ): Boolean {
         // AND logic for top-level conditions
         return conditions.all { condition ->
-            evaluateCondition(condition, packetInfo, payload, payloadStr, state)
+            evaluateCondition(condition, packetInfo, payload, payloadStr, window, true)
         }
     }
 
@@ -404,32 +465,38 @@ object RuleEngine {
         packetInfo: Map<String, Any>,
         payload: ByteArray?,
         payloadStr: String?,
-        state: RuleState
+        window: SourceWindow?,
+        assume: Boolean
     ): Boolean {
         return when (condition) {
             is Condition.ProtocolEquals -> evaluateProtocolEquals(condition, packetInfo)
             is Condition.PortEquals -> evaluatePortEquals(condition, packetInfo)
             is Condition.PortInRange -> evaluatePortInRange(condition, packetInfo)
             is Condition.IpEquals -> evaluateIpEquals(condition, packetInfo)
+            is Condition.IpInCidr -> evaluateIpInCidr(condition, packetInfo)
             is Condition.FlagsContain -> evaluateFlagsContain(condition, packetInfo)
-            is Condition.PayloadSize -> evaluatePayloadSize(condition, payload)
+            is Condition.DirectionEquals -> evaluateDirectionEquals(condition, packetInfo)
+            is Condition.PayloadSize -> evaluatePayloadSize(condition, packetInfo, payload)
             is Condition.PayloadContains -> evaluatePayloadContains(condition, payloadStr)
             is Condition.PayloadMatches -> evaluatePayloadMatches(condition, payloadStr)
             is Condition.HeaderExists -> evaluateHeaderExists(condition, packetInfo)
             is Condition.HeaderEquals -> evaluateHeaderEquals(condition, packetInfo)
             is Condition.HeaderMatches -> evaluateHeaderMatches(condition, packetInfo)
-            is Condition.PacketRate -> evaluatePacketRate(condition, state)
-            is Condition.UniqueDestinations -> evaluateUniqueDestinations(condition, state)
-            is Condition.And -> condition.conditions.all { evaluateCondition(it, packetInfo, payload, payloadStr, state) }
-            is Condition.Or -> condition.conditions.any { evaluateCondition(it, packetInfo, payload, payloadStr, state) }
-            is Condition.Not -> !evaluateCondition(condition.condition, packetInfo, payload, payloadStr, state)
+            is Condition.PacketRate -> if (window == null) assume else evaluatePacketRate(condition, window)
+            is Condition.UniqueDestinations -> if (window == null) assume else evaluateUniqueDestinations(condition, window)
+            is Condition.TimeSince -> evaluateTimeSince(condition)
+            is Condition.And -> condition.conditions.all { evaluateCondition(it, packetInfo, payload, payloadStr, window, assume) }
+            is Condition.Or -> condition.conditions.any { evaluateCondition(it, packetInfo, payload, payloadStr, window, assume) }
+            is Condition.Not -> !evaluateCondition(condition.condition, packetInfo, payload, payloadStr, window, !assume)
             is Condition.DomainEquals -> evaluateDomainEquals(condition, packetInfo)
             is Condition.DomainContains -> evaluateDomainContains(condition, packetInfo)
             is Condition.DomainMatches -> evaluateDomainMatches(condition, packetInfo)
+            is Condition.DnsQueryType -> evaluateDnsQueryType(condition, packetInfo)
+            is Condition.DnsResponseCount -> evaluateDnsResponseCount(condition, packetInfo)
             is Condition.HttpMethod -> evaluateHttpMethod(condition, packetInfo)
+            is Condition.HttpStatus -> evaluateHttpStatus(condition, packetInfo)
             is Condition.UrlContains -> evaluateUrlContains(condition, packetInfo)
             is Condition.UrlMatches -> evaluateUrlMatches(condition, packetInfo)
-            else -> false
         }
     }
 
@@ -470,13 +537,52 @@ object RuleEngine {
         }
     }
 
-    private fun evaluateFlagsContain(condition: Condition.FlagsContain, packetInfo: Map<String, Any>): Boolean {
-        val flags = packetInfo["flags"]?.toString() ?: ""
-        return condition.flags.any { flags.contains(it, ignoreCase = true) }
+    private fun evaluateIpInCidr(condition: Condition.IpInCidr, packetInfo: Map<String, Any>): Boolean {
+        val destIp = packetInfo["destinationIp"]?.toString() ?: ""
+        val sourceIp = packetInfo["sourceIp"]?.toString() ?: ""
+        return when (condition.direction) {
+            Direction.DESTINATION -> ipv4InCidr(destIp, condition.cidr)
+            Direction.SOURCE -> ipv4InCidr(sourceIp, condition.cidr)
+            Direction.BOTH -> ipv4InCidr(destIp, condition.cidr) || ipv4InCidr(sourceIp, condition.cidr)
+        }
     }
 
-    private fun evaluatePayloadSize(condition: Condition.PayloadSize, payload: ByteArray?): Boolean {
-        val size = payload?.size ?: 0
+    private fun ipv4ToInt(ip: String): Int? {
+        val parts = ip.split('.')
+        if (parts.size != 4) return null
+        var value = 0
+        for (part in parts) {
+            val octet = part.toIntOrNull() ?: return null
+            if (octet !in 0..255) return null
+            value = (value shl 8) or octet
+        }
+        return value
+    }
+
+    private fun ipv4InCidr(ip: String, cidr: String): Boolean {
+        val address = ipv4ToInt(ip) ?: return false
+        val network = ipv4ToInt(cidr.substringBefore('/')) ?: return false
+        val bits = cidr.substringAfter('/', "32").toIntOrNull() ?: return false
+        if (bits !in 0..32) return false
+        val mask = if (bits == 0) 0 else -1 shl (32 - bits)
+        return (address and mask) == (network and mask)
+    }
+
+    private fun evaluateFlagsContain(condition: Condition.FlagsContain, packetInfo: Map<String, Any>): Boolean {
+        val flags = packetInfo["flags"]?.toString() ?: ""
+        return condition.flags.any { wanted ->
+            // A NULL scan is the absence of every flag, so there is no name to search for
+            if (wanted == "NULL") flags.isBlank() else flags.contains(wanted, ignoreCase = true)
+        }
+    }
+
+    private fun evaluateDirectionEquals(condition: Condition.DirectionEquals, packetInfo: Map<String, Any>): Boolean {
+        return packetInfo["direction"]?.toString().equals(condition.direction, ignoreCase = true)
+    }
+
+    private fun evaluatePayloadSize(condition: Condition.PayloadSize, packetInfo: Map<String, Any>, payload: ByteArray?): Boolean {
+        // The record carries the size even when an encrypted payload is withheld from matching
+        val size = (packetInfo["payloadSize"] as? Int) ?: payload?.size ?: 0
         return compareWithOperator(size, condition.size, condition.operator)
     }
 
@@ -507,28 +613,41 @@ object RuleEngine {
         return condition.regex.containsMatchIn(headerValue)
     }
 
-    private fun evaluatePacketRate(condition: Condition.PacketRate, state: RuleState): Boolean {
-        val now = System.currentTimeMillis()
-        val windowStart = now - condition.windowMs
-        val recentPackets = state.packetHistory.count { packet ->
-            val timestamp = (packet["timestamp"] as? Long) ?: 0
-            timestamp >= windowStart
-        }
+    private fun evaluatePacketRate(condition: Condition.PacketRate, window: SourceWindow): Boolean {
+        val recentPackets = window.countSince(System.currentTimeMillis() - condition.windowMs)
         return compareWithOperator(recentPackets, condition.count, condition.operator)
     }
 
-    private fun evaluateUniqueDestinations(condition: Condition.UniqueDestinations, state: RuleState): Boolean {
-        val now = System.currentTimeMillis()
-        val windowStart = now - condition.windowMs
-        val uniqueDests = state.packetHistory
-            .filter { packet ->
-                val timestamp = (packet["timestamp"] as? Long) ?: 0
-                timestamp >= windowStart
-            }
-            .mapNotNull { it["destinationIp"]?.toString() }
-            .toSet()
-            .size
+    private fun evaluateUniqueDestinations(condition: Condition.UniqueDestinations, window: SourceWindow): Boolean {
+        val uniqueDests = window.uniqueDestinationsSince(System.currentTimeMillis() - condition.windowMs)
         return compareWithOperator(uniqueDests, condition.count, condition.operator)
+    }
+
+    /** Time since the rule named by [Condition.TimeSince.event] last fired; never-fired counts as forever. */
+    private fun evaluateTimeSince(condition: Condition.TimeSince): Boolean {
+        val last = ruleState[condition.event]?.lastTriggered ?: 0L
+        val elapsed = if (last == 0L) Long.MAX_VALUE else System.currentTimeMillis() - last
+        return compareWithOperator(elapsed, condition.durationMs, condition.operator)
+    }
+
+    private fun evaluateDnsQueryType(condition: Condition.DnsQueryType, packetInfo: Map<String, Any>): Boolean {
+        val dnsData = packetInfo["dnsData"] as? Map<*, *> ?: return false
+        val queryType = dnsData["queryType"]?.toString() ?: return false
+        // The dissector renders some types with a gloss, e.g. "A (IPv4)"
+        return queryType.substringBefore(' ').equals(condition.type, ignoreCase = true)
+    }
+
+    private fun evaluateDnsResponseCount(condition: Condition.DnsResponseCount, packetInfo: Map<String, Any>): Boolean {
+        val dnsData = packetInfo["dnsData"] as? Map<*, *> ?: return false
+        if (dnsData["type"] != "Response") return false
+        val answers = dnsData["answers"]?.toString()?.toIntOrNull() ?: return false
+        return compareWithOperator(answers, condition.count, condition.operator)
+    }
+
+    private fun evaluateHttpStatus(condition: Condition.HttpStatus, packetInfo: Map<String, Any>): Boolean {
+        val httpData = packetInfo["httpData"] as? Map<*, *> ?: return false
+        val status = httpData["statusCode"]?.toString()?.toIntOrNull() ?: return false
+        return compareWithOperator(status, condition.status, condition.operator)
     }
 
     private fun evaluateDomainEquals(condition: Condition.DomainEquals, packetInfo: Map<String, Any>): Boolean {
@@ -564,7 +683,10 @@ object RuleEngine {
         return condition.regex.containsMatchIn(url)
     }
 
-    private fun compareWithOperator(actual: Int, expected: Int, operator: Operator): Boolean {
+    private fun compareWithOperator(actual: Int, expected: Int, operator: Operator): Boolean =
+        compareWithOperator(actual.toLong(), expected.toLong(), operator)
+
+    private fun compareWithOperator(actual: Long, expected: Long, operator: Operator): Boolean {
         return when (operator) {
             Operator.EQUALS -> actual == expected
             Operator.NOT_EQUALS -> actual != expected

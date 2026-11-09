@@ -704,7 +704,11 @@ class PacketAnalyzerApp extends StatelessWidget {
           appBarTheme: _appBarTheme,
           elevatedButtonTheme: _elevatedButtonTheme(),
         ),
-        home: const AuthWrapper(),
+        // Evaluation builds (--dart-define=ANDRONET_EVAL=true) skip the lock screen so that a
+        // script can drive capture on a test device. Normal builds always show it.
+        home: const bool.fromEnvironment('ANDRONET_EVAL')
+            ? const PacketAnalyzerScreen()
+            : const AuthWrapper(),
         routes: {
           '/setup-auth': (context) => const SetupAuthScreen(),
           '/login': (context) => const LoginScreen(),
@@ -1049,11 +1053,9 @@ class _PacketAnalyzerScreenState extends State<PacketAnalyzerScreen>
       _isRooted = await VpnController.checkRootAccess();
       _vpnPermissionGranted = await VpnController.prepareVpn();
 
-      if (_isRooted && !_vpnPermissionGranted) {
-        _selectedCaptureMode = CaptureMode.libpcap;
-      } else {
-        _selectedCaptureMode = CaptureMode.vpn;
-      }
+      // Root decides the capture path: a rooted device gets interface-level visibility,
+      // every other device gets the VPN path. The user can still switch in the UI.
+      _selectedCaptureMode = _isRooted ? CaptureMode.libpcap : CaptureMode.vpn;
 
       try {
         _deviceInfo = await PacketService.getDeviceInfo();

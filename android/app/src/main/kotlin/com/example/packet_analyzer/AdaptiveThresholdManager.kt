@@ -5,8 +5,9 @@ package com.example.packet_analyzer
  *
  * Learns normal traffic rates during a 60-second baseline period, then sets
  * detection thresholds proportional to that baseline.  Hard floor values
- * prevent baseline-poisoning attacks; a ceiling multiplier prevents thresholds
- * from drifting so high that real attacks are missed.
+ * keep quiet networks sensitive. Ceilings are fixed when learning ends, and a sample
+ * at or above the current threshold never trains the baseline, so an attack cannot
+ * raise the threshold it is being measured against.
  */
 class AdaptiveThresholdManager {
 
@@ -19,25 +20,31 @@ class AdaptiveThresholdManager {
         // regardless of how quiet the observed baseline is
         const val FLOOR_PORT_SCAN = 8
         const val FLOOR_SYN_FLOOD = 30
-        const val FLOOR_CONNECTION_RATE = 15
+        // Browsing on a real phone peaks at 45 new connections a second during page loads
+        const val FLOOR_CONNECTION_RATE = 60
         const val FLOOR_DNS_QUERY_RATE = 10
         const val FLOOR_ARP_RATE = 3
 
-        // Threshold ceiling = baseline * CEILING_MULTIPLIER
-        // Prevents thresholds from drifting so high that real attacks are missed
+        // Threshold ceiling = learned baseline * CEILING_MULTIPLIER, never below the default
         const val CEILING_MULTIPLIER = 4.0
+
+        const val DEFAULT_PORT_SCAN = 20
+        const val DEFAULT_SYN_FLOOD = 100
+        const val DEFAULT_CONNECTION_RATE = 60
+        const val DEFAULT_DNS_QUERY_RATE = 30
+        const val DEFAULT_ARP_RATE = 10
     }
 
     // Current adaptive threshold values exposed to AnomalyDetector
-    var portScanThreshold: Int = 20
+    var portScanThreshold: Int = DEFAULT_PORT_SCAN
         private set
-    var synFloodThreshold: Int = 100
+    var synFloodThreshold: Int = DEFAULT_SYN_FLOOD
         private set
-    var connectionRateThreshold: Int = 50
+    var connectionRateThreshold: Int = DEFAULT_CONNECTION_RATE
         private set
-    var dnsQueryRateThreshold: Int = 30
+    var dnsQueryRateThreshold: Int = DEFAULT_DNS_QUERY_RATE
         private set
-    var arpRateThreshold: Int = 10
+    var arpRateThreshold: Int = DEFAULT_ARP_RATE
         private set
 
     // Learning period state
@@ -58,6 +65,13 @@ class AdaptiveThresholdManager {
     private var baselineConnectionRate = 0.0
     private var baselineDnsRate = 0.0
     private var baselineArpRate = 0.0
+
+    // Fixed when learning ends; the EMA can move a threshold only up to here
+    private var ceilingPortScan = DEFAULT_PORT_SCAN
+    private var ceilingSynFlood = DEFAULT_SYN_FLOOD
+    private var ceilingConnectionRate = DEFAULT_CONNECTION_RATE
+    private var ceilingDnsRate = DEFAULT_DNS_QUERY_RATE
+    private var ceilingArpRate = DEFAULT_ARP_RATE
 
     fun startLearning() {
         learningStartTime = System.currentTimeMillis()
@@ -106,8 +120,17 @@ class AdaptiveThresholdManager {
         baselineDnsRate = percentile90(observedDnsRates)
         baselineArpRate = percentile90(observedArpRates)
 
+        ceilingPortScan = ceilingFor(baselinePortScan, DEFAULT_PORT_SCAN)
+        ceilingSynFlood = ceilingFor(baselineSynFlood, DEFAULT_SYN_FLOOD)
+        ceilingConnectionRate = ceilingFor(baselineConnectionRate, DEFAULT_CONNECTION_RATE)
+        ceilingDnsRate = ceilingFor(baselineDnsRate, DEFAULT_DNS_QUERY_RATE)
+        ceilingArpRate = ceilingFor(baselineArpRate, DEFAULT_ARP_RATE)
+
         recalculateThresholds()
     }
+
+    private fun ceilingFor(baseline: Double, default: Int): Int =
+        (baseline * CEILING_MULTIPLIER).toInt().coerceAtLeast(default)
 
     private fun updateEMA(
         portScans: Int,
@@ -116,41 +139,32 @@ class AdaptiveThresholdManager {
         dnsRate: Int,
         arpRate: Int
     ) {
-        baselinePortScan = ALPHA_SLOW * portScans + (1 - ALPHA_SLOW) * baselinePortScan
-        baselineSynFlood = ALPHA_SLOW * synRate + (1 - ALPHA_SLOW) * baselineSynFlood
-        baselineConnectionRate = ALPHA_SLOW * connectionRate + (1 - ALPHA_SLOW) * baselineConnectionRate
-        baselineDnsRate = ALPHA_SLOW * dnsRate + (1 - ALPHA_SLOW) * baselineDnsRate
-        baselineArpRate = ALPHA_SLOW * arpRate + (1 - ALPHA_SLOW) * baselineArpRate
+        // A sample that reached the threshold is a detection, and must not teach the baseline
+        if (portScans < portScanThreshold) {
+            baselinePortScan = ALPHA_SLOW * portScans + (1 - ALPHA_SLOW) * baselinePortScan
+        }
+        if (synRate < synFloodThreshold) {
+            baselineSynFlood = ALPHA_SLOW * synRate + (1 - ALPHA_SLOW) * baselineSynFlood
+        }
+        if (connectionRate < connectionRateThreshold) {
+            baselineConnectionRate = ALPHA_SLOW * connectionRate + (1 - ALPHA_SLOW) * baselineConnectionRate
+        }
+        if (dnsRate < dnsQueryRateThreshold) {
+            baselineDnsRate = ALPHA_SLOW * dnsRate + (1 - ALPHA_SLOW) * baselineDnsRate
+        }
+        if (arpRate < arpRateThreshold) {
+            baselineArpRate = ALPHA_SLOW * arpRate + (1 - ALPHA_SLOW) * baselineArpRate
+        }
 
         recalculateThresholds()
     }
 
     private fun recalculateThresholds() {
-        portScanThreshold = clamp(
-            (baselinePortScan * 2.5).toInt(),
-            FLOOR_PORT_SCAN,
-            (baselinePortScan * CEILING_MULTIPLIER).toInt().coerceAtLeast(FLOOR_PORT_SCAN * 2)
-        )
-        synFloodThreshold = clamp(
-            (baselineSynFlood * 2.5).toInt(),
-            FLOOR_SYN_FLOOD,
-            (baselineSynFlood * CEILING_MULTIPLIER).toInt().coerceAtLeast(FLOOR_SYN_FLOOD * 2)
-        )
-        connectionRateThreshold = clamp(
-            (baselineConnectionRate * 2.5).toInt(),
-            FLOOR_CONNECTION_RATE,
-            (baselineConnectionRate * CEILING_MULTIPLIER).toInt().coerceAtLeast(FLOOR_CONNECTION_RATE * 2)
-        )
-        dnsQueryRateThreshold = clamp(
-            (baselineDnsRate * 2.5).toInt(),
-            FLOOR_DNS_QUERY_RATE,
-            (baselineDnsRate * CEILING_MULTIPLIER).toInt().coerceAtLeast(FLOOR_DNS_QUERY_RATE * 2)
-        )
-        arpRateThreshold = clamp(
-            (baselineArpRate * 2.5).toInt(),
-            FLOOR_ARP_RATE,
-            (baselineArpRate * CEILING_MULTIPLIER).toInt().coerceAtLeast(FLOOR_ARP_RATE * 2)
-        )
+        portScanThreshold = clamp((baselinePortScan * 2.5).toInt(), FLOOR_PORT_SCAN, ceilingPortScan)
+        synFloodThreshold = clamp((baselineSynFlood * 2.5).toInt(), FLOOR_SYN_FLOOD, ceilingSynFlood)
+        connectionRateThreshold = clamp((baselineConnectionRate * 2.5).toInt(), FLOOR_CONNECTION_RATE, ceilingConnectionRate)
+        dnsQueryRateThreshold = clamp((baselineDnsRate * 2.5).toInt(), FLOOR_DNS_QUERY_RATE, ceilingDnsRate)
+        arpRateThreshold = clamp((baselineArpRate * 2.5).toInt(), FLOOR_ARP_RATE, ceilingArpRate)
     }
 
     internal fun percentile90(values: List<Int>): Double {
@@ -184,11 +198,16 @@ class AdaptiveThresholdManager {
     }
 
     fun reset() {
-        portScanThreshold = 20
-        synFloodThreshold = 100
-        connectionRateThreshold = 50
-        dnsQueryRateThreshold = 30
-        arpRateThreshold = 10
+        portScanThreshold = DEFAULT_PORT_SCAN
+        synFloodThreshold = DEFAULT_SYN_FLOOD
+        connectionRateThreshold = DEFAULT_CONNECTION_RATE
+        dnsQueryRateThreshold = DEFAULT_DNS_QUERY_RATE
+        arpRateThreshold = DEFAULT_ARP_RATE
+        ceilingPortScan = DEFAULT_PORT_SCAN
+        ceilingSynFlood = DEFAULT_SYN_FLOOD
+        ceilingConnectionRate = DEFAULT_CONNECTION_RATE
+        ceilingDnsRate = DEFAULT_DNS_QUERY_RATE
+        ceilingArpRate = DEFAULT_ARP_RATE
         baselinePortScan = 0.0
         baselineSynFlood = 0.0
         baselineConnectionRate = 0.0

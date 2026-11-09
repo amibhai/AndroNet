@@ -24,6 +24,7 @@ class RuleEngineTest {
         destIp: String = "192.0.2.10",
         sourceIp: String = "192.0.2.20",
         flags: String = "",
+        direction: String = "outgoing",
         httpData: Map<String, Any>? = null,
         domain: String? = null,
         timestamp: Long = System.currentTimeMillis()
@@ -35,6 +36,7 @@ class RuleEngineTest {
             "destinationIp" to destIp,
             "sourceIp" to sourceIp,
             "flags" to flags,
+            "direction" to direction,
             "timestamp" to timestamp
         )
         if (httpData != null) map["httpData"] = httpData
@@ -65,7 +67,7 @@ class RuleEngineTest {
         val p = packet(
             protocol = "TCP",
             destPort = 80,
-            httpData = mapOf("url" to "/login.php?id=1' OR '1'='1--")
+            httpData = mapOf("type" to "request", "url" to "/login.php?id=1' OR '1'='1--")
         )
         assertTrue(matches(p).hasRule("RULE-002"))
     }
@@ -75,9 +77,26 @@ class RuleEngineTest {
         val p = packet(
             protocol = "TCP",
             destPort = 80,
-            httpData = mapOf("url" to "/home/index.html")
+            httpData = mapOf("type" to "request", "url" to "/home/index.html")
         )
         assertFalse(matches(p).hasRule("RULE-002"))
+    }
+
+    @Test
+    fun `SQL injection rule fires on a port other than 80`() {
+        val p = packet(
+            protocol = "TCP",
+            destPort = 8000,
+            httpData = mapOf("type" to "request", "url" to "/item?id=1 UNION SELECT 1,2,3")
+        )
+        assertTrue(matches(p).hasRule("RULE-002"))
+    }
+
+    @Test
+    fun `SQL injection rule ignores SQL words inside a server response`() {
+        val payload = "Our guide to UNION SELECT queries".toByteArray()
+        val p = packet(protocol = "TCP", sourcePort = 80, httpData = mapOf("type" to "response"))
+        assertFalse(matches(p, payload).hasRule("RULE-002"))
     }
 
     // ---- RULE-003 Malicious File Download ----------------------------------
@@ -99,7 +118,7 @@ class RuleEngineTest {
     @Test
     fun `port scan rule fires with many unique destinations and SYN flag`() {
         var result = emptyList<RuleEngine.RuleMatch>()
-        for (i in 1..20) {
+        for (i in 1..120) {
             result = matches(
                 packet(protocol = "TCP", destPort = 443, destIp = "203.0.113.$i", flags = "SYN")
             )
@@ -110,9 +129,31 @@ class RuleEngineTest {
     @Test
     fun `port scan rule does not fire with too few unique destinations`() {
         var result = emptyList<RuleEngine.RuleMatch>()
-        for (i in 1..5) {
+        for (i in 1..80) {
             result = matches(
                 packet(protocol = "TCP", destPort = 443, destIp = "203.0.114.$i", flags = "SYN")
+            )
+        }
+        assertFalse(result.hasRule("RULE-001"))
+    }
+
+    @Test
+    fun `port scan rule ignores established traffic to many destinations`() {
+        var result = emptyList<RuleEngine.RuleMatch>()
+        for (i in 1..120) {
+            result = matches(
+                packet(protocol = "TCP", destPort = 443, destIp = "203.0.115.$i", flags = "ACK")
+            )
+        }
+        assertFalse(result.hasRule("RULE-001"))
+    }
+
+    @Test
+    fun `port scan rule counts each source separately`() {
+        var result = emptyList<RuleEngine.RuleMatch>()
+        for (i in 1..120) {
+            result = matches(
+                packet(protocol = "TCP", destPort = 443, sourceIp = "198.18.0.$i", destIp = "203.0.116.$i", flags = "SYN")
             )
         }
         assertFalse(result.hasRule("RULE-001"))
@@ -155,13 +196,22 @@ class RuleEngineTest {
         assertFalse(result.hasRule("RULE-004"))
     }
 
+    @Test
+    fun `DNS tunneling rule rate counts only suspicious queries`() {
+        // Plenty of unrelated traffic must not make one odd query look like a sustained tunnel
+        repeat(50) { matches(packet(protocol = "TCP", destPort = 443, flags = "ACK")) }
+        val odd = "0123456789abcdef0123456789abcdef.tunnel.example.com"
+        val result = matches(packet(protocol = "UDP", destPort = 53, domain = odd), ByteArray(10))
+        assertFalse(result.hasRule("RULE-004"))
+    }
+
     // ---- RULE-005 Brute Force (Or ports + PacketRate) -----------------------
 
     @Test
-    fun `brute force rule fires after 21 rapid SSH connection attempts`() {
+    fun `brute force rule fires after 11 rapid SSH connection attempts`() {
         var result = emptyList<RuleEngine.RuleMatch>()
-        repeat(21) {
-            result = matches(packet(protocol = "TCP", destPort = 22))
+        repeat(11) {
+            result = matches(packet(protocol = "TCP", destPort = 22, flags = "SYN"))
         }
         assertTrue(result.hasRule("RULE-005"))
     }
@@ -170,32 +220,38 @@ class RuleEngineTest {
     fun `brute force rule does not fire for only a handful of attempts`() {
         var result = emptyList<RuleEngine.RuleMatch>()
         repeat(5) {
-            result = matches(packet(protocol = "TCP", destPort = 22))
+            result = matches(packet(protocol = "TCP", destPort = 22, flags = "SYN"))
         }
         assertFalse(result.hasRule("RULE-005"))
     }
 
-    // ---- RULE-006 Cryptomining (Protocol + Port + PayloadContains) ----------
+    @Test
+    fun `brute force rule ignores the packets of one long SSH session`() {
+        var result = emptyList<RuleEngine.RuleMatch>()
+        repeat(200) {
+            result = matches(packet(protocol = "TCP", destPort = 22, flags = "ACK PSH"))
+        }
+        assertFalse(result.hasRule("RULE-005"))
+    }
+
+    // ---- RULE-006 Cryptomining (Protocol + PayloadMatches) -------------------
 
     @Test
-    fun `cryptomining rule fires for stratum payload on mining port`() {
-        val payload = "stratum+tcp://pool.example.com:3333".toByteArray()
-        val p = packet(protocol = "TCP", destPort = 3333)
-        assertTrue(matches(p, payload).hasRule("RULE-006"))
+    fun `cryptomining rule fires for a Bitcoin stratum subscribe`() {
+        val payload = """{"id":1,"method":"mining.subscribe","params":["cgminer/4.10.0"]}""".toByteArray()
+        assertTrue(matches(packet(protocol = "TCP", destPort = 3333), payload).hasRule("RULE-006"))
     }
 
     @Test
-    fun `cryptomining rule does not fire without stratum keyword`() {
-        val payload = "just some ordinary tcp traffic".toByteArray()
-        val p = packet(protocol = "TCP", destPort = 3333)
-        assertFalse(matches(p, payload).hasRule("RULE-006"))
+    fun `cryptomining rule fires for an XMRig login on any port`() {
+        val payload = """{"id":1,"method":"login","params":{"login":"x","agent":"XMRig/6.21"}}""".toByteArray()
+        assertTrue(matches(packet(protocol = "TCP", destPort = 8080), payload).hasRule("RULE-006"))
     }
 
     @Test
-    fun `cryptomining rule does not fire on non-mining port even with stratum keyword`() {
-        val payload = "stratum+tcp://pool.example.com".toByteArray()
-        val p = packet(protocol = "TCP", destPort = 8080)
-        assertFalse(matches(p, payload).hasRule("RULE-006"))
+    fun `cryptomining rule does not fire for ordinary JSON login traffic`() {
+        val payload = """{"id":1,"method":"login","params":{"user":"x"}}""".toByteArray()
+        assertFalse(matches(packet(protocol = "TCP", destPort = 3333), payload).hasRule("RULE-006"))
     }
 
     // ---- RULE-007 Suspicious Outbound Traffic (PacketRate + PayloadSize) ----
@@ -204,7 +260,7 @@ class RuleEngineTest {
     fun `outbound transfer rule fires for large payloads at high rate`() {
         val payload = ByteArray(2000) { 0x42 }
         var result = emptyList<RuleEngine.RuleMatch>()
-        repeat(101) {
+        repeat(501) {
             result = matches(packet(protocol = "TCP", destPort = 54321, destIp = "198.51.100.5"), payload)
         }
         assertTrue(result.hasRule("RULE-007"))
@@ -217,18 +273,34 @@ class RuleEngineTest {
         assertFalse(result.hasRule("RULE-007"))
     }
 
+    @Test
+    fun `outbound transfer rule ignores a large download`() {
+        val payload = ByteArray(2000) { 0x42 }
+        var result = emptyList<RuleEngine.RuleMatch>()
+        repeat(600) {
+            result = matches(packet(protocol = "TCP", sourcePort = 443, destPort = 54323, direction = "incoming"), payload)
+        }
+        assertFalse(result.hasRule("RULE-007"))
+    }
+
     // ---- RULE-008 Shellcode Pattern (Or of PayloadMatches) -------------------
 
     @Test
     fun `shellcode rule fires for NOP sled pattern`() {
-        val payload = ByteArray(15) { 0x90.toByte() }
+        val payload = ByteArray(20) { 0x90.toByte() }
         assertTrue(matches(packet(destPort = 44000), payload).hasRule("RULE-008"))
     }
 
     @Test
-    fun `shellcode rule fires for JMP short pattern`() {
-        val payload = byteArrayOf(0x01, 0x02, 0xEB.toByte(), 0x0E, 0x03, 0x04)
+    fun `shellcode rule fires for the xor eax push pattern`() {
+        val payload = byteArrayOf(0x41, 0x31, 0xC0.toByte(), 0x50, 0x68, 0x2F)
         assertTrue(matches(packet(destPort = 44001), payload).hasRule("RULE-008"))
+    }
+
+    @Test
+    fun `shellcode rule does not fire on a two-byte coincidence`() {
+        val payload = byteArrayOf(0x01, 0x02, 0xEB.toByte(), 0x0E, 0x03, 0x04)
+        assertFalse(matches(packet(destPort = 44003), payload).hasRule("RULE-008"))
     }
 
     @Test
@@ -352,6 +424,82 @@ class RuleEngineTest {
         )
     }
 
+    // ---- Predicates that used to fall through to `else -> false` --------------
+
+    private fun singleConditionRule(id: String, condition: RuleEngine.Condition) = RuleEngine.Rule(
+        id = id,
+        name = id,
+        description = "test",
+        severity = AnomalyDetector.Severity.LOW,
+        category = "TEST",
+        conditions = listOf(condition),
+        action = RuleEngine.Action.Alert
+    )
+
+    @Test
+    fun `IpInCidr matches inside the network and not outside`() {
+        RuleEngine.addRule(singleConditionRule("TEST-CIDR", RuleEngine.Condition.IpInCidr("198.18.0.0/15")))
+        assertTrue(matches(packet(destIp = "198.19.200.1")).hasRule("TEST-CIDR"))
+        assertFalse(matches(packet(destIp = "198.20.0.1")).hasRule("TEST-CIDR"))
+    }
+
+    @Test
+    fun `DnsQueryType ignores the gloss the dissector adds`() {
+        RuleEngine.addRule(singleConditionRule("TEST-QTYPE", RuleEngine.Condition.DnsQueryType("A")))
+        val a = packet(protocol = "UDP", destPort = 53).toMutableMap()
+        a["dnsData"] = mapOf("queryType" to "A (IPv4)")
+        val txt = packet(protocol = "UDP", destPort = 53).toMutableMap()
+        txt["dnsData"] = mapOf("queryType" to "TXT")
+        assertTrue(matches(a).hasRule("TEST-QTYPE"))
+        assertFalse(matches(txt).hasRule("TEST-QTYPE"))
+    }
+
+    @Test
+    fun `DnsResponseCount compares the number of answers in a response`() {
+        RuleEngine.addRule(
+            singleConditionRule("TEST-ANSWERS", RuleEngine.Condition.DnsResponseCount(RuleEngine.Operator.GREATER_THAN, 3))
+        )
+        val many = packet(protocol = "UDP", sourcePort = 53).toMutableMap()
+        many["dnsData"] = mapOf("type" to "Response", "answers" to "8")
+        val few = packet(protocol = "UDP", sourcePort = 53).toMutableMap()
+        few["dnsData"] = mapOf("type" to "Response", "answers" to "1")
+        assertTrue(matches(many).hasRule("TEST-ANSWERS"))
+        assertFalse(matches(few).hasRule("TEST-ANSWERS"))
+    }
+
+    @Test
+    fun `HttpStatus compares the response status`() {
+        RuleEngine.addRule(
+            singleConditionRule("TEST-STATUS", RuleEngine.Condition.HttpStatus(RuleEngine.Operator.GREATER_EQUAL, 500))
+        )
+        assertTrue(matches(packet(httpData = mapOf("statusCode" to "503"))).hasRule("TEST-STATUS"))
+        assertFalse(matches(packet(httpData = mapOf("statusCode" to "200"))).hasRule("TEST-STATUS"))
+    }
+
+    @Test
+    fun `TimeSince sees when a named rule last fired`() {
+        RuleEngine.addRule(
+            singleConditionRule("TEST-TRIGGER", RuleEngine.Condition.PortEquals(59100))
+        )
+        RuleEngine.addRule(
+            singleConditionRule(
+                "TEST-FOLLOWUP",
+                RuleEngine.Condition.And(
+                    listOf(
+                        RuleEngine.Condition.PortEquals(59101),
+                        RuleEngine.Condition.TimeSince("TEST-TRIGGER", RuleEngine.Operator.LESS_THAN, 60_000)
+                    )
+                )
+            )
+        )
+        assertFalse(
+            "The trigger rule has not fired yet",
+            matches(packet(destPort = 59101)).hasRule("TEST-FOLLOWUP")
+        )
+        matches(packet(destPort = 59100))
+        assertTrue(matches(packet(destPort = 59101)).hasRule("TEST-FOLLOWUP"))
+    }
+
     // ---- getStatistics ---------------------------------------------------
 
     @Test
@@ -379,7 +527,7 @@ class RuleEngineTest {
     fun `clearState resets rate-based rule history`() {
         var triggered = false
         repeat(25) {
-            if (matches(packet(protocol = "TCP", destPort = 3389)).hasRule("RULE-005")) triggered = true
+            if (matches(packet(protocol = "TCP", destPort = 3389, flags = "SYN")).hasRule("RULE-005")) triggered = true
         }
         assertTrue("Expected brute force rule to fire before reset", triggered)
 
@@ -387,7 +535,7 @@ class RuleEngineTest {
 
         var triggeredAfterReset = false
         repeat(3) {
-            if (matches(packet(protocol = "TCP", destPort = 3389)).hasRule("RULE-005")) {
+            if (matches(packet(protocol = "TCP", destPort = 3389, flags = "SYN")).hasRule("RULE-005")) {
                 triggeredAfterReset = true
             }
         }

@@ -9,6 +9,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2026-11-02
+
+Corrections from the first measured evaluation against labelled attack traffic on a physical
+phone (`evaluation/`). Version 1.3.0 passed all its unit tests and still could not detect most of
+what it claimed, because the tests fed each stage hand-built records instead of the previous
+stage's output.
+
+### 🐛 Fixed
+- **Dissector and detectors disagreed on field names** (`uri`/`url`, `userAgent`/`User-Agent`), so
+  every URL and User-Agent signature and rule could never fire on real traffic.
+- **Root capture never worked.** `libpcap_capture.so` was absent from every build, an app process
+  cannot open a packet socket anyway, and frames bypassed analysis. Replaced by an AF_PACKET helper
+  started through `su` (`jni/capture_helper.c`), feeding the same pipeline as VPN mode. ARP frames
+  now reach the ARP detector, which no capture path used to deliver them to.
+- **Five rule predicates always evaluated to false** (`IpInCidr`, `TimeSince`, `DnsQueryType`,
+  `DnsResponseCount`, `HttpStatus`), hidden by an `else -> false` branch.
+- **Adaptive thresholds defeated detection.** The baseline learned from counters that were not
+  running during learning, and per-packet sampling let a flood raise its own threshold faster than
+  its count could reach it, so a 400 pps SYN flood raised no alert.
+- **Rate predicates counted all traffic from all hosts.** They now count qualifying packets per source.
+- **False alarms on ordinary traffic:** port-only signatures, `<!DOCTYPE` as an XXE indicator, OR where
+  AND was meant in composite signatures, two-byte shellcode patterns matching ciphertext at random,
+  the entropy allowlist testing the wrong field, and server replies counted as a port scan.
+- **Packets from flows with no resolvable owner were never analysed:** storing `null` in a
+  `ConcurrentHashMap` threw, and the record was dropped.
+- **Data race:** zdtun, which is not thread-safe, was driven from two coroutines at once. One loop now owns it.
+- **Quadratic regular expressions** in the rule layer took 7 ms per packet on a Tensor G3.
+- **Busy-wait on the TUN descriptor** when no packets were pending.
+- **pcapng export:** a non-standard 4-byte trailer made Wireshark report every file as cut short, and
+  annotations used a custom option no tool displays. The trailer is gone and annotations are now
+  standard packet comments, which Wireshark and tshark show as `frame.comment`.
+
+### ✨ Added
+- `PacketRecord` and `PacketPipeline`: one record builder and one analysis path for both capture modes.
+- Alert aggregation per finding and host, HTTP recognised on any port, and request bodies in
+  their own TCP segment recognised through a bounded flow table.
+- `UiStream`: a bounded, best-effort packet stream to the UI, so a traffic burst cannot grow the main
+  thread's queue without limit. Analysis and export still see every packet.
+- `PipelineContractTest`: runs real wire bytes through the whole pipeline.
+- `evaluation/`: replay harness, lab traffic generators and scripts behind the published numbers.
+
+### 🔧 Changed
+- Rule and threshold limits calibrated on measured phone traffic (see `evaluation/README.md`).
+- Signature `BRUTE-001`/`BRUTE-002` now match login-tool banners and cookies. Repeated attempts are
+  left to `RULE-005`, which counts connection attempts rather than packets.
+- A rooted device now selects root capture automatically.
+
+---
+
 ## [1.3.0] - 2026-08-06
 
 A full pass across the codebase: dead code removal, real bug fixes, dependency/toolchain

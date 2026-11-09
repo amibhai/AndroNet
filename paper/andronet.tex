@@ -1,0 +1,371 @@
+% AndroNet camera-ready paper. Generated into andronet.tex by build_paper.py, which fills every
+% measured value from evaluation/results/. Edit this template, never the generated file.
+\documentclass[runningheads]{llncs}
+\usepackage[T1]{fontenc}
+\usepackage{newtxtext}
+\usepackage[varvw]{newtxmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{bbding}
+\usepackage{url}
+\urlstyle{same}
+\begin{document}
+
+\title{AndroNet: Privilege-Adaptive Packet Capture and On-Device Multi-Layer Threat Detection for Android}
+\titlerunning{AndroNet: Privilege-Adaptive Capture and On-Device Detection}
+
+% Springer cannot change authors after the files are delivered. One corresponding author is marked
+% by \Envelope and must have an email address. ORCIDs, when available, go after each name as
+% \orcidID{0000-0000-0000-0000}.
+\author{Swastik\Envelope \and
+Ritik \and
+Kamal Akhter \and
+Syed Misbah Uddin}
+\authorrunning{Swastik et al.}
+\institute{Department of Computer Science and Information Technology,\\
+Central University of Jammu, Samba 181143, Jammu and Kashmir, India\\
+\email{swastik362004@gmail.com, ritikrajput147@gmail.com,}\\
+\email{kamalakhter694@gmail.com, bytesyed@gmail.com}}
+
+
+\maketitle
+
+\begin{abstract}
+Security analysis of phone traffic still tends to end with a capture file on a desktop. Android tools can now capture without root, through a local VPN, or with root at the interface, yet attack detection has largely stayed off the device. AndroNet is an open-source analyser that feeds both capture paths into one canonical packet record and runs protocol dissection and three detection layers on the handset: volumetric detectors, signature matching, and stateful multi-packet rules. We evaluate it on a Pixel~8 with 28 public attack captures held out until the code was frozen, and with 1.01~million benign packets including the phone's own browsing. Measurement reshaped the system. The first implementation passed its unit tests yet flagged 48.8\% of benign phone packets, missed a SYN flood outright, and analysed only 130 packets per second. Correcting the exposed defects cut flagged benign traffic from 33.9\% to 0.022\% of packets and per-packet cost to about 120~\textmu s. Recall stayed at 12 of 19 in-scope held-out captures, with two detections gained and two lost. Through its VPN tunnel AndroNet sustains 39~Mbit/s downstream. A direct comparison with PCAPdroid, the leading open-source capture tool, shows the price of this design: 20\% of its download rate and 39\% more power under a 10~Mbit/s load. The rooted path, exercised on an emulator, also detects inbound scans and ARP spoofing, which no VPN path can see.
+
+\keywords{Mobile network security \and Intrusion detection \and Android VpnService \and Packet capture \and On-device analysis.}
+\end{abstract}
+
+\section{Introduction}
+
+Ask a network analyst to examine suspicious traffic and the answer is reflexive: open Wireshark. Ask for the same from the phone in their pocket and the reflex fails, because packet analysers assume things Android withholds from an ordinary app: promiscuous interface access, raw sockets, and generous CPU and memory headroom. A penetration tester carrying Kali NetHunter~\cite{nethunter}, an Android build of the Kali toolchain, often still tethers the handset to a laptop for packet-level visibility, spending the mobility that motivated the platform on the first move.
+
+Capture itself is no longer the obstacle. The VpnService API~\cite{vpnservice} lets an unprivileged app route device traffic through a local tunnel~\cite{haystack,antmonitor,mopeye}, and PCAPdroid~\cite{pcapdroid}, the best-known open-source tool in this class, offers that path alongside a root mode that reads the interface directly. The harder question is what happens to the traffic next. PCAPdroid can flag connections to hosts on third-party blocklists~\cite{pcapdroiddocs}. Payload signatures and multi-packet behaviour remain the province of systems such as Snort~\cite{snort} and Zeek~\cite{bro}, which on a phone need a rooted NetHunter chroot. Chen et al.~\cite{chen2021} built an Android intrusion prevention system on VpnService and tcpdump with signature databases, but we have found neither an open implementation of that approach nor per-packet cost and energy measurements for it on a handset.
+
+AndroNet addresses this gap. Its root-free and rooted back-ends emit one canonical packet record, and a single pipeline above that record performs protocol dissection and three detection layers, ordered from cheap and broad to costly and specific. The whole system runs on the phone with no server or tethered host.
+
+This paper also reports what happened when that design met real traffic. Our first implementation had a passing unit test suite and looked sound on paper. Its first run on a phone flagged over 40\% of ordinary packets, missed a 400-packet-per-second SYN flood, and took 7.7~ms per packet where a design-time estimate had promised two or three. Each failure traced to a defect that only appears when stages are joined, or only on the target runtime. We corrected them against a development set, froze the code, and only then measured on third-party captures.
+
+Concretely, this paper contributes:
+\begin{enumerate}
+\item \textbf{One analysis path for two capture back-ends.} A root-free VpnService path and a rooted AF\_PACKET path share one record builder and one pipeline. Across 22 shared attack scenarios they raise identical alert sets (Sect.~\ref{sec:parity}).
+\item \textbf{An on-device detection engine} whose behavioural rules count qualifying packets per source, with limits calibrated on measured phone traffic (Sect.~\ref{sec:detection}).
+\item \textbf{A measured evaluation on a physical phone}: held-out accuracy, per-layer cost on each core class, throughput, energy, and a direct comparison with PCAPdroid (Sect.~\ref{sec:evaluation}). Code, harness and result files are public~\cite{repo}.
+\item \textbf{A catalogue of the defects that measurement exposed}, with their measured effects, as guidance for anyone building detection for this platform (Sect.~\ref{sec:defects}).
+\end{enumerate}
+
+\section{Background and Related Work}\label{sec:related}
+
+\subsection{Capturing Traffic on Android}
+
+Android applications are sandboxed and cannot open raw sockets. The standard work\-around declares the app a VPN, receives outbound traffic on a TUN descriptor, and relays it through sockets the app owns. Haystack~\cite{haystack}, later Lumen~\cite{lumen}, used this for in-situ study of app traffic, while AntMonitor~\cite{antmonitor} and MopEye~\cite{mopeye} applied it to monitoring and per-app performance measurement. Each flow is terminated and re-originated at a local endpoint, with two lasting consequences: inbound packets are synthesised, so payloads are genuine while low-level header fields are not the bytes that crossed the network~\cite{pcapdroiddocs}, and only connections started by the device enter the tunnel.
+
+PCAPdroid~\cite{pcapdroid} is the closest system to ours. It relays traffic with the zdtun library~\cite{zdtun}, which AndroNet also uses, classifies flows with nDPI~\cite{ndpi}, and can decrypt TLS through a mitmproxy add-on. On a rooted device it spawns a capture daemon and continues to analyse what it captures~\cite{pcapdroiddocs}, so a choice between capture paths is already behind a single interface in that tool. AndroNet's difference lies above the capture layer, as Table~\ref{tab:capability} sets out.
+
+\subsection{Detecting Attacks in Traffic}
+
+Snort~\cite{snort} established signature matching against curated rule sets, and Bro, now Zeek~\cite{bro}, stateful analysis of network events. Volumetric attacks are the classic province of thresholds, whose trade-offs among detection probability, false alarms and delay are well mapped~\cite{siris}; dynamic thresholds reduce false positives further in software-defined networks~\cite{synguard}. These systems run on servers and appliances. PCAPdroid's paid malware detection matches hosts against third-party blocklists, and its documentation is candid that this is no complete solution~\cite{pcapdroiddocs}.
+
+Detection on the phone itself has precedents. AndroIDS~\cite{androids} brought Snort-style signatures to Android in 2013 through an iptables queue, which needs root, and left statistical anomaly detection to a server; its slides report no measurements, and we could not find its code. Commercial products detect network attacks on the device~\cite{zimperium}, but they are closed and we found no accuracy or per-packet cost for them. Small open prototypes such as Syrrak~\cite{syrrak} and Breakline~\cite{breakline} apply rate and flow rules to VpnService traffic from packet headers alone, and we found no evaluation of them.
+
+Methodology matters as much as mechanism. Attacks are rare, so the false alarm rate largely decides whether a detector is usable~\cite{baserate}, and benchmark datasets have been criticised for ageing and inconsistent construction~\cite{ringsurvey,sarhan}. We therefore report false alarms on a real phone's traffic, hold third-party captures out of development, and publish results per capture.
+
+\section{Threat Model and Design Goals}\label{sec:threat}
+
+AndroNet runs on the device whose traffic it observes, operated by the owner or an authorised assessor. It monitors and alerts; it does not block or rewrite connections. We consider an adversary whose activity shows in the device's own traffic: malware on the device beaconing to command-and-control infrastructure or exfiltrating data, an attacker on the same network segment scanning, flooding or manipulating ARP, and hosts exhibiting recognisable attack tooling. An adversary with kernel-level control of the device defeats any analyser on it and is out of scope, as is activity confined to encrypted payloads with no distinguishing header, size or timing signal.
+
+Four goals order the design. \textbf{G1, universality:} useful analysis on unmodified consumer devices, with root adding visibility. \textbf{G2, capture-mode transparency:} no component above the capture tier branches on capture mode. \textbf{G3, on-device detection:} detection completes on the handset within a per-packet budget compatible with sustained use. \textbf{G4, interoperability:} output stays readable by the desktop toolchain, so AndroNet complements established forensic workflows.
+
+\section{System Architecture}\label{sec:architecture}
+
+AndroNet has three tiers: a Flutter interface, a Kotlin service layer and a C native layer (Fig.~\ref{fig:architecture}). At launch it probes for a working \texttt{su}. A rooted device selects the root path and any other device the VPN path, and the user can override the choice. Both paths build the same record, defined in one source file, and hand it to one pipeline.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\textwidth]{fig_architecture.pdf}
+\Description{Block diagram. A root probe selects between a VPN capture path on the left and a root capture path on the right. Both feed a canonical packet record in the centre. Below it, dissection leads to three detection layers in sequence, statistical, signature and rule engine, which feed alerts. Export and a bounded user interface stream also read from the record.}
+\caption{AndroNet's architecture. The canonical packet record is the abstraction boundary: nothing below it knows which capture path produced a packet, which is what goal G2 requires.}\label{fig:architecture}
+\end{figure}
+
+\subsection{The Canonical Packet Record}
+
+Each captured packet is normalised into one record: source and destination address and port, transport and application protocol, size and timestamp, TCP flags, the owning app where the platform can resolve it, capture mode and direction, and for ARP the sender's address and MAC. The capture mode is carried for provenance only: no analysis component reads it, and a unit test asserts that both modes raise identical alerts for identical bytes. Keeping the builder in one place has practical weight, as Sect.~\ref{sec:defects} shows: most of our worst defects were disagreements between a stage's output and the next stage's expectation.
+
+\subsection{The Two Capture Paths}
+
+\subsubsection{Root-Free Path.} AndroNet declares a VpnService, obtains a TUN descriptor and relays traffic through zdtun~\cite{zdtun}. Only the user-granted VPN permission is needed, and connectivity is preserved because packets are forwarded after inspection. zdtun is not thread-safe, so a single loop owns it: the loop drains the TUN descriptor, then lets zdtun service its sockets, and it sleeps only when a \texttt{select} over both reports nothing to do.
+
+\subsubsection{Rooted Path.} An app process cannot open a packet socket whatever the device's root status, and Android forks apps with an empty capability bounding set, so even a setuid helper could not regain \texttt{CAP\_NET\_RAW}. AndroNet therefore starts a small helper through \texttt{su}. The helper opens one AF\_PACKET socket, drops to the app's user ID, which the open socket survives, and streams frames over standard output. It exits as soon as the app stops reading, so a crashed app leaves no capture process behind. The \texttt{SOCK\_DGRAM} socket type strips the link layer, so one parser serves every interface type and ARP arrives ready to parse.
+
+\subsubsection{Export and Interface.} Both paths hand the analysis stage packets that begin at the IP header, and AndroNet exports them as pcapng~\cite{pcapng} that Wireshark and tshark read directly, with a high volumetric anomaly score carried as a standard packet comment (checked on a 2{,}747-packet export from the Pixel~8). A traffic burst can outrun the interface thread by an order of magnitude, so the stream to the UI is bounded and best-effort, while analysis and export still see every packet.
+
+\subsection{Protocol Dissection}
+
+For HTTP on any port the dissection stage extracts the request line, a percent-decoded URL, status and headers, and a bounded flow table recognises request bodies that travel in their own segment. For DNS it reads the question, record types, answers and transaction identifiers. For TLS it reads the record-layer version, handshake type and Server Name Indication from the cleartext handshake, with no key material or interception. It also parses DHCP, QUIC, SIP, RTP, SMB and NTP, and a port-based classifier names about forty application protocols. Payloads on encrypted ports are marked and withheld from later payload predicates.
+
+\section{Three-Layer Detection Engine}\label{sec:detection}
+
+Every enriched packet traverses three layers in sequence, ordered as a cost gradient. All detection is confined to the packet, plus small bounded per-source state. Findings are aggregated: repeats of one finding about one host within 10~s yield a single alert, as with event filtering in Snort.
+
+\subsection{Layer 1: Statistical Detectors}
+
+Table~\ref{tab:l1} lists the detectors. Thresholds adapt to the network. A 60~s learning period, during which alerts are muted, records the per-second peak of each counter. The threshold becomes $2.5$ times the 90th percentile of those peaks, clamped between a floor and a ceiling, where the ceiling is the larger of the default and four times the learned baseline and stays fixed once learning ends. An exponential moving average ($\alpha=0.05$) then tracks the baseline, but a sample that reached the threshold is a detection and never trains it, so an attack cannot raise the bar it is measured against.
+
+\begin{table}[t]
+\centering
+\caption{Layer~1 detectors. Floors and defaults come from measured benign traffic (Sect.~\ref{sec:setup}).}\label{tab:l1}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Detector & Trigger & Severity \\
+\midrule
+Port scan & destination ports from one source in 10~s (floor 8, default 20) & High \\
+SYN flood & SYN packets to one target per second (floor 30, default 100) & Critical \\
+Connection flood & new connections from one source per second (floor, default 60) & High \\
+DNS tunnelling & query name longer than 50 characters & Medium \\
+ARP spoofing & observed IP-to-MAC binding changes (rooted path) & Critical \\
+Malformed TCP & SYN set together with FIN or RST & Medium \\
+Covert channel & high entropy in ICMP, or outgoing HTTP or DNS, for 5 packets & High+ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Layer 2: Signature Database}
+
+The second layer matches 18 signatures across eight categories: command and control (4), web attacks (3), reconnaissance (3), malware (2), brute force (2), network attacks (2), exploits (1) and exfiltration (1). A signature binds an identifier, category and severity to a pattern built from seven constructors: \texttt{PayloadContains}, \texttt{HeaderPattern} (a regular expression on a named HTTP field), \texttt{PortPattern}, \texttt{IpPattern}, \texttt{DnsPattern}, \texttt{UrlPattern}, and \texttt{CompositePattern}, which closes the set under AND and OR. Entries include Meterpreter method names, the default Cobalt Strike User-Agent, Nmap, Nikto and sqlmap fingerprints, login-tool banners, the WannaCry kill-switch domains and the EternalBlue echo string. Two entries, the Tor exit and known-C2 lists, ship with a handful of sample indicators only: operational use needs a threat feed, which is future work.
+
+\subsection{Layer 3: Rule Engine}
+
+The third layer evaluates 10 rules (Table~\ref{tab:rules}) over a grammar of 25 predicates and the combinators And, Or and Not. Predicates cover packet headers, payload content, HTTP and DNS fields, and three temporal forms: packet rate, unique destinations, and time since another rule fired.
+
+The temporal predicates carry the design. Evaluation has two passes. The first ignores rate predicates, and a packet that fails it is not the kind this rule counts, so it never enters the rule's window. A packet that passes joins a window kept per rule and per source, and the second pass evaluates the rate predicates over that window alone. ``More than 10 per second'' thus means ten suspicious packets from this source. Windows are bounded to 1000 entries for each of 64 sources per rule.
+
+\begin{table}[t]
+\centering
+\caption{The ten composite rules. Rates count qualifying packets per source.}\label{tab:rules}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Rule & Condition & Severity \\
+\midrule
+Horizontal scan & TCP, ACK clear, over 100 unique destinations in 10~s & High \\
+SQL injection & HTTP request, SQL injection pattern in URL or body & Critical \\
+File download & GET of an executable, script or APK & High \\
+DNS tunnelling & UDP/53, large payload or long encoded label, over 10/s & High \\
+Brute force & SYN to SSH, RDP, FTP or Telnet, over 10 per minute & High \\
+Cryptomining & stratum or XMRig login method in TCP payload & Medium \\
+Bulk upload & outgoing, payload over 1~KiB, over 500 per 10~s & Medium \\
+Shellcode & NOP sled or known shellcode prefix in cleartext payload & Critical \\
+Scanner agent & bot, scanner, crawler, Python, curl or tool User-Agent & Medium \\
+ICMP tunnelling & ICMP, payload over 64 bytes, over 10/s & High \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Worked Example.} DNS tunnelling appears twice, at different points on the sensitivity curve. Layer~1 fires on a single long query name, which catches a slow tunnel at the risk of flagging a legitimately long name. The Layer~3 rule fires only when protocol, port, payload shape and sustained rate all agree. In the live runs, a tunnel at 25 queries per second raised both alerts, while one at a query every 2~s raised only Layer~1.
+
+\section{Evaluation}\label{sec:evaluation}
+
+We ask four questions. How accurate is detection on traffic no development decision saw? Do the two capture paths behave alike? What does analysis cost on real hardware? How does the whole system compare with PCAPdroid in throughput and energy?
+
+\subsection{Setup and Data}\label{sec:setup}
+
+\textbf{Hardware.} The phone is a Pixel~8: Tensor~G3 with one Cortex-X3 at 2.91~GHz, four Cortex-A715 at 2.37~GHz and four Cortex-A510 at 1.70~GHz, 8~GB RAM, Android~17 (unrooted user build), on 802.11ax Wi-Fi with the lab laptop on the same access point. Android's stock user build cannot exercise the rooted path, so we run it on an Android~16 x86-64 emulator image with root.
+
+\textbf{Harness.} Replay experiments run the production Kotlin classes under ART on the phone, through \texttt{app\_process}. The only source change is a mechanical substitution of the clock, so that sliding windows follow trace time; for version 1.3.0, whose packet parser lived inside an Android service, we also copied that parser verbatim into the harness. Version 1.4.0 gave identical verdicts on the phone and a desktop JVM on all 40 held-out traces (1{,}119{,}888 packets), despite different regular expression engines. Version 1.3.0 is too slow to finish the largest traces on the phone, so we report its desktop run, whose verdicts matched the phone on the 35 traces small enough to compare. Live experiments use a release build that differs from a normal build only in accepting scripted start and stop commands.
+
+\textbf{Data.} Table~\ref{tab:data} summarises the split, which we fixed before any detector saw the files. Development traffic informed every correction and limit. Its attack traces come from real tools where our lab allowed it (nmap and sqlmap), real protocol exchanges over sockets (for example stratum logins, and Nikto's request shape, because the laptop's antivirus blocks the tool itself), and crafted frames where a desktop socket cannot emit the packet. Limits in Tables~\ref{tab:l1} and~\ref{tab:rules} sit above what the phone session we had at that point reached: 80 distinct destinations per 10~s and 45 new connections per second over 131~s. The code was then frozen, with file hashes recorded~\cite{repo}, before any held-out capture was replayed. After the held-out results we found that a script fault had kept only the first rotated file of each phone session. Over its full 391~s the development session reaches 126 destinations and 118 connections per second, above two limits. We left the limits frozen, since changing them now would void the split, and replayed the held-out session in full. Held-out attacks all come from third parties. We labelled them from their publishers' descriptions and wrote the expected alerts down in advance. Nine of them represent threats no AndroNet detector targets; they stay in the set so that results show what is missed.
+
+\begin{table}[t]
+\centering
+\caption{Evaluation data. Attack sources: Wireshark~\cite{wiresharksamples}, Sanders~\cite{sanders}, StopDDoS~\cite{stopddos}, Bousseaden~\cite{bousseaden}, Zeek~\cite{zeektraces} and a WannaCry capture by D.~Szili~\cite{mta}.}\label{tab:data}
+\begin{tabular}{@{}llrr@{}}
+\toprule
+Split & Traffic & Captures & Packets \\
+\midrule
+Development & lab attack traces & 32 & 54{,}198 \\
+ & tcpreplay smallFlows~\cite{tcpreplay}, Pixel~8 browsing & 2 & 84{,}556 \\
+Held out & third-party attack captures & 28 & 108{,}168 \\
+ & third-party benign captures, including bigFlows & 11 & 810{,}700 \\
+ & Pixel~8 browsing of 20 other sites, after the freeze & 1 & 201{,}020 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{What Measurement Changed}\label{sec:defects}
+
+Version 1.3.0, our first implementation, passed all 106 of its unit tests. Table~\ref{tab:defects} lists what its first measurement exposed. Two patterns stand out. Unit tests built their input records by hand, so the dissector and the detectors could each pass while disagreeing on field names, which disabled every URL and User-Agent signature on real traffic. And several failures only exist on the target: ICU's regular expression engine turned patterns with leading and trailing wildcards into a 7.2~ms per-packet cost, and real page loads reach connection counts our desktop traces never showed. We now run real wire bytes through the whole pipeline in a contract test suite, part of the 145 tests that version 1.4.0 passes.
+
+\begin{table}[t]
+\centering
+\caption{Defects in version 1.3.0 that measurement exposed, all corrected in version 1.4.0.}\label{tab:defects}
+\small
+\begin{tabular}{@{}p{0.52\textwidth}p{0.46\textwidth}@{}}
+\toprule
+Defect & Measured or observed effect \\
+\midrule
+Dissector wrote \texttt{uri}, \texttt{userAgent}; detectors read \texttt{url}, \texttt{User-Agent} & URL and User-Agent signatures and rules never fired \\
+Thresholds sampled per packet, counters still rising & 400~pps SYN flood raised no alert \\
+Learning period did not run the counters & Thresholds always at the floor \\
+Rate rules counted all traffic from all hosts & 95{,}673 false alerts on the phone session alone \\
+Two-byte shellcode pattern tried on ciphertext & 2{,}128 critical false alerts on the phone session \\
+Port-only signatures; OR where AND was meant & 93\% of benign SSH packets flagged \\
+\texttt{<!DOCTYPE} treated as an XXE indicator & Alerts on every HTML page over HTTP \\
+Quadratic regular expressions under ICU & 7.7~ms mean per packet, 130~pps \\
+Five predicates fell through to \texttt{else -> false} & Those conditions could never hold \\
+Null stored in a map for unresolved app owners & Packets forwarded but never analysed \\
+zdtun driven from two coroutines at once & 15~Mbit/s tunnel, with the other fixes already in \\
+Root capture absent from builds, bypassed analysis & No rooted path existed in practice \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Detection Accuracy}\label{sec:accuracy}
+
+We report \emph{capture recall}, the share of in-scope attack captures raising at least one expected alert; the \emph{packet false positive rate}, the share of benign packets that raise any alert; and \emph{alert precision}, alerts on attack traffic over all alerts. Precision depends on the base rate of the data at hand, so we also give results per traffic source. Table~\ref{tab:accuracy} compares the versions on the held-out set.
+
+\begin{table}[t]
+\centering
+\caption{Held-out detection results by version, and by layer for version 1.4.0. A capture counts for a layer if that layer raised an expected alert on it.}\label{tab:accuracy}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Measure & v1.3.0 & v1.4.0 & \\
+\midrule
+Capture recall (in scope) & 12/19 & 12/19 & \\
+Packet false positive rate & 33.9\% & 0.022\% & \\
+Alerts on benign traffic & 352{,}310 & 218 & \\
+Alerts per 1000 benign packets & 348 & 0.22 & \\
+Alert precision & 19.0\% & 20.7\% & \\
+Phone browsing: packets flagged & 48.8\% & 0.001\% & \\
+\midrule
+v1.4.0 by layer & L1 & L2 & L3 \\
+\midrule
+Captures detected & 7 & 4 & 3 \\
+Alerts on attack traffic & 25 & 18 & 14 \\
+Alerts on benign traffic & 70 & 31 & 117 \\
+Alert precision & 26.3\% & 36.7\% & 10.7\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The two versions detect the same number of captures, though two of them differ, and the equality flatters the first. Version 1.3.0 ``detected'' SSH password guessing by alerting on every packet on port~22, flagging 93\% of benign SSH just the same, and WannaCry by alerting on nearly every packet on port~445. It also caught the spoofed ICMP flood, through the same all-hosts counting behind its false alarms, a detection that per-source windows give up. It missed the SYN flood and the path traversal that version 1.4.0 catches, and on 1.01~million benign packets it raised 352{,}310 alerts, an unusable volume.
+
+Version 1.4.0 raised 218. The bigFlows enterprise capture accounts for 180, and its largest groups are plain false alarms: 66 from 52 clients polling a web service whose path ends in \texttt{.dll}, which the download rule takes for a file; 35 from large uploads; and 30 from one server taking up to 154 connections per second from about 40 clients. Two benign IRC captures raised 34, of which 24 are ordinary chat commands matching our bot signature on the IRC port, and an SMB capture raised one ARP alert. On the phone's own traffic version 1.4.0 raised three in replay, one connection flood and two bulk uploads, the same three as the live 9-minute session behind that capture (21 per hour).
+
+Recall stands at 63\%, and each miss has a specific cause in the capture. In the spoofed ICMP flood, 9{,}889 packets arrive from 9{,}886 source addresses, so no per-source window fills. In the ARP poisoning capture, the forged binding is the first one seen for its address, so no binding ever changes, even though one MAC claims two addresses. One capture we labelled a DNS channel from its published name turns out to be a cleartext Windows shell on TCP port~53, which our DNS detectors never examine; we kept the label as written in advance. Another channel carries PowerShell commands in TXT responses, with query names under 28 characters at about one query per second. A Meterpreter session's 4.9~MB measures 7.99 bits of entropy per byte, so no method name shows in the clear. Nmap's version scan touches two ports against a floor of eight, and SSH guessing in the Zeek capture peaks at exactly ten attempts per minute, where the rule requires more than ten. We tuned nothing after seeing these results, and each is a candidate for future work. Of the nine captures no detector targets, one raised an alert, the shellcode rule on an MS04-011 exploit, which we leave uncounted. Real worm traffic fared better: WannaCry spreading through EternalBlue raised the signature we wrote from the published echo string, with no sample in hand during development.
+
+We also ran 22 attack scenarios live on the Pixel~8 through the real tunnel, with the app's alert log as the only output: all 22 raised their expected alerts. These scenarios resemble the development traces, so this verifies the path end to end and is no independent accuracy claim.
+
+\subsection{Capture-Path Parity and Observability}\label{sec:parity}
+
+Running the same 22 scenarios under the rooted path gave identical alert sets, which is direct evidence for goal G2. Injecting 7 further traces as real frames on the interface, covering inbound SYN, FIN, NULL and Xmas scans, a SYN flood and ARP spoofing, raised the expected alert in every case. The helper exited within 5~s of the app being killed. These rooted runs used an emulator and a stand-in for \texttt{su}, which is a limit of this evidence: we have not yet run the rooted path on a physical rooted handset.
+
+Identical analysis does not mean identical visibility, and Table~\ref{tab:observability} states the difference. To confirm it, we scanned the phone with real nmap from the laptop across Wi-Fi during VPN-mode capture. Over three scans of 1000 ports each, the phone's kernel answered 3{,}000 probes with resets, so the packets did arrive, and AndroNet raised no scan alerts, because unsolicited inbound packets never enter a VPN tunnel. Any VPN-based tool shares this blind spot, and it is the strongest reason to keep a rooted path.
+
+\begin{table}[t]
+\centering
+\caption{What each capture path can observe, as measured. Encrypted payloads expose only headers, sizes, rates and the TLS handshake on either path.}\label{tab:observability}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Traffic & VPN path & Rooted path \\
+\midrule
+Scans, floods and tunnels from software on the device & yes & yes \\
+Cleartext web attacks, C2 and tool fingerprints from the device & yes & yes \\
+Inbound scans and floods from the LAN & no & yes \\
+ARP spoofing, DHCP and other link-level traffic & no & yes \\
+Verbatim inbound packet headers & no & yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Per-Packet Cost}\label{sec:cost}
+
+We cost each layer by ablation: replaying a trace with the signature and rule lists emptied by reflection, so that the production code carries no timers. Figure~\ref{fig:cost} shows the result for both versions on a mid core. The rule layer fell from 7.2~ms to 23~\textmu s per packet and dissection from 428 to 54~\textmu s. To isolate the causes we rebuilt version 1.3.0 with single changes. Removing only the leading and trailing wildcards from its rule expressions, which cannot alter a containment match, brings the rule layer to 291~\textmu s. Replacing only its per-byte hexadecimal formatting brings dissection to 91~\textmu s. Version 1.4.0 averages 120~\textmu s per packet (35 at the median, 319 at p95), which sustains about 8{,}300 packets per second on one mid core, 12{,}300 on the big core and 2{,}300 on a little core. On the phone's own capture, whose encrypted payloads skip the payload predicates, the mean is 25~\textmu s; version 1.3.0 took 2{,}234~\textmu s over the first 3{,}000 packets of that capture. Detection state occupies 444~KiB of heap after replaying the trace; version 1.3.0, which retained whole packet records in its rule history, used 3{,}396~KiB.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_cost.pdf}
+\Description{Grouped horizontal bar chart on a logarithmic axis of microseconds per packet for record building, statistics, dissection, Layer 1, Layer 2, Layer 3 and the total, comparing version 1.3.0 and version 1.4.0. Layer 3 and the total fall by about two orders of magnitude.}
+\caption{Mean per-packet cost by stage on a Cortex-A715 core under ART, replaying tcpreplay smallFlows. The axis is logarithmic.}\label{fig:cost}
+\end{figure}
+
+\subsection{Throughput, Energy and PCAPdroid}\label{sec:headtohead}
+
+Table~\ref{tab:headtohead} compares no capture, PCAPdroid~2.0.2 and AndroNet~1.4.0 on the same phone and network, with conditions shuffled in each of five rounds. Figures are medians of 50~MB transfers, two per direction in each round. For energy, a script on the phone logged battery current and voltage once per second over 150~s, with the cable out, the screen on at minimum brightness and three repetitions in a rotating order. Current is read from the fuel gauge, so these figures are coarser than those from an external power monitor. We measured PCAPdroid's free build with no capture file written, and did not test its paid blocklist feature.
+
+\begin{table}[t]
+\centering
+\caption{Head-to-head on the Pixel~8. Throughput and connect time are TCP between phone and laptop. AndroNet's columns are forwarding alone, forwarding with analysis, and the full app with its UI stream. Power is whole-device, under a 10~Mbit/s download and at idle, with its standard deviation across repetitions.}\label{tab:headtohead}
+\small
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Measure & No capture & PCAPdroid & \multicolumn{3}{c}{AndroNet} \\
+\cmidrule(l){4-6}
+ & & & forward & analysis & full \\
+\midrule
+Download (Mbit/s) & 190 & 189 & 70 & 42 & 39 \\
+Upload (Mbit/s) & 206 & 194 & 105 & 75 & 47 \\
+TCP connect (ms) & 22.8 & 34.9 & 28.5 & 30.1 & 30.0 \\
+App CPU (\% of a core) & -- & 19 & 41 & 64 & 128 \\
+Peak memory (MiB) & -- & 154 & 299 & 424 & 414 \\
+\midrule
+Power, 10~Mbit/s (W) & 1.10 $\pm$ 0.04 & 1.14 $\pm$ 0.03 & & & 1.59 $\pm$ 0.04 \\
+Power, idle (W) & 0.86 $\pm$ 0.14 & 0.88 $\pm$ 0.02 & & & 0.96 $\pm$ 0.18 \\
+Battery, 10~Mbit/s (\%/h) & 7.1 & 7.1 & & & 9.4 \\
+Battery, idle (\%/h) & 5.6 & 5.1 & & & 5.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+PCAPdroid is the faster relay: on this link it keeps pace with no capture at all, and most of the gap exists before any analysis runs, since forwarding alone reaches 37\% of its download rate while using only 41\% of a core. Raw CPU is therefore not the limit. PCAPdroid drives the same zdtun library with a 10,000-byte tunnel MTU and blocking tunnel writes, where ours uses 1500 bytes and non-blocking writes; we have not yet isolated how much of the gap each explains. Analysis takes the download to 42~Mbit/s, and the UI stream then costs mainly CPU, which it doubles. For scale, the 9-minute browsing session, relayed through AndroNet itself, averaged 2.4~Mbit/s with a busiest second of 63~Mbit/s, so ordinary browsing sits well inside this capacity on average while its bursts reach it. Under the 10~Mbit/s load AndroNet adds 0.49~W to the no-capture baseline, where PCAPdroid adds 0.05~W, and its process stays near 100\% of a core against 4\%. At idle the three differ by less than the spread between repetitions. Two idle runs in which the cable was reconnected early are excluded.
+
+\begin{table}[t]
+\centering
+\caption{Capabilities compared, from each tool's documentation and our measurements. $\bullet$ present, $\circ$ partial or conditional, -- absent.}\label{tab:capability}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Capability & Wireshark & Snort & PCAPdroid & AndroNet \\
+\midrule
+Runs natively on Android & -- & $\circ$\textsuperscript{a} & $\bullet$ & $\bullet$ \\
+Works without root & -- & -- & $\bullet$ & $\bullet$ \\
+One analysis path over both capture paths & n/a & n/a & $\bullet$ & $\bullet$ \\
+Application-layer dissection & $\bullet$ & $\bullet$ & $\bullet$ & $\circ$\textsuperscript{b} \\
+TLS decryption & $\circ$\textsuperscript{c} & -- & $\bullet$ & -- \\
+Reputation blocklists & -- & $\bullet$ & $\circ$\textsuperscript{d} & $\circ$\textsuperscript{e} \\
+Payload signatures & -- & $\bullet$ & -- & $\bullet$ \\
+Stateful multi-packet rules & -- & $\bullet$ & -- & $\bullet$ \\
+Volumetric attack detection & -- & $\circ$ & -- & $\bullet$ \\
+Connection blocking & -- & $\bullet$ & $\circ$\textsuperscript{d} & -- \\
+\bottomrule
+\multicolumn{5}{@{}l@{}}{\footnotesize \textsuperscript{a} in a rooted NetHunter chroot. \textsuperscript{b} narrower than nDPI. \textsuperscript{c} with supplied keys.} \\
+\multicolumn{5}{@{}l@{}}{\footnotesize \textsuperscript{d} paid feature. \textsuperscript{e} sample lists only.} \\
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:capability} states the novelty plainly. PCAPdroid is the stronger capture and visibility tool: broader classification, TLS decryption, a faster relay. Combining both capture paths behind one pipeline is common ground. What AndroNet adds is the combination: payload signatures, stateful multi-packet rules and volumetric detectors together, on an unrooted handset that stays online, in open source, with accuracy, cost and energy measured on that handset. Each ingredient has precedents (Sect.~\ref{sec:related}), and we found no other system with all of them. We make no claim to a new detection algorithm; the statistical, signature and rule paradigms are long established.
+
+\subsection{Threats to Validity}
+
+Our held-out attack set is small, and many captures are short, so recall carries wide uncertainty; we publish per-capture results for that reason. Many third-party traces come from desktop networks. The benign phone traffic is scripted browsing on one device, over Wi-Fi, for minutes, and real use spanning days and apps may raise more false alarms. Replaying traces at the IP layer omits VPN-path effects on inbound headers, although those do not affect payload or rate predicates. Limits were set on one phone and may not suit others. Wi-Fi capacity varied between rounds, so small throughput differences mean little. Energy readings come from a single device's fuel gauge.
+
+\section{Discussion and Limitations}\label{sec:discussion}
+
+\textbf{Encrypted traffic.} Most phone traffic is TLS or QUIC, and AndroNet deliberately withholds such payloads from matching. Its few false alarms on phone traffic are partly a consequence: it sees handshakes, names, sizes and rates there. Payload signatures earn their place on cleartext traffic, on tool-generated traffic that often remains cleartext, and on a rooted assessment device. A malicious app using TLS on port~443 evades the payload layers entirely, leaving volumetric detectors, SNI and DNS names.
+
+\textbf{No stream reassembly.} Detection works on packets. A signature split across TCP segments, or a query name below the length limit, escapes it. Reassembly would cost memory that the design has so far avoided.
+
+\textbf{Future work.} Running on a physical rooted phone comes first, followed by threat-feed integration, a faster relay, and detectors for the misses above: flood counting that tolerates spoofing, ARP checks for one MAC claiming several addresses, inspection of DNS responses, and a check that traffic on a well-known port speaks that port's protocol.
+
+\section{Conclusion}\label{sec:conclusion}
+
+AndroNet carries packet capture on Android through to detection on the handset, with one pipeline over a root-free and a rooted capture path. The more instructive result is how far its first implementation sat from its design. Passing unit tests and a plausible cost analysis coexisted with detectors that could not fire, thresholds that an attack could outrun, and a per-packet cost several times the estimate. Measurement on a real phone found what none of that revealed. After correction, the frozen system detects 12 of 19 in-scope held-out captures, flags 0.022\% of benign packets, and analyses a packet in about 120~\textmu s on a mid core. Our evaluation makes its limits equally plain: a slower relay than PCAPdroid, real misses on spoofed floods and DNS-borne commands, and a rooted path still awaiting physical hardware. For on-device security tools, an honest number from the phone is worth more than a careful estimate from the desk.
+
+\begin{credits}
+\subsubsection{\ackname}  During the preparation of this work the authors used Claude (Anthropic; model Claude Opus~5.5, through Claude Code) in all sections of this manuscript. The tool drafted and revised the text, wrote the evaluation harness, traffic generators and scoring scripts, proposed and implemented the code corrections described in Sect.~\ref{sec:defects}, produced the figures and tables from measured results, and helped operate the experiments on the authors' hardware. All measurements come from running the published code. The authors reviewed the manuscript and the code, verified the results, and take full responsibility for the content of this publication.
+
+\subsubsection{\discintname} The authors have no competing interests to declare that are relevant to the content of this article.
+\end{credits}
+
+\bibliographystyle{splncs04}
+\bibliography{andronet}
+\end{document}

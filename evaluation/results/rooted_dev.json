@@ -1,0 +1,321 @@
+{
+ "detected": 29,
+ "total": 29,
+ "scenarios": [
+  {
+   "scenario": "port_scan_connect",
+   "detected": true,
+   "expected": [
+    "L1:PORT_SCAN",
+    "RULE-001"
+   ],
+   "alerts": {
+    "L1:PORT_SCAN": 1,
+    "L1:SYN_FLOOD": 1,
+    "L1:CONNECTION_FLOOD": 1
+   }
+  },
+  {
+   "scenario": "syn_flood",
+   "detected": true,
+   "expected": [
+    "L1:SYN_FLOOD"
+   ],
+   "alerts": {
+    "L1:SYN_FLOOD": 1,
+    "L1:CONNECTION_FLOOD": 1
+   }
+  },
+  {
+   "scenario": "http_sqli",
+   "detected": true,
+   "expected": [
+    "EXP-001",
+    "RULE-002"
+   ],
+   "alerts": {
+    "EXP-001": 1,
+    "RULE-002": 1
+   }
+  },
+  {
+   "scenario": "http_traversal",
+   "detected": true,
+   "expected": [
+    "EXP-002"
+   ],
+   "alerts": {
+    "EXP-002": 1
+   }
+  },
+  {
+   "scenario": "http_scanner_sqlmap_ua",
+   "detected": true,
+   "expected": [
+    "RECON-003",
+    "RULE-009"
+   ],
+   "alerts": {
+    "RECON-003": 1,
+    "RULE-009": 1
+   }
+  },
+  {
+   "scenario": "http_scanner_nikto_ua",
+   "detected": true,
+   "expected": [
+    "RECON-002",
+    "RULE-009"
+   ],
+   "alerts": {
+    "RECON-002": 1,
+    "RULE-009": 1
+   }
+  },
+  {
+   "scenario": "http_scanner_nmap_ua",
+   "detected": true,
+   "expected": [
+    "RECON-001",
+    "RULE-009"
+   ],
+   "alerts": {
+    "RECON-001": 1,
+    "RULE-009": 1
+   }
+  },
+  {
+   "scenario": "http_shellshock",
+   "detected": true,
+   "expected": [
+    "NET-002"
+   ],
+   "alerts": {
+    "EXP-003": 1,
+    "NET-002": 1
+   }
+  },
+  {
+   "scenario": "http_rce",
+   "detected": true,
+   "expected": [
+    "EXP-003"
+   ],
+   "alerts": {
+    "EXP-003": 1
+   }
+  },
+  {
+   "scenario": "http_xxe",
+   "detected": true,
+   "expected": [
+    "EXP-004"
+   ],
+   "alerts": {
+    "EXP-004": 1
+   }
+  },
+  {
+   "scenario": "http_download",
+   "detected": true,
+   "expected": [
+    "RULE-003"
+   ],
+   "alerts": {
+    "RULE-003": 1
+   }
+  },
+  {
+   "scenario": "http_cobalt_beacon",
+   "detected": true,
+   "expected": [
+    "MAL-003"
+   ],
+   "alerts": {
+    "MAL-003": 1
+   }
+  },
+  {
+   "scenario": "http_exfil",
+   "detected": true,
+   "expected": [
+    "EXFIL-001",
+    "RULE-007"
+   ],
+   "alerts": {
+    "EXFIL-001": 1,
+    "RULE-007": 1
+   }
+  },
+  {
+   "scenario": "dns_tunnel_fast",
+   "detected": true,
+   "expected": [
+    "L1:DNS_TUNNELING",
+    "RULE-004"
+   ],
+   "alerts": {
+    "L1:DNS_TUNNELING": 2,
+    "RULE-004": 2
+   }
+  },
+  {
+   "scenario": "dns_tunnel_slow",
+   "detected": true,
+   "expected": [
+    "L1:DNS_TUNNELING"
+   ],
+   "alerts": {
+    "L1:DNS_TUNNELING": 3
+   }
+  },
+  {
+   "scenario": "stratum_btc",
+   "detected": true,
+   "expected": [
+    "RULE-006"
+   ],
+   "alerts": {
+    "RULE-006": 1
+   }
+  },
+  {
+   "scenario": "stratum_xmrig",
+   "detected": true,
+   "expected": [
+    "RULE-006"
+   ],
+   "alerts": {
+    "RULE-006": 1
+   }
+  },
+  {
+   "scenario": "irc_bot",
+   "detected": true,
+   "expected": [
+    "C2-003"
+   ],
+   "alerts": {
+    "C2-003": 1
+   }
+  },
+  {
+   "scenario": "meterpreter",
+   "detected": true,
+   "expected": [
+    "MAL-001"
+   ],
+   "alerts": {
+    "MAL-001": 1
+   }
+  },
+  {
+   "scenario": "ssh_tool_banner",
+   "detected": true,
+   "expected": [
+    "BRUTE-001"
+   ],
+   "alerts": {
+    "BRUTE-001": 1
+   }
+  },
+  {
+   "scenario": "ssh_bruteforce",
+   "detected": true,
+   "expected": [
+    "RULE-005"
+   ],
+   "alerts": {
+    "RULE-005": 1
+   }
+  },
+  {
+   "scenario": "shellcode",
+   "detected": true,
+   "expected": [
+    "RULE-008"
+   ],
+   "alerts": {
+    "RULE-008": 1
+   }
+  },
+  {
+   "scenario": "inbound_nmap_syn",
+   "detected": true,
+   "expected": [
+    "L1:PORT_SCAN"
+   ],
+   "alerts": {
+    "L1:PORT_SCAN": 1,
+    "L1:SYN_FLOOD": 1,
+    "L1:CONNECTION_FLOOD": 1
+   }
+  },
+  {
+   "scenario": "inbound_nmap_fin",
+   "detected": true,
+   "expected": [
+    "L1:PORT_SCAN"
+   ],
+   "alerts": {
+    "L1:PORT_SCAN": 1
+   }
+  },
+  {
+   "scenario": "inbound_nmap_null",
+   "detected": true,
+   "expected": [
+    "L1:PORT_SCAN"
+   ],
+   "alerts": {
+    "L1:PORT_SCAN": 1
+   }
+  },
+  {
+   "scenario": "inbound_nmap_xmas",
+   "detected": true,
+   "expected": [
+    "L1:PORT_SCAN"
+   ],
+   "alerts": {
+    "L1:PORT_SCAN": 1
+   }
+  },
+  {
+   "scenario": "inbound_nmap_synfin",
+   "detected": true,
+   "expected": [
+    "L1:MALFORMED_PACKET"
+   ],
+   "alerts": {
+    "L1:MALFORMED_PACKET": 1,
+    "L1:PORT_SCAN": 1,
+    "L1:SYN_FLOOD": 1,
+    "L1:CONNECTION_FLOOD": 1
+   }
+  },
+  {
+   "scenario": "inbound_syn_flood",
+   "detected": true,
+   "expected": [
+    "L1:SYN_FLOOD"
+   ],
+   "alerts": {
+    "L1:SYN_FLOOD": 1
+   }
+  },
+  {
+   "scenario": "arp_spoof",
+   "detected": true,
+   "expected": [
+    "L1:ARP_SPOOFING"
+   ],
+   "alerts": {
+    "L1:ARP_SPOOFING": 2
+   }
+  }
+ ],
+ "other": {},
+ "helperUidLine": "10150 sh /system/xbin/su -c /data/user/0",
+ "helpersLeftAfterStop": "1"
+}

@@ -1,0 +1,135 @@
+{
+ "icmpFlood": {
+  "packets": 9889,
+  "distinctSources": 9886,
+  "distinctTargets": 1,
+  "packetsPerSourceMax": 2,
+  "maxPerSecondOneSource": 2,
+  "maxPerSecondAllSources": 9889,
+  "payloadOver64": 8151,
+  "payloadMedian": 734,
+  "durationSeconds": 0.39
+ },
+ "arpPoison": {
+  "arpPackets": 4,
+  "firstFrames": [
+   {
+    "frame": "54",
+    "op": "1",
+    "ip": "172.16.0.1",
+    "mac": "00:25:b3:bf:91:ee"
+   },
+   {
+    "frame": "55",
+    "op": "2",
+    "ip": "172.16.0.107",
+    "mac": "00:21:70:c0:56:f0"
+   },
+   {
+    "frame": "56",
+    "op": "2",
+    "ip": "172.16.0.1",
+    "mac": "00:25:b3:bf:91:ee"
+   },
+   {
+    "frame": "165",
+    "op": "1",
+    "ip": "172.16.0.105",
+    "mac": "00:25:b3:bf:91:ee"
+   }
+  ],
+  "ipsWhoseMacChanged": {},
+  "macsClaimingSeveralIps": {
+   "00:25:b3:bf:91:ee": [
+    "172.16.0.1",
+    "172.16.0.105"
+   ]
+  }
+ },
+ "dnsRemoteShell": {
+  "wellFormedDnsQueries": 3,
+  "nameLengthMax": 24,
+  "tcpPort53Segments": 10,
+  "tcpPort53Bytes": 2618,
+  "startsWith": "Microsoft Windows XP [Version 5.1.2600]",
+  "carriesCmdPrompt": true
+ },
+ "dnsTxtC2": {
+  "queries": 112,
+  "queryTypes": {
+   "1": 12,
+   "12": 50,
+   "16": 50
+  },
+  "nameLengthMax": 27,
+  "over50Characters": 0,
+  "queryUdpLengthMax": 53,
+  "txtQueries": 50,
+  "txtMedianGapSeconds": 1.166,
+  "txtMaxQueriesPerSecond": 8,
+  "txtResponses": 64,
+  "txtResponseUdpLengthMax": 313,
+  "firstResponseIsPowerShell": true
+ },
+ "nmapVersion": {
+  "synPackets": 17,
+  "sources": 1,
+  "ports": [
+   80,
+   443
+  ],
+  "layer1FloorPorts": 8
+ },
+ "sshGuessing": {
+  "synToPort22": 11,
+  "sources": 1,
+  "maxSynPerMinute": 10,
+  "ruleFiresAbovePerMinute": 10
+ },
+ "meterpreter": {
+  "bytesOnPort4444": 4866192,
+  "segments": 687,
+  "medianEntropyBitsPerByte": 7.99,
+  "entropyWholeStream": 8.0,
+  "methodStringsInFile": {
+   "stdapi_": 0,
+   "core_channel": 0,
+   "core_loadlib": 0,
+   "priv_": 0,
+   "metsrv": 0,
+   "meterpreter": 0,
+   "ReflectiveLoader": 0
+  }
+ },
+ "bigFlows": {
+  "alerts": {
+   "RULE-003": 66,
+   "RULE-002": 14,
+   "L1:SYN_FLOOD": 30,
+   "L1:CONNECTION_FLOOD": 5,
+   "L1:DNS_TUNNELING": 13,
+   "RULE-007": 35,
+   "EXP-002": 5,
+   "EXFIL-001": 2,
+   "L1:COVERT_CHANNEL": 4,
+   "L1:PORT_SCAN": 6
+  },
+  "alertsTotal": 180,
+  "packets": 791615,
+  "downloadRule": {
+   "requests": 124,
+   "clients": 52,
+   "servers": 1,
+   "paths": {
+    "/secars/secars.dll": 124
+   }
+  },
+  "synBurst": {
+   "secondsOver30SynPerTarget": 300,
+   "targetsOver30": 1,
+   "peakSynPerSecond": 154,
+   "clientsAtPeak": 40,
+   "medianClientsWhenBusy": 40
+  }
+ }
+}

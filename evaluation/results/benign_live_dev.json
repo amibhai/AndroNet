@@ -1,0 +1,13 @@
+{
+ "tag": "dev",
+ "sites": 15,
+ "seconds": 390,
+ "alerts": {
+  "RULE-001": 21,
+  "RULE-007": 14,
+  "L1:CONNECTION_FLOOD": 7
+ },
+ "cpuPercent": 40.9,
+ "rssMiB": 188,
+ "capinfos": "\"benign_dev.pcapng\",\"70295\""
+}

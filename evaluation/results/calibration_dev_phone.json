@@ -1,0 +1,9 @@
+{
+ "ipPackets": 250587,
+ "seconds": 391,
+ "new connections / s per source": 118,
+ "SYN / s per target": 13,
+ "outgoing >1024 B packets / 10 s per source": 223,
+ "distinct destinations probed / 10 s per source": 126,
+ "distinct ports probed / 10 s per source": 2
+}

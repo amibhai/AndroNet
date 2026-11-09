@@ -1,0 +1,8 @@
+# LaTeX by-products; build_paper.py regenerates them
+*.aux
+*.blg
+*.log
+*.out
+# Submission files, uploaded to CMT and not kept in the repository
+andronet_final.pdf
+andronet_source.zip

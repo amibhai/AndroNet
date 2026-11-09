@@ -18,7 +18,7 @@ class AdaptiveThresholdTest {
     fun `initial thresholds equal defaults`() {
         assertEquals(20, manager.portScanThreshold)
         assertEquals(100, manager.synFloodThreshold)
-        assertEquals(50, manager.connectionRateThreshold)
+        assertEquals(60, manager.connectionRateThreshold)
         assertEquals(30, manager.dnsQueryRateThreshold)
         assertEquals(10, manager.arpRateThreshold)
     }
@@ -98,7 +98,7 @@ class AdaptiveThresholdTest {
         manager.reset()
         assertEquals(20, manager.portScanThreshold)
         assertEquals(100, manager.synFloodThreshold)
-        assertEquals(50, manager.connectionRateThreshold)
+        assertEquals(60, manager.connectionRateThreshold)
         assertEquals(30, manager.dnsQueryRateThreshold)
         assertEquals(10, manager.arpRateThreshold)
         assertFalse(manager.isInLearningPeriod())
@@ -122,6 +122,14 @@ class AdaptiveThresholdTest {
         assertTrue(wouldBe <= ceiling)
         // Verify CEILING_MULTIPLIER is exactly 4.0
         assertEquals(4.0, AdaptiveThresholdManager.CEILING_MULTIPLIER, 0.001)
+    }
+
+    // 11. Without an open learning period, recordObservation must not move anything
+    @Test
+    fun `observations outside any learning period change nothing`() {
+        repeat(50) { manager.recordObservation(500, 500, 500, 500, 500) }
+        assertEquals(AdaptiveThresholdManager.DEFAULT_PORT_SCAN, manager.portScanThreshold)
+        assertEquals(AdaptiveThresholdManager.DEFAULT_SYN_FLOOD, manager.synFloodThreshold)
     }
 
     // 10. EMA update moves threshold in correct direction after learning completes

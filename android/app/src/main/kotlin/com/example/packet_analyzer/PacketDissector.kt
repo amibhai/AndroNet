@@ -34,6 +34,87 @@ object PacketDissector {
         return KNOWN_DOH_PROVIDERS.any { host == it || host.endsWith(".$it") }
     }
 
+    // Ports whose payload is ciphertext. Signature and rule payload predicates skip these
+    // packets: a short byte pattern matches ciphertext at random often enough to matter.
+    private val ENCRYPTED_PORTS = setOf(443, 465, 563, 636, 853, 989, 990, 992, 993, 994, 995, 5061, 5223, 8443, 8883)
+
+    private val HTTP_METHODS = listOf("GET ", "POST ", "PUT ", "HEAD ", "DELETE ", "OPTIONS ", "PATCH ", "TRACE ", "CONNECT ", "HTTP/")
+
+    private val HEX_DIGITS = "0123456789abcdef".toCharArray()
+
+    private const val MAX_REQUEST_FLOWS = 256
+
+    // Client-to-server flows that recently sent an HTTP request head, so that a body arriving in
+    // a later segment is still recognised as part of a request, on any port. Least recently
+    // used entries fall out, which keeps this bounded whatever the traffic does.
+    private val requestFlows = java.util.Collections.synchronizedMap(
+        object : LinkedHashMap<String, Boolean>(64, 0.75f, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Boolean>?) =
+                size > MAX_REQUEST_FLOWS
+        }
+    )
+
+    private fun flowKey(packetInfo: Map<String, Any>, sourcePort: Int, destPort: Int) =
+        "${packetInfo["sourceIp"]}:$sourcePort>${packetInfo["destinationIp"]}:$destPort"
+
+    /** True when a TCP payload opens with an HTTP request or status line, whatever the port. */
+    private fun looksLikeHttp(payload: ByteArray): Boolean = HTTP_METHODS.any { token ->
+        payload.size >= token.length && token.indices.all { payload[it].toInt() == token[it].code }
+    }
+
+    private fun hexPreview(payload: ByteArray, maxBytes: Int): String {
+        val n = minOf(payload.size, maxBytes)
+        if (n == 0) return ""
+        val out = CharArray(n * 3 - 1)
+        for (i in 0 until n) {
+            val v = payload[i].toInt() and 0xFF
+            val at = i * 3
+            out[at] = HEX_DIGITS[v ushr 4]
+            out[at + 1] = HEX_DIGITS[v and 0x0F]
+            if (i < n - 1) out[at + 2] = ' '
+        }
+        return String(out)
+    }
+
+    private fun asciiPreview(payload: ByteArray, maxBytes: Int): String {
+        val n = minOf(payload.size, maxBytes)
+        val out = CharArray(n)
+        for (i in 0 until n) {
+            val c = payload[i].toInt() and 0xFF
+            out[i] = if (c in 32..126) c.toChar() else '.'
+        }
+        return String(out)
+    }
+
+    /** Percent-decodes a request URI for matching; undecodable sequences pass through untouched. */
+    internal fun decodeUri(uri: String): String {
+        if (uri.indexOf('%') < 0 && uri.indexOf('+') < 0) return uri
+        val queryStart = uri.indexOf('?')
+        val out = StringBuilder(uri.length)
+        var i = 0
+        while (i < uri.length) {
+            val c = uri[i]
+            if (c == '%' && i + 2 < uri.length) {
+                val hi = Character.digit(uri[i + 1], 16)
+                val lo = Character.digit(uri[i + 2], 16)
+                if (hi >= 0 && lo >= 0) {
+                    out.append(((hi shl 4) or lo).toChar())
+                    i += 3
+                    continue
+                }
+            }
+            out.append(if (c == '+' && queryStart in 0 until i) ' ' else c)
+            i++
+        }
+        return out.toString()
+    }
+
+    /** "user-agent" -> "User-Agent"; header names are case-insensitive on the wire. */
+    private fun canonicalHeaderName(name: String): String =
+        name.split('-').joinToString("-") { part ->
+            part.lowercase().replaceFirstChar { it.uppercase() }
+        }
+
     /**
      * Dissect a packet and extract application-layer details
      */
@@ -52,35 +133,33 @@ object PacketDissector {
 
         val enrichedInfo = packetInfo.toMutableMap()
 
-        // Add payload content (both hex and ASCII). Slice to the display limit
-        // BEFORE formatting, not after — formatting the full payload (which can be
-        // tens of KB) just to discard most of the resulting string wastes CPU on
-        // every single packet.
-        val payloadHex = payload.take(666).joinToString(" ") { byte ->
-            "%02x".format(byte)
-        } // ~2000 chars max (3 chars/byte)
-
-        val payloadAscii = buildString {
-            for (byte in payload.take(1000)) {
-                val char = byte.toInt() and 0xFF
-                append(if (char in 32..126) char.toChar() else '.')
-            }
-        }
-
-        enrichedInfo["payload"] = payloadAscii
-        enrichedInfo["payloadHex"] = payloadHex
+        // Add payload content (both hex and ASCII), bounded for display. These run on every
+        // packet, so they fill char arrays directly instead of calling String.format per byte.
+        enrichedInfo["payload"] = asciiPreview(payload, 1000)
+        enrichedInfo["payloadHex"] = hexPreview(payload, 666) // ~2000 chars max (3 chars/byte)
         enrichedInfo["payloadSize"] = payload.size
 
+        if (destPort in ENCRYPTED_PORTS || sourcePort in ENCRYPTED_PORTS) {
+            enrichedInfo["encrypted"] = true
+        }
 
         try {
             when {
-                // HTTP traffic
+                // HTTP traffic: recognised by its first bytes, since attack tooling and C2
+                // servers do not restrict themselves to 80 and 8080
                 protocol == "TCP" && (destPort == 80 || sourcePort == 80 ||
-                                     destPort == 8080 || sourcePort == 8080) -> {
+                                     destPort == 8080 || sourcePort == 8080 ||
+                                     looksLikeHttp(payload) ||
+                                     requestFlows.containsKey(flowKey(packetInfo, sourcePort, destPort))) -> {
                     val httpData = parseHttp(payload)
+                    val flow = flowKey(packetInfo, sourcePort, destPort)
                     if (httpData.isNotEmpty()) {
                         enrichedInfo["httpData"] = httpData
                         enrichedInfo["appName"] = "HTTP"
+                        if (httpData["type"] == "request") requestFlows[flow] = true
+                    } else if (destPort == 80 || destPort == 8080 || requestFlows.containsKey(flow)) {
+                        // Many clients send a request body in its own segment after the headers
+                        enrichedInfo["httpData"] = mapOf("type" to "request", "summary" to "HTTP request body")
                     }
                 }
 
@@ -93,6 +172,7 @@ object PacketDissector {
                         // If SNI was extracted, record it in DomainTracker
                         val sni = tlsData["sni"]
                         if (sni != null && destPort == 443) {
+                            enrichedInfo["domain"] = sni
                             // For outgoing HTTPS, map the destination IP to the SNI
                             val destIp = packetInfo["destinationIp"] as? String ?: packetInfo["destinationAddress"] as? String
                             if (destIp != null) {
@@ -118,6 +198,19 @@ object PacketDissector {
                     if (dnsData.isNotEmpty()) {
                         enrichedInfo["dnsData"] = dnsData
                         enrichedInfo["appName"] = "DNS"
+                        dnsData["queryName"]?.takeIf { it.isNotEmpty() && it != "." }?.let {
+                            enrichedInfo["domain"] = it
+                        }
+                    }
+                }
+
+                // DHCP traffic (only visible to an interface tap: a TUN device never carries it)
+                protocol == "UDP" && (destPort == 67 || sourcePort == 67 ||
+                                     destPort == 68 || sourcePort == 68) -> {
+                    val dhcpData = parseDhcp(payload)
+                    if (dhcpData.isNotEmpty()) {
+                        enrichedInfo["dhcpData"] = dhcpData
+                        enrichedInfo["appName"] = "DHCP"
                     }
                 }
 
@@ -174,8 +267,7 @@ object PacketDissector {
             // scanning can only ever return noise, not signal, while still costing a
             // full-payload string conversion and scan on every packet.
             val appName = enrichedInfo["appName"] as? String
-            val isEncrypted = destPort == 443 || sourcePort == 443 ||
-                    destPort == 853 || sourcePort == 853 ||
+            val isEncrypted = enrichedInfo["encrypted"] == true ||
                     appName == "HTTPS" || appName == "QUIC/HTTP3" ||
                     (appName?.contains("TLS", ignoreCase = true) == true)
 
@@ -198,7 +290,8 @@ object PacketDissector {
      */
     private fun parseHttp(payload: ByteArray): Map<String, String> {
         try {
-            val httpText = String(payload, StandardCharsets.UTF_8)
+            // Only the head of the message carries a request line and headers
+            val httpText = String(payload, 0, minOf(payload.size, 4096), Charsets.ISO_8859_1)
             val lines = httpText.split("\r\n", "\n")
 
             if (lines.isEmpty()) return emptyMap()
@@ -223,13 +316,15 @@ object PacketDissector {
                     result["type"] = "request"
                     result["method"] = parts[0]
                     result["uri"] = parts[1]
+                    result["url"] = decodeUri(parts[1])
                     result["version"] = parts[2]
                 }
             } else {
                 return emptyMap()
             }
 
-            // Parse headers
+            // Parse headers. Detection looks them up by canonical name, so that name goes
+            // into the record alongside the short display fields below.
             val headers = mutableMapOf<String, String>()
             for (i in 1 until lines.size) {
                 val line = lines[i].trim()
@@ -237,9 +332,10 @@ object PacketDissector {
 
                 val colonIndex = line.indexOf(':')
                 if (colonIndex > 0) {
-                    val key = line.substring(0, colonIndex).trim()
+                    val key = canonicalHeaderName(line.substring(0, colonIndex).trim())
                     val value = line.substring(colonIndex + 1).trim()
                     headers[key] = value
+                    result[key] = value
                 }
             }
 

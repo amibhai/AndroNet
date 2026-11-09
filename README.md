@@ -41,7 +41,7 @@ Mobile security professionals have long lacked a native, Wireshark-like packet a
 |---|---|
 | Packet capture on mobile | Full capture without breaking internet connectivity |
 | Deep inspection | Application-layer analysis (HTTP, DNS, TLS, DHCP) |
-| Root fragmentation | Dual-mode operation — libpcap (rooted) or VPN (unrooted) |
+| Root fragmentation | Dual-mode operation — AF_PACKET helper (rooted) or VPN (unrooted) |
 | Real-time visibility | Live traffic statistics and anomaly detection |
 | Forensic handoff | Standard PCAP export for Wireshark |
 
@@ -53,10 +53,10 @@ Mobile security professionals have long lacked a native, Wireshark-like packet a
 
 - **Dual-mode packet capture**
   - **VPN mode** (unrooted): zero-setup capture via Android VPN API + zdtun
-  - **Libpcap mode** (Kali NetHunter): native libpcap integration for full, Wireshark-like inspection
-- Bidirectional traffic monitoring — inbound and outbound
-- Zero packet loss, full internet connectivity maintained throughout
-- All major protocols: TCP, UDP, ICMP, ARP, and more
+  - **Root mode**: a small helper started through `su` captures on an AF_PACKET socket, which adds inbound scans, ARP and other link-level traffic a VPN can never see
+- Both modes feed one record builder and one analysis pipeline
+- Internet connectivity maintained throughout
+- TCP, UDP, ICMP on both paths; ARP and DHCP on the root path
 
 ### Deep Packet Inspection (DPI)
 
@@ -69,15 +69,19 @@ Mobile security professionals have long lacked a native, Wireshark-like packet a
 
 ### Security Anomaly Detection
 
-Five real-time detection algorithms, each with adaptive baselines rather than static thresholds:
+Statistical detectors, followed by 18 signatures and 10 stateful rules. Limits were calibrated on
+measured phone traffic and are listed with their floors:
 
 | Detector | Trigger | Severity |
 |---|---|---|
-| Port Scan | 20+ ports probed within 10 seconds (adaptive) | High |
-| SYN Flood | 100+ SYN packets/sec (adaptive) | Critical |
-| Connection Flooding | 50+ new connections/sec (adaptive) | High |
-| DNS Tunneling | Excessive queries, abnormally long domain names | Medium |
-| ARP Spoofing | Unexpected IP-to-MAC mapping changes | Critical |
+| Port Scan | distinct destination ports from one source in 10 s (floor 8, default 20) | High |
+| SYN Flood | SYN packets to one target per second (floor 30, default 100) | Critical |
+| Connection Flooding | new connections from one source per second (60) | High |
+| DNS Tunneling | query name longer than 50 characters | Medium |
+| ARP Spoofing | IP-to-MAC binding changes (root mode) | Critical |
+| Malformed TCP | SYN set together with FIN or RST | Medium |
+
+Measured accuracy, cost and energy, including what AndroNet misses, are in [`evaluation/`](evaluation/README.md).
 
 Alerts surface instantly as in-app SnackBar notifications with severity, type, source IP, and description.
 
@@ -85,8 +89,8 @@ Alerts surface instantly as in-app SnackBar notifications with severity, type, s
 - 60-second calibration window on capture start (no false alerts during warm-up)
 - Baselines derived from the 90th percentile of observed traffic — resistant to outlier spikes
 - Exponential moving average (α = 0.05) keeps baselines current as traffic patterns evolve
-- Hard floor values block baseline-poisoning (an attacker slowly training thresholds upward)
-- A 4× ceiling multiplier prevents thresholds from drifting high enough to miss real attacks
+- Samples that reach the threshold never train the baseline, so an attack cannot raise its own bar
+- Ceilings are fixed when learning ends: the larger of the default and 4× the learned baseline
 - Live threshold values visible under **Settings → Adaptive Thresholds**
 - Status indicator shows amber (calibrating, with countdown) or green (actively monitoring)
 
@@ -94,14 +98,14 @@ Alerts surface instantly as in-app SnackBar notifications with severity, type, s
 
 | Signal | Threshold | Detects |
 |---|---|---|
-| DNS query entropy | > 6.2 | dnscat2, iodine tunneling |
+| DNS payload entropy | > 6.2 | dnscat2, iodine tunneling |
 | ICMP payload entropy | > 6.0 | icmptunnel, ptunnel covert channels |
-| HTTP/plain-protocol entropy | > 7.6 | Data exfiltration |
+| Outgoing HTTP or DNS entropy | > 7.6 | Data exfiltration |
 | Suspicious encoding | 7.2–7.6 | Flagged at medium severity |
 
 Entropy score is displayed as a live badge (`E:x.x`) on each packet in the capture UI.
 
-*False-positive mitigations:* 30-second per-source cooldown after an alert, a 5-packet consecutive-hit requirement (3 for DNS), a magic-byte pre-filter for common compressed/media formats (JPEG, PNG, ZIP, GZIP, BZ2, XZ, RAR, 7ZIP, MP4, WebM), and an allowlist for legitimately high-entropy protocols (TLS, QUIC, HTTPS, SSL, DTLS, WireGuard, IPSec, SSH, SFTP, FTPS, SMTPS, IMAPS, POP3S, DoT, DoH, SRTP, ZRTP).
+*False-positive mitigations:* 30-second per-source cooldown after an alert, a 5-packet consecutive-hit requirement (3 for DNS), a magic-byte pre-filter for common compressed/media formats (JPEG, PNG, ZIP, GZIP, BZ2, XZ, RAR, 7ZIP, MP4, WebM), an allowlist for legitimately high-entropy protocols, and no payload matching on encrypted ports.
 
 ### Traffic Statistics & Analytics
 
@@ -111,13 +115,13 @@ Entropy score is displayed as a live badge (`E:x.x`) on each packet in the captu
 
 ### PCAP Export
 
-- Standard pcapng format (RFC 7663) with nanosecond-resolution timestamps — natively readable by Wireshark, tcpdump, and tshark
+- Standard pcapng format with nanosecond-resolution timestamps — natively readable by Wireshark and tshark
 - Saved to `/sdcard/Download/AndroNet/`
 - Size- and duration-based file rotation with automatic pruning of old captures
 
 ### Protocol Intelligence
 
-Recognizes **65+ application protocols**, including HTTPS, DNS, SSH, FTP, SMTP, MySQL, PostgreSQL, MongoDB, Redis, SIP, RDP, and VNC. DNS-over-HTTPS is detected by TLS SNI against known public resolvers, surfacing a common technique for bypassing on-path DNS monitoring.
+Names **about 40 application protocols** by port and dissects HTTP, DNS, TLS, DHCP, QUIC, SIP, RTP, SMB and NTP, including HTTPS, DNS, SSH, FTP, SMTP, MySQL, PostgreSQL, MongoDB, Redis, SIP, RDP, and VNC. DNS-over-HTTPS is detected by TLS SNI against known public resolvers, surfacing a common technique for bypassing on-path DNS monitoring.
 
 ### Per-App Traffic Attribution
 
@@ -128,7 +132,7 @@ Every TCP/UDP flow is resolved to the installed app that owns it (via `Connectiv
 - **16 predefined, color-coded filters:** ALL, HTTP, HTTPS, DNS, TCP, UDP, TLS, QUIC, ICMP, DHCP, ARP, SSH, FTP, SMTP, POP3, IMAP
 - Live packet counts per filter (e.g. `HTTP (25)`)
 - Filters adapt to observed traffic and match on both transport and application layers
-- Enriched DPI detail inline — HTTP URLs/methods/status, DNS queries, TLS SNI, DHCP message types, resolved owning app
+- Enriched DPI detail inline — HTTP URLs/methods/status, DNS queries, TLS SNI, DHCP addresses, resolved owning app
 - Light, dark, and system-follow themes (Settings → Theme)
 
 ---
@@ -150,9 +154,9 @@ Every TCP/UDP flow is resolved to the installed app that owns it (via `Connectiv
                  ▼                               ▼
    ┌─────────────────────────┐    ┌─────────────────────────────┐
    │  ZdtunVpnService.kt     │    │  NetHunterService.kt         │
-   │  (VPN Mode)             │    │  (Libpcap Mode)               │
-   │  TUN mgmt · parsing     │    │  Libpcap integration          │
-   │  65+ protocol detection │    │  Raw capture, all interfaces  │
+   │  (VPN Mode)             │    │  (Root Mode)                  │
+   │  TUN mgmt · zdtun relay │    │  su helper, AF_PACKET         │
+   │  PacketRecord builder   │    │  PacketRecord builder         │
    └────────────┬────────────┘    └───────────────┬───────────────┘
                  └───────────────┬─────────────────┘
                                   ▼
@@ -169,12 +173,12 @@ Every TCP/UDP flow is resolved to the installed app that owns it (via `Connectiv
                                   ▼
         ┌───────────────────────────────────────────────┐
         │               Native Layer (C / JNI)           │
-        │   zdtun_vpn.c │ libpcap_capture.c │ pcap_writer.c │
+        │   zdtun_vpn.c │ capture_helper.c │ pcap_writer.c  │
         └───────────┬─────────────────────┬───────────────┘
                      ▼                     ▼
               ┌───────────┐         ┌────────────┐
-              │  zdtun    │         │  libpcap   │
-              │  library  │         │  library   │
+              │  zdtun    │         │  AF_PACKET │
+              │  library  │         │  socket    │
               └─────┬─────┘         └──────┬─────┘
                      └──────────┬───────────┘
                                  ▼
@@ -240,7 +244,7 @@ scripts/tag-release.ps1 1.0.0
 - Flutter SDK 3.44.0+
 - Android Studio with NDK 28.2.13676358
 - CMake 3.22.1+
-- Kali NetHunter (optional — required only for libpcap mode)
+- A rooted device (optional — required only for root mode)
 
 ---
 
@@ -252,11 +256,11 @@ scripts/tag-release.ps1 1.0.0
 2. Tap **Start Capture**
 3. Internet connectivity continues normally while capturing
 
-### Libpcap Mode (Kali NetHunter)
+### Root Mode
 
-1. Root access is detected automatically
-2. Select a network interface
-3. Tap **Start Capture** for full, Wireshark-like inspection
+1. A working `su` is detected at launch and selects this mode automatically
+2. Grant root when your root manager asks
+3. Tap **Start Capture**; the helper runs only for the duration of the capture
 
 ### Exporting PCAP
 
@@ -268,12 +272,9 @@ scripts/tag-release.ps1 1.0.0
 
 ## Performance
 
-| Metric | VPN Mode | Libpcap Mode |
-|---|---|---|
-| Packet rate | 500–800 pps | 1000+ pps |
-| CPU usage | 10–15% | 8–12% |
-| RAM usage | 60–80 MB | 50–70 MB |
-| Packet loss | 0% | 0% |
+Measured on a Pixel 8 against PCAPdroid, with the method and limits in [`evaluation/`](evaluation/README.md).
+The figures that matter are in the paper's evaluation section and in `evaluation/results/`. Root mode has
+been exercised on a rootable emulator only.
 
 ---
 
@@ -285,7 +286,7 @@ scripts/tag-release.ps1 1.0.0
 | Service | Kotlin 1.8, Coroutines |
 | Native | C (JNI), CMake 3.22.1 |
 | VPN Engine | zdtun |
-| Capture | libpcap (Kali NetHunter) |
+| Root capture | AF_PACKET helper through `su` |
 
 ---
 
@@ -334,16 +335,15 @@ adb logcat | grep -E "ZdtunVpn|CaptureService|AndroNet"
 - Confirm the tunnel is active: **Settings → Network → VPN** should show "AndroNet VPN Active"
 - Restart the app — the service recovers automatically on next launch
 
-### Libpcap / NetHunter mode issues
+### Root mode issues
 
 ```bash
 # On-device, requires root
 su -c "id"                          # must return uid=0
-su -c "apt install -y libpcap-dev"  # Kali NetHunter only
+adb logcat -s RootChecker NetHunterService   # says why the probe or the helper failed
 ```
 
 - If root detection fails, some Magisk configurations hide root from apps — grant root to AndroNet explicitly in the Magisk app manager
-- After installing libpcap, rebuild from source so CMake picks it up
 
 ### Android 15 — crashes with illegal instruction / alignment fault
 
@@ -361,8 +361,9 @@ Attach `bug-report.zip` when opening a GitHub issue.
 
 ## Roadmap
 
-- [ ] Kernel-level capture path for rooted devices, reducing capture overhead below current libpcap-mode figures
-- [ ] Expanded anomaly-detection benchmarking (labeled traffic dataset, precision/recall reporting)
+- [ ] Root mode on physical rooted hardware, which has only run on an emulator so far
+- [ ] A faster relay, the main throughput gap against PCAPdroid
+- [ ] Detectors for the measured misses: spoofed floods, poisoning already underway, low-rate DNS channels
 - [ ] Cross-device portability testing across the NetHunter-supported device matrix
 - [ ] Historical session storage and diffing between captures (sqflite is already a dependency, currently unused for this)
 - [ ] In-app packet search across IP/domain/payload/app, beyond the existing protocol filters
@@ -394,7 +395,6 @@ Contributions are welcome. Please fork the repository, create a feature branch, 
 
 - [PCAPdroid](https://github.com/emanuele-f/PCAPdroid) — inspiration for the zdtun integration approach
 - [zdtun](https://github.com/emanuele-f/zdtun) — packet tunneling library by @emanuele-f
-- [libpcap](https://www.tcpdump.org/) — the packet capture standard
 - [Wireshark](https://www.wireshark.org/) — protocol reference
 - Kali NetHunter — target platform
 

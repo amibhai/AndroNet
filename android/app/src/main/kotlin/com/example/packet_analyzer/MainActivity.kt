@@ -40,7 +40,8 @@ class MainActivity : FlutterFragmentActivity() {
 
         // Set the method channel for service communication
         ZdtunVpnService.setMethodChannel(methodChannel)
-        Log.i("MainActivity", "✅ Method channel set for ZdtunVpnService")
+        NetHunterService.setMethodChannel(methodChannel)
+        Log.i("MainActivity", "✅ Method channel set for capture services")
 
         // Initialize PacketAnalysisManager with context and channel
         PacketAnalysisManager.initialize(this, methodChannel)
@@ -57,11 +58,13 @@ class MainActivity : FlutterFragmentActivity() {
                 Log.i("MainActivity", "📡 Packet stream listener attached")
                 packetEventSink = events
                 ZdtunVpnService.setPacketSink(events)
+                NetHunterService.setPacketSink(events)
             }
             override fun onCancel(arguments: Any?) {
                 Log.i("MainActivity", "📡 Packet stream listener detached")
                 packetEventSink = null
                 ZdtunVpnService.setPacketSink(null)
+                NetHunterService.setPacketSink(null)
             }
         })
 
@@ -294,6 +297,55 @@ class MainActivity : FlutterFragmentActivity() {
         }
 
         setupBiometricPrompt()
+        handleAutomationIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleAutomationIntent(intent)
+    }
+
+    /**
+     * Scripted capture control for reproducible measurement. Only exists in evaluation builds
+     * (-PandronetAutomation=true, which also installs under a separate application id); a normal
+     * build compiles this down to nothing.
+     */
+    private fun handleAutomationIntent(intent: Intent?) {
+        if (!BuildConfig.AUTOMATION) return
+        when (intent?.getStringExtra("andronet_action")) {
+            "start_vpn" -> {
+                // Makes this app the prepared VPN, or asks once if consent was never given
+                val consent = VpnService.prepare(this)
+                if (consent != null) {
+                    pendingVpnAction = "startVpn"
+                    startActivityForResult(consent, VPN_REQUEST_CODE)
+                    return
+                }
+                ZdtunVpnService.skipAnalysis = intent.getStringExtra("analysis") == "off"
+                ZdtunVpnService.skipUi = intent.getStringExtra("ui") == "off"
+                setupAnomalyListener()
+                startService(Intent(this, ZdtunVpnService::class.java))
+                startAnomalyDetection()
+            }
+            "stop_vpn" -> {
+                startService(Intent(this, ZdtunVpnService::class.java).apply { action = "STOP_VPN" })
+                stopAnomalyDetection()
+            }
+            "start_root" -> {
+                setupAnomalyListener()
+                startService(Intent(this, NetHunterService::class.java).apply {
+                    action = "START_CAPTURE"
+                    putExtra("interface", intent.getStringExtra("interface") ?: "any")
+                })
+                startAnomalyDetection()
+            }
+            "stop_root" -> {
+                startService(Intent(this, NetHunterService::class.java).apply { action = "STOP_CAPTURE" })
+                stopAnomalyDetection()
+            }
+            "export_start" -> PacketAnalysisManager.getInstance().startPcapExport(intent.getStringExtra("name"))
+            "export_stop" -> PacketAnalysisManager.getInstance().stopPcapExport()
+        }
     }
 
     // === ANOMALY DETECTION METHODS ===

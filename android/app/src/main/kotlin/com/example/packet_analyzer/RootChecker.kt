@@ -1,7 +1,6 @@
 package com.example.packet_analyzer
 
-import android.os.Build
-import java.io.File
+import android.util.Log
 
 /**
  * Single source of truth for root detection. Previously duplicated three ways
@@ -9,25 +8,14 @@ import java.io.File
  * different, inconsistent heuristics — consolidated here.
  */
 object RootChecker {
+    private const val TAG = "RootChecker"
 
-    private val SU_PATHS = arrayOf(
-        "/system/app/Superuser.apk",
-        "/sbin/su",
-        "/system/bin/su",
-        "/system/xbin/su",
-        "/data/local/xbin/su",
-        "/data/local/bin/su",
-        "/system/sd/xbin/su",
-        "/system/bin/failsafe/su",
-        "/data/local/su",
-        "/su/bin/su"
-    )
-
-    fun isRooted(): Boolean {
-        if (Build.TAGS?.contains("test-keys") == true) return true
-        if (SU_PATHS.any { File(it).exists() }) return true
-        return canExecuteSu()
-    }
+    /**
+     * Root means su runs and returns uid 0. A su binary that is merely present, or a build
+     * signed with test keys, proves nothing, and would select a capture path that cannot open
+     * its socket.
+     */
+    fun isRooted(): Boolean = canExecuteSu()
 
     private fun canExecuteSu(): Boolean {
         return try {
@@ -35,8 +23,12 @@ object RootChecker {
             val process = ProcessBuilder("su", "-c", "id").redirectErrorStream(true).start()
             val output = process.inputStream.bufferedReader().readText()
             val exitCode = process.waitFor()
-            exitCode == 0 && output.contains("uid=0")
+            val rooted = exitCode == 0 && output.contains("uid=0")
+            if (!rooted) Log.i(TAG, "su exited with $exitCode: ${output.take(200)}")
+            rooted
         } catch (e: Exception) {
+            // The usual answer on an unrooted device: there is no su to run
+            Log.i(TAG, "su could not be started: ${e.message}")
             false
         }
     }

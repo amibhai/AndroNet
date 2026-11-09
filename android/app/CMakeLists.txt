@@ -70,6 +70,26 @@ target_link_libraries(
 target_link_options(pcap_writer PRIVATE "-Wl,-z,max-page-size=16384")
 
 # ============================================
+# ALWAYS BUILD: root capture helper, started through su by NetHunterService.
+# A real executable, named like a library so that it gets packaged per ABI.
+# ============================================
+add_executable(
+    capd
+    ${CMAKE_SOURCE_DIR}/src/main/jni/capture_helper.c
+)
+
+set_target_properties(
+    capd
+    PROPERTIES
+    OUTPUT_NAME "libcapd"
+    SUFFIX ".so"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+    POSITION_INDEPENDENT_CODE ON
+)
+
+target_link_options(capd PRIVATE "-pie" "-Wl,-z,max-page-size=16384")
+
+# ============================================
 # OPTIONAL: Libpcap capture (only for rooted devices with libpcap)
 # This will be skipped on regular Android builds
 # For Kali NetHunter: Install libpcap-dev and rebuild

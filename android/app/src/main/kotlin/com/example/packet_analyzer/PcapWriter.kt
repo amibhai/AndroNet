@@ -22,7 +22,7 @@ object PcapWriter {
 
     external fun nativeWritePacket(packetData: ByteArray, timestampMs: Long): Boolean
 
-    /** Write a packet with an anomaly annotation stored as EPB option 2988. */
+    /** Write a packet with an anomaly annotation stored as the EPB comment option. */
     external fun nativeWriteAnnotatedPacket(
         packetData: ByteArray,
         timestampMs: Long,

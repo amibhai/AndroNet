@@ -62,7 +62,8 @@ class EntropyTest {
 
     // === New false-positive fix tests (COMMIT 15) ===
 
-    // Helpers
+    // Helpers. These records have the shape both capture paths really produce: "protocol" holds
+    // the transport, and the application protocol travels in "appName".
     private fun highEntropyPayload(size: Int): ByteArray {
         val rng = java.util.Random(42)
         return ByteArray(size) { rng.nextInt(256).toByte() }
@@ -104,7 +105,9 @@ class EntropyTest {
         val packet = mapOf(
             "sourceIp" to "10.0.0.1",
             "destinationIp" to "10.0.0.2",
-            "protocol" to "TLS",
+            "protocol" to "TCP",
+            "appName" to "TLS",
+            "encrypted" to true,
             "destinationPort" to 443,
             "flags" to ""
         )
@@ -123,7 +126,9 @@ class EntropyTest {
         val packet = mapOf(
             "sourceIp" to "10.0.0.1",
             "destinationIp" to "10.0.0.2",
-            "protocol" to "HTTP",
+            "protocol" to "TCP",
+            "appName" to "HTTP",
+            "direction" to "outgoing",
             "destinationPort" to 80,
             "flags" to ""
         )
@@ -142,7 +147,9 @@ class EntropyTest {
         val packet = mapOf(
             "sourceIp" to "10.0.0.3",
             "destinationIp" to "10.0.0.2",
-            "protocol" to "HTTP",
+            "protocol" to "TCP",
+            "appName" to "HTTP",
+            "direction" to "outgoing",
             "destinationPort" to 80,
             "flags" to ""
         )
@@ -167,7 +174,9 @@ class EntropyTest {
         val packet = mapOf(
             "sourceIp" to "10.0.0.4",
             "destinationIp" to "10.0.0.2",
-            "protocol" to "HTTP",
+            "protocol" to "TCP",
+            "appName" to "HTTP",
+            "direction" to "outgoing",
             "destinationPort" to 80,
             "flags" to ""
         )
@@ -189,7 +198,9 @@ class EntropyTest {
         val packet = mapOf(
             "sourceIp" to "10.0.0.5",
             "destinationIp" to "10.0.0.2",
-            "protocol" to "HTTP",
+            "protocol" to "TCP",
+            "appName" to "HTTP",
+            "direction" to "outgoing",
             "destinationPort" to 80,
             "flags" to ""
         )
@@ -212,6 +223,40 @@ class EntropyTest {
         )
     }
 
+    // 11. An encrypted protocol on an arbitrary port says nothing: most apps have one
+    @Test
+    fun `no entropy alert for high entropy on an unknown port`() {
+        val payload = highEntropyPayload(1000)
+        val packet = mapOf(
+            "sourceIp" to "10.0.0.7",
+            "destinationIp" to "10.0.0.2",
+            "protocol" to "TCP",
+            "appName" to "TCP",
+            "direction" to "outgoing",
+            "destinationPort" to 5228,
+            "flags" to ""
+        )
+        repeat(10) { AnomalyDetector.analyzePacket(packet, payload) }
+        assertTrue(firedAnomalies.none { it.type == AnomalyDetector.AnomalyType.HIGH_ENTROPY_PAYLOAD })
+    }
+
+    // 12. A compressed download over HTTP is not exfiltration
+    @Test
+    fun `no entropy alert for a high entropy HTTP download`() {
+        val payload = highEntropyPayload(1000)
+        val packet = mapOf(
+            "sourceIp" to "10.0.0.8",
+            "destinationIp" to "10.0.0.2",
+            "protocol" to "TCP",
+            "appName" to "HTTP",
+            "direction" to "incoming",
+            "sourcePort" to 80,
+            "flags" to ""
+        )
+        repeat(10) { AnomalyDetector.analyzePacket(packet, payload) }
+        assertTrue(firedAnomalies.none { it.type == AnomalyDetector.AnomalyType.HIGH_ENTROPY_PAYLOAD })
+    }
+
     // 10. DNS tunneling check does not fire below entropy 6.2
     @Test
     fun `DNS tunneling check does not fire below threshold 6_2`() {
@@ -222,7 +267,9 @@ class EntropyTest {
         val packet = mapOf(
             "sourceIp" to "10.0.0.6",
             "destinationIp" to "8.8.8.8",
-            "protocol" to "DNS",
+            "protocol" to "UDP",
+            "appName" to "DNS",
+            "direction" to "outgoing",
             "destinationPort" to 53,
             "flags" to ""
         )

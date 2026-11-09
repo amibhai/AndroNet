@@ -1,0 +1,50 @@
+{
+ "frozenAt": "2026-11-02T21:45:45",
+ "baseCommit": "93d058f0abcdfc0579577b4ab1b6e9c567711065",
+ "sha256": {
+  "android/app/CMakeLists.txt": "3b9e3a189e44693b8bd60e98966cb77a9f7d5ecf31fb9395107ae0b8b4eb89e4",
+  "android/app/build.gradle": "e828ca9abd3955d153f2eb570a8247ae898a837343229714da369c238f0448c0",
+  "android/app/src/main/jni\\capture_helper.c": "0064318f2392863106f1e82e2d68fb159205e07014441657334d9a9bc5c529d2",
+  "android/app/src/main/jni\\libpcap_capture.c": "aee59901034181380cb1e5d61dcadcde75ae629ece9825428aadeb4a24ebf65e",
+  "android/app/src/main/jni\\pcap_writer.c": "45fc2b75c8c9844c5563cd79e3bea51f665d4d2b1e337ca9fbad5101a0c99ca7",
+  "android/app/src/main/jni\\zdtun_vpn.c": "21f8067d021dfc5476a4aabb2e29d6f080ce6393272a4f66b1690fa7a7eeaaee",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\AdaptiveThresholdManager.kt": "66d3aa4f0198c4bff921beae5aa23b2e54eeeb1032dde6c65655caf652878dfc",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\AnomalyDetector.kt": "e379b2594280e88e1fe6f1c02f384adc916bd1054ef45a6d5db2a1c25428ae51",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\DomainTracker.kt": "22317444eaab69d49076262be9343b57ed6e72ee68a018922188f95a01f3fbac",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\LibpcapBridge.kt": "ed511997565d833c8472599e440dd9d567eb3dd8750314ed9abec43f8e330c00",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\MainActivity.kt": "35c408de7c78e8b782d584757edd44a660abb8550946b774fb6140b927c9262e",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\NetHunterService.kt": "93ef0eadc01c0d6eb7d59540393adbd5af88206c1a40771ed69320d01d8ac075",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\PacketAnalysisManager.kt": "8b48546bb61818cb6a9bbd6b64d13ae7386dbc46e8f43fe21af785b1f70aa61d",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\PacketDissector.kt": "37c6559d5b4d9679aac68c4fae7e4d32583b95cab1f35d9bcf8b87045bdcd897",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\PacketPipeline.kt": "b7b31072352a488ddebf2723e6322e76cddac1fbadf6c15edb0890ce80f1e637",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\PacketRecord.kt": "879e5080fc3d5dafb71fa520ea30ea3fec55e5b9b912588551b3af965539d24b",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\PayloadAnalyzer.kt": "919fabff5338bc728d81b52e7df4a4b5a920799b53b4af00e6f644a22c54499a",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\PcapWriter.kt": "8704e5448d8b30375fda594957bc807b722fab179258372ca375738abd2461a2",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\RootChecker.kt": "abae9004cf6656a1719c8b06f68d9b158b9b2930cc2f83f8b7a9bb2d396879f0",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\RuleEngine.kt": "64e3a1c7481ced47668a31df1c3398f04ecd837e0db754808fcecb7da9c950e4",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\SignatureDatabase.kt": "1d007884ad100f6ea27911b54d65d48ddcc159c01e657bcf2cb5a60a9dbc66a8",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\TrafficStatistics.kt": "4a2771389be44f285740f0b402a513ab80c715a7a475dbe1775c943e77891191",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\UiStream.kt": "cfdf02b0589e0d3b5133083a05e21da28719e96d4b52eae99a747c256e9460f6",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\ZdtunVpn.kt": "6bb90a6217212263d7c7b38bfaf9ae4897c9cc4c8efdc08d793fac5e96e0f281",
+  "android/app/src/main/kotlin/com/example/packet_analyzer\\ZdtunVpnService.kt": "d01744afcb78821a7642fb7953b33eac2bc7b00c0a19a7e9c1385f0741821fb2",
+  "lib/main.dart": "d7f0fe5cccae7611994ca31297a69d33e4b5a668ceee4d8b301f739f1b817fd9",
+  "android/app/src/main/jni/capture_helper.c": "1cdf2d289325ac6d38c215161e317030b8bc2ee233c224ab69cce1333ebf33e4",
+  "android/app/src/main/jni/pcap_writer.c": "f49983f54981fdd2bbf25a46dbba1aa999587832015ed4b0f7dd862056fd2a2d",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/PcapWriter.kt": "a2b71c9f5a9596d7e382ca132e022bd6317b2d851527ee6e156226c119ac87d1",
+  "android/app/src/main/kotlin/com/example/packet_analyzer/PacketAnalysisManager.kt": "283d8e2d9b55795ef5f6b0ee6b3b6c81fb3ecd0904ca7fa47a2c99e625384ec6"
+ },
+ "amendments": [
+  {
+   "file": "android/app/src/main/jni/capture_helper.c",
+   "reason": "Helper now exits when its stdout is a socket whose peer has gone. Process cleanup only; no detection code changed. Rooted experiment rerun afterwards."
+  },
+  {
+   "file": "jni/pcap_writer.c (and comments in PcapWriter.kt, PacketAnalysisManager.kt)",
+   "reason": "Export only. Removed a non-standard 4-byte trailer that made Wireshark report every file as cut short, and moved annotations to the standard comment option so tools display them. No detection code changed, and no measured run had export enabled except the ones repeated afterwards."
+  },
+  {
+   "file": "scripts/benign_session.py and results only; no detection code",
+   "reason": "The session script collected only the first rotated export of each phone session, so the held-out phone trace covered 110 s of 523 s, and calibration saw 131 s of the 391 s development session. Found after the held-out results. The whole held-out session was then replayed on all builds (scripts/merge_session_replay.py). Over the whole development session benign traffic reached 126 destinations per 10 s and 118 new connections per second, above the frozen limits of 100 and 60. The limits were deliberately left unchanged, because the held-out results had been seen."
+  }
+ ]
+}

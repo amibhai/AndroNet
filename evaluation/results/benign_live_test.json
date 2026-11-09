@@ -1,0 +1,13 @@
+{
+ "tag": "test",
+ "sites": 20,
+ "seconds": 519,
+ "alerts": {
+  "L1:CONNECTION_FLOOD": 1,
+  "RULE-007": 2
+ },
+ "cpuPercent": 21.6,
+ "rssMiB": 138,
+ "exportFiles": 1,
+ "exportPackets": 74587
+}

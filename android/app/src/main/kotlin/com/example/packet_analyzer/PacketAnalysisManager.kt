@@ -18,7 +18,7 @@ class PacketAnalysisManager(private val context: Context) {
 
     @Volatile private var isAnalyzing = false
     @Volatile private var isPcapExporting = false
-    private val managerScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private var managerScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     // Statistics tracking
     @Volatile private var lastStatsUpdate = 0L
@@ -63,6 +63,10 @@ class PacketAnalysisManager(private val context: Context) {
 
         isAnalyzing = true
         Log.i(TAG, "🔍 Starting packet analysis...")
+
+        // stopAnalysis() cancels the scope, and a cancelled scope silently ignores launch, which
+        // used to leave a second capture session without its periodic cleanup
+        managerScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
         // Reset statistics
         TrafficStatistics.reset()
@@ -131,48 +135,18 @@ class PacketAnalysisManager(private val context: Context) {
             // 1. Update traffic statistics
             TrafficStatistics.updateStats(packetInfo)
 
-            // 2. Deep packet inspection (if payload available)
-            var extractedPayload: ByteArray? = null
-            val enrichedPacket = if (rawPacket != null && rawPacket.isNotEmpty()) {
-                extractedPayload = extractPayload(rawPacket, packetInfo)
-                PacketDissector.dissect(packetInfo, extractedPayload)
-            } else {
-                packetInfo
-            }
-
-            // 2.5. Add domain name information
-            val finalPacket = enrichedPacket.toMutableMap()
-            // Try both field name variants
-            val destIp = (enrichedPacket["destinationAddress"] ?: enrichedPacket["destinationIp"]) as? String
-            val sourceIp = (enrichedPacket["sourceAddress"] ?: enrichedPacket["sourceIp"]) as? String
-
-            // Check if destination IP has a known domain
-            if (destIp != null) {
-                val domain = DomainTracker.getDomainForIp(destIp)
-                if (domain != null) {
-                    finalPacket["domain"] = domain
-                    finalPacket["domainFriendly"] = DomainTracker.getFriendlyName(domain)
-                }
-            }
-
-            // Check if source IP has a known domain (for incoming traffic)
-            if (sourceIp != null) {
-                val sourceDomain = DomainTracker.getDomainForIp(sourceIp)
-                if (sourceDomain != null) {
-                    finalPacket["sourceDomain"] = sourceDomain
-                }
-            }
+            // 2. Deep packet inspection and domain enrichment
+            val (finalPacket, extractedPayload) = PacketPipeline.dissectAndEnrich(packetInfo, rawPacket)
 
             // 3. Anomaly detection (pass extracted payload for entropy analysis)
-            AnomalyDetector.analyzePacket(finalPacket, extractedPayload)
-            finalPacket["anomalyScore"] = AnomalyDetector.calculateAnomalyScore(finalPacket)
+            PacketPipeline.analyze(finalPacket, extractedPayload)
 
             // 4. PCAP export (if active)
             if (isPcapExporting && rawPacket != null) {
                 val timestamp = (packetInfo["timestamp"] as? Long) ?: System.currentTimeMillis()
                 val anomalyScore = (finalPacket["anomalyScore"] as? Double) ?: 0.0
                 if (anomalyScore >= 0.5) {
-                    // Annotate flagged packets with EPB option 2988 so Wireshark shows them
+                    // Annotate flagged packets with an EPB comment, which Wireshark shows
                     val annotation = "anomaly_score=%.2f".format(anomalyScore)
                     PcapWriter.writeAnnotatedPacket(rawPacket, timestamp, annotation)
                 } else {
@@ -262,8 +236,10 @@ class PacketAnalysisManager(private val context: Context) {
             val pcapFilename = filename ?: PcapWriter.generateFilename()
             val outputPath = File(andronetDir, pcapFilename).absolutePath
 
-            val (ifName, linktype) = detectCaptureInterface()
-            val success = PcapWriter.startCapture(outputPath, linktype = linktype, ifName = ifName)
+            // Both back-ends hand the writer packets that start at the IP header, whichever
+            // interface they came from, so the file's link type is always Raw IP.
+            val (ifName, _) = detectCaptureInterface()
+            val success = PcapWriter.startCapture(outputPath, linktype = 101, ifName = ifName)
 
             if (success) {
                 isPcapExporting = true
@@ -420,78 +396,6 @@ class PacketAnalysisManager(private val context: Context) {
             } catch (e: Exception) {
                 Log.e(TAG, "Error in cleanup: ${e.message}")
             }
-        }
-    }
-
-    /**
-     * Extract payload from raw packet
-     */
-    private fun extractPayload(packet: ByteArray, packetInfo: Map<String, Any>): ByteArray? {
-        try {
-            if (packet.size < 20) return null
-
-            // Detect IP version
-            val version = (packet[0].toInt() and 0xF0) shr 4
-
-            val ipHeaderLen = when (version) {
-                4 -> {
-                    // IPv4: Get IHL (Internet Header Length)
-                    (packet[0].toInt() and 0x0F) * 4
-                }
-                6 -> {
-                    // IPv6: Fixed header is always 40 bytes
-                    40
-                }
-                else -> {
-                    Log.w(TAG, "Unknown IP version: $version")
-                    return null
-                }
-            }
-
-            val protocol = packetInfo["protocol"] as? String ?: return null
-
-            // Get the underlying transport protocol
-            val transportProtocol = when (protocol) {
-                "HTTP", "HTTPS", "FTP", "SSH", "Telnet", "SMTP", "POP3", "IMAP", "IMAPS", "POP3S", "HTTP-Alt" -> "TCP"
-                "DNS", "DHCP", "NTP", "SNMP", "SNMP-Trap", "QUIC/HTTP3", "DNS-over-TLS", "mDNS" -> "UDP"
-                else -> {
-                    // Handle IPv6 protocol names like "IPv6-TCP", "IPv6-UDP"
-                    when {
-                        protocol.contains("TCP", ignoreCase = true) -> "TCP"
-                        protocol.contains("UDP", ignoreCase = true) -> "UDP"
-                        protocol.contains("ICMP", ignoreCase = true) -> "ICMP"
-                        else -> protocol
-                    }
-                }
-            }
-
-            val payloadStart = when (transportProtocol) {
-                "TCP" -> {
-                    // TCP header is at least 20 bytes
-                    if (packet.size < ipHeaderLen + 20) return null
-                    val tcpHeaderLen = ((packet[ipHeaderLen + 12].toInt() and 0xFF) shr 4) * 4
-                    ipHeaderLen + tcpHeaderLen
-                }
-                "UDP" -> {
-                    // UDP header is 8 bytes
-                    ipHeaderLen + 8
-                }
-                "ICMP", "ICMPv6" -> {
-                    // ICMP header is at least 8 bytes
-                    ipHeaderLen + 8
-                }
-                else -> return null
-            }
-
-            if (payloadStart >= packet.size) {
-                return null
-            }
-
-            return packet.copyOfRange(payloadStart, packet.size)
-
-        } catch (e: Exception) {
-            Log.e(TAG, "Error extracting payload: ${e.message}")
-            return null
         }
     }
 

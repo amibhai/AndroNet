@@ -104,15 +104,23 @@ android {
         }
     }
 
+    // Evaluation builds (see evaluation/README.md) install beside a normal build and accept
+    // scripted capture control. Pass -PandronetAutomation=true to get one.
+    def automation = project.hasProperty('andronetAutomation')
+
     buildTypes {
         release {
-            signingConfig hasReleaseSigning ? signingConfigs.release : signingConfigs.debug
+            signingConfig hasReleaseSigning && !automation ? signingConfigs.release : signingConfigs.debug
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField 'boolean', 'AUTOMATION', automation ? 'true' : 'false'
+            if (automation) applicationIdSuffix '.eval'
         }
         debug {
             minifyEnabled false
+            buildConfigField 'boolean', 'AUTOMATION', automation ? 'true' : 'false'
+            if (automation) applicationIdSuffix '.eval'
         }
     }
 }

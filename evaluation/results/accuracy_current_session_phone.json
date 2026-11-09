@@ -1,0 +1,1 @@
+{"pipeline":"current","thresholds":"shipped","view":"root","runs":[{"name":"benign_phone_test_00","packets":201020,"dropped":0,"durationSec":522.722499,"thresholdsEnd":{"portScan":8,"synFlood":30,"connectionRate":60},"labels":{"benign":{"packets":201020,"flagged":{"any":3,"L1":1,"L2":0,"L3":2},"alerts":{"L1:CONNECTION_FLOOD":1,"RULE-007":2}}},"severity":{"HIGH":1,"MEDIUM":2}}]}

@@ -248,6 +248,12 @@ Java_com_example_packet_1analyzer_ZdtunVpn_nativeHandleEvents(JNIEnv *env, jobje
     // Get zdtun's file descriptors
     zdtun_fds(g_ctx.tun, &max_fd, &rdset, &wrset);
 
+    // The TUN joins the same wait, so a packet from an app ends it immediately
+    FD_SET(g_ctx.tunfd, &rdset);
+    if (g_ctx.tunfd > max_fd) {
+        max_fd = g_ctx.tunfd;
+    }
+
     // Wait for activity
     int ret = select(max_fd + 1, &rdset, &wrset, NULL, &timeout);
     if (ret < 0) {
